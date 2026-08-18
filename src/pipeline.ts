@@ -22,6 +22,9 @@ import { describeAcrossZones, nextPublishTimes } from './publish/publishSlots.js
 import { planSpeed } from './edit/speedPlanner.js';
 import { applySpeedPlan } from './edit/applySpeedPlan.js';
 import { clusterFlights } from './telemetry/flightCluster.js';
+import { uploadVideo } from './publish/uploader.js';
+import { scheduleAndUpload } from './publish/publishScheduler.js';
+import { verifyChannelAccess } from './publish/youtubeClient.js';
 import { findDayNightPairs } from './edit/dayNightPairing.js';
 import { readdir } from 'node:fs/promises';
 import { join, extname, basename } from 'node:path';
@@ -82,6 +85,16 @@ shorts-factory - asama bazli calistirma
       Ucus telemetrisinden kurgu plani cikarir: gereksiz yerleri atar, yavas
       gecisleri hizlandirir, guzel hizli anlari agir cekime alir.
       --output verilmezse sadece plan yazdirilir, dosya uretilmez.
+
+  npm run pipeline -- --stage publish --channel <shorts|travel> --input <video.mp4> --title "<baslik>"
+                       [--description "<aciklama>"] [--tags "a,b,c"] [--jobId <n>] [--dry-run]
+      Videoyu private+publishAt ile YouTube'a yukler. --jobId verilirse
+      DB'ye kaydedilir ve sira otomatik ilerler; verilmezse tek seferlik
+      test yuklemesi yapilir. --dry-run gercek API cagrisi yapmadan hangi
+      slotun secilecegini gosterir.
+
+  npm run pipeline -- --stage authcheck --channel <shorts|travel>
+      Kanalin OAuth kimlik dogrulamasinin gecerli olup olmadigini kontrol eder.
 
   npm run pipeline -- --stage cluster --dir <klasor>
       Klasordeki .SRT dosyalarini okuyup ucuslari bolgelere ayirir, ayni gunun
@@ -194,6 +207,61 @@ async function stageCluster(args: Args): Promise<void> {
       );
     }
   }
+}
+
+async function stagePublish(args: Args): Promise<void> {
+  const { channel: channelId, input, title, description, tags, jobId } = args.values;
+  if (!channelId || !input || !title) {
+    throw new Error('publish asamasi --channel --input --title gerektirir');
+  }
+
+  const channel = getChannel(channelId);
+  const tagList = tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+
+  if (args.flags.has('dry-run')) {
+    const [slot] = nextPublishTimes(channel.primeTimeSlots, 1);
+    Logger.info(`[DRY RUN] ${channel.label} icin yuklenecek olan:`);
+    Logger.info(`  baslik: ${title}`);
+    Logger.info(`  aciklama: ${description ?? '(yok)'}`);
+    Logger.info(`  etiketler: ${tagList.join(', ') || '(yok)'}`);
+    Logger.info(`  kategori: ${channel.categoryId}`);
+    Logger.info(`  slot: ${slot ? `${slot.slot.label} -> ${describeAcrossZones(slot.publishAt)}` : 'bulunamadi'}`);
+    return;
+  }
+
+  if (jobId) {
+    const result = await scheduleAndUpload({
+      jobId: Number(jobId),
+      channel,
+      filePath: input,
+      title,
+      description: description ?? '',
+      tags: tagList,
+    });
+    Logger.success(`Yuklendi ve zamanlandi: ${result.publicUrl}`);
+    return;
+  }
+
+  const [slot] = nextPublishTimes(channel.primeTimeSlots, 1);
+  if (!slot) throw new Error('uygun yayin slotu bulunamadi');
+
+  const result = await uploadVideo({
+    channel,
+    filePath: input,
+    title,
+    description: description ?? '',
+    tags: tagList,
+    publishAt: slot.publishAt,
+  });
+  Logger.success(`Yuklendi (tek seferlik test, DB kaydi yok): ${result.publicUrl}`);
+}
+
+async function stageAuthCheck(channelId: string): Promise<void> {
+  const channel = getChannel(channelId);
+  const result = await verifyChannelAccess(channel);
+
+  if (result.ok) Logger.success(`${channel.label}: yetkilendirme gecerli (${result.channelTitle ?? 'kanal adi alinamadi'})`);
+  else Logger.error(`${channel.label}: yetkilendirme gecersiz - ${result.error}`);
 }
 
 async function stageSchedule(args: Args): Promise<void> {
@@ -326,6 +394,8 @@ async function main(): Promise<void> {
       case 'schedule': await stageSchedule(args); break;
       case 'speed': await stageSpeed(args); break;
       case 'cluster': await stageCluster(args); break;
+      case 'publish': await stagePublish(args); break;
+      case 'authcheck': await stageAuthCheck(args.values.channel ?? ''); break;
       case 'llm': await stageLlm(args); break;
       case 'cost': Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`); break;
       default: printHelp();

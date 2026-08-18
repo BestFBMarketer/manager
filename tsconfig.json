@@ -14,6 +14,6 @@
     "lib": ["ES2023", "DOM"],
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "remotion/**/*.ts", "remotion/**/*.tsx"],
+  "include": ["src/**/*.ts", "remotion/**/*.ts", "remotion/**/*.tsx", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist", "data"]
 }

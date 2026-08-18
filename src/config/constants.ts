@@ -12,6 +12,8 @@ export const TIMEOUTS = {
   DOWNLOAD_MS: 600_000,
   FFMPEG_MS: 900_000,
   RENDER_MS: 3_600_000,
+  /** Buyuk video dosyalari (18-42dk gezi videolari) icin genis zaman asimi */
+  UPLOAD_MS: 1_800_000,
 } as const;
 
 export const RETRY = {
