@@ -75,9 +75,16 @@ function buildQuery(box: BoundingBox, kinds: PoiKind[]): string {
   ].join('\n');
 }
 
-function toPoi(element: OverpassElement, kinds: PoiKind[]): PointOfInterest | null {
+function toPoi(
+  element: OverpassElement,
+  kinds: PoiKind[],
+  languages: string[],
+): PointOfInterest | null {
   const tags = element.tags ?? {};
-  const name = tags['name:tr'] ?? tags.name;
+  // Isim once kanal dilinde aranir (OSM cok dilli isim etiketleri tutar),
+  // yoksa yerel isme dusulur.
+  const name =
+    languages.map((lang) => tags[`name:${lang}`]).find((value) => value) ?? tags.name;
   // Isimsiz noktalar ekranda anlamli bir not uretmez.
   if (!name) return null;
 
@@ -115,7 +122,11 @@ function detectKind(tags: Record<string, string>, requested: PoiKind[]): PoiKind
  * @param kinds Aranacak kategoriler
  * @returns Isimlendirilmis POI listesi (hata durumunda bos dizi)
  */
-export async function fetchPois(box: BoundingBox, kinds: PoiKind[]): Promise<PointOfInterest[]> {
+export async function fetchPois(
+  box: BoundingBox,
+  kinds: PoiKind[],
+  languages: string[] = ['en'],
+): Promise<PointOfInterest[]> {
   const query = buildQuery(box, kinds);
 
   try {
@@ -136,7 +147,7 @@ export async function fetchPois(box: BoundingBox, kinds: PoiKind[]): Promise<Poi
 
     const payload = (await response.json()) as OverpassResponse;
     const pois = (payload.elements ?? [])
-      .map((element) => toPoi(element, kinds))
+      .map((element) => toPoi(element, kinds, languages))
       .filter((poi): poi is PointOfInterest => poi !== null);
 
     // Ayni yer hem node hem way olarak gelebilir - isme gore tekillestir.
