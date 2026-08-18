@@ -195,9 +195,22 @@ irtifayi** okuyup videoyu enerji bolumlerine ayirir:
 | **low** | yavas + alcak ucus, yakin plan | dreamy / chill / cinematic |
 
 Her bolum kendi parcasini alir ve ardisik bolumlerde ayni parca tekrarlanmaz.
-Koruma kurallari: bolumler en az 12 sn (sik muzik degisimi izleyiciyi yorar),
-video basina en fazla 3 parca, bitisik ayni enerjili bolumler birlestirilir.
-Telemetri yoksa eski davranisa donulur (tek parca).
+
+**Limitler video suresine gore olceklenir** — 30 saniyelik bir Shorts ile
+30 dakikalik bir gezi videosu ayni kurala tabi olamaz:
+
+| Video suresi | Parca tavani | En kisa bolum |
+|---|---|---|
+| 30 sn – 5 dk | 3 | 12 sn |
+| 16 dakika | 4 | 48 sn |
+| 24 dakika | 5 | 72 sn |
+| 30 dakika ve uzeri | 6 | 90 sn+ |
+
+Tavan her ~5 dakika icin bir parca hakki ekler ve 6'da durur. En kisa bolum
+suresi de video suresinin 1/20'si kadar buyur: uzun videoda 12 saniyede bir
+muzik degistirmek, kisa videoda 90 saniye tek parca calmak kadar yanlistir.
+Yumusatma penceresi de ayni oranda buyudugu icin uzun kliplerde gereksiz
+hesap yapilmaz. Telemetri yoksa tek parcaya donulur.
 
 `audioMix` her bolumun parcasini gerektiginde donguler, bolum sinirlarinda
 carprazlama fade uygular ve seslendirme varken `sidechaincompress` ile muzigi
