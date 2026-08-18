@@ -58,12 +58,22 @@ export const MUSIC_SEGMENT = {
   /** Hiz/irtifa serisini yumusatma penceresi - anlik GPS gurultusu segment uretmesin */
   SMOOTH_WINDOW_SEC: 5,
   /**
-   * En kisa muzik bolumu. Bunun altindaki bolumler komsusuna katilir:
+   * En kisa muzik bolumu (taban). Bunun altindaki bolumler komsusuna katilir:
    * her birkac saniyede muzik degistirmek izleyicide huzursuzluk yaratir.
    */
-  MIN_SEGMENT_SEC: 12,
-  /** Bir videoda en fazla kac farkli parca kullanilabilir */
-  MAX_TRACKS_PER_VIDEO: 3,
+  BASE_MIN_SEGMENT_SEC: 12,
+  /**
+   * Uzun videolarda taban yetmez: 30 dakikalik bir videoda 12 saniyede bir
+   * muzik degistirmek felaket olur. En kisa bolum, video suresinin bu orani
+   * kadar da olabilir (hangisi buyukse o gecerli).
+   */
+  MIN_SEGMENT_DURATION_RATIO: 1 / 20,
+  /** Kisa videolarda parca tavani - ucus fazlari degisse bile bu asilmaz */
+  BASE_MAX_TRACKS: 3,
+  /** Uzun videolarda her bu kadar saniye icin bir parca hakki eklenir */
+  SEC_PER_EXTRA_TRACK: 300,
+  /** Parca sayisi tavani - 16-30 dakikalik gezi videolari icin ust sinir */
+  HARD_MAX_TRACKS: 6,
   /** Iki parca arasi gecis suresi (crossfade) */
   CROSSFADE_SEC: 2,
   /** Hiz esikleri (m/s): bunun ustu hizli gecis, alti yakin plan/hover */

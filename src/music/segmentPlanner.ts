@@ -38,12 +38,19 @@ interface Window {
   altM: number;
 }
 
-/** Ardisik noktalardan yumusatilmis hiz/irtifa pencereleri uretir. */
-function buildWindows(track: TrackPoint[]): Window[] {
+/**
+ * Ardisik noktalardan yumusatilmis hiz/irtifa pencereleri uretir.
+ * Pencere boyu video suresine gore buyur: 30 dakikalik bir klipte 5 saniyelik
+ * pencerelerle calismak hem gereksiz hesap hem asiri parcali sonuc verir.
+ */
+function buildWindows(track: TrackPoint[], clipDurationSec: number): Window[] {
   if (track.length < 2) return [];
 
   const windows: Window[] = [];
-  const windowSec = MUSIC_SEGMENT.SMOOTH_WINDOW_SEC;
+  const windowSec = Math.max(
+    MUSIC_SEGMENT.SMOOTH_WINDOW_SEC,
+    minSegmentFor(clipDurationSec) / 4,
+  );
   const lastPoint = track[track.length - 1]!;
 
   for (let start = track[0]!.tSec; start < lastPoint.tSec; start += windowSec) {
@@ -152,15 +159,39 @@ function coalesce(segments: MusicSegment[]): MusicSegment[] {
   return result;
 }
 
+/**
+ * Video suresine gore parca tavani.
+ * Kisa videolarda taban (3) gecerlidir; uzun videolarda her ~5 dakika icin
+ * bir parca hakki eklenir ve sert tavanda (6) durur.
+ */
+export function maxTracksFor(durationSec: number): number {
+  const byDuration = Math.ceil(durationSec / MUSIC_SEGMENT.SEC_PER_EXTRA_TRACK);
+  return Math.min(
+    MUSIC_SEGMENT.HARD_MAX_TRACKS,
+    Math.max(MUSIC_SEGMENT.BASE_MAX_TRACKS, byDuration),
+  );
+}
+
+/**
+ * Video suresine gore en kisa bolum suresi.
+ * Uzun videoda kisa bolum, kisa videoda uzun bolum ayni derecede yanlistir.
+ */
+export function minSegmentFor(durationSec: number): number {
+  return Math.max(
+    MUSIC_SEGMENT.BASE_MIN_SEGMENT_SEC,
+    durationSec * MUSIC_SEGMENT.MIN_SEGMENT_DURATION_RATIO,
+  );
+}
+
 /** Cok kisa bolumleri komsusuna katar - sik muzik degisimi izleyiciyi yorar. */
-function absorbShortSegments(segments: MusicSegment[]): MusicSegment[] {
+function absorbShortSegments(segments: MusicSegment[], minSegmentSec: number): MusicSegment[] {
   if (segments.length <= 1) return segments;
 
   const result = [...segments];
 
   for (let i = 0; i < result.length; i += 1) {
     const segment = result[i]!;
-    if (segment.endSec - segment.startSec >= MUSIC_SEGMENT.MIN_SEGMENT_SEC) continue;
+    if (segment.endSec - segment.startSec >= minSegmentSec) continue;
     if (result.length === 1) break;
 
     // Daha uzun komsuya katilir; esitlikte oncekine.
@@ -197,7 +228,7 @@ export function planMusicSegments(
   clipDurationSec: number,
   source: ClipSource = 'dji',
 ): MusicSegment[] {
-  const windows = buildWindows(track);
+  const windows = buildWindows(track, clipDurationSec);
 
   // Telemetri yoksa video tek parcayla dosenir - eski davranis korunur.
   if (windows.length === 0) {
@@ -214,10 +245,13 @@ export function planMusicSegments(
     ];
   }
 
-  let segments = coalesce(absorbShortSegments(mergeWindows(windows, source)));
+  const maxTracks = maxTracksFor(clipDurationSec);
+  const minSegmentSec = minSegmentFor(clipDurationSec);
+
+  let segments = coalesce(absorbShortSegments(mergeWindows(windows, source), minSegmentSec));
 
   // Parca sayisi tavani: en kisa bolumler komsusuna katilarak azaltilir.
-  while (segments.length > MUSIC_SEGMENT.MAX_TRACKS_PER_VIDEO) {
+  while (segments.length > maxTracks) {
     let shortestIndex = 0;
     let shortestSpan = Number.POSITIVE_INFINITY;
 
@@ -244,7 +278,7 @@ export function planMusicSegments(
   if (last && last.endSec < clipDurationSec) last.endSec = clipDurationSec;
 
   Logger.info(
-    `Muzik bolumleri: ${segments
+    `Muzik bolumleri (tavan ${maxTracks}, en kisa ${minSegmentSec.toFixed(0)}sn): ${segments
       .map((s) => `${s.energy}(${(s.endSec - s.startSec).toFixed(0)}sn)`)
       .join(' -> ')}`,
   );
