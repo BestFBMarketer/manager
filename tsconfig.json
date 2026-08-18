@@ -3,7 +3,6 @@
     "target": "ES2023",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2023"],
     "outDir": "dist",
     "rootDir": ".",
     "strict": true,
@@ -11,6 +10,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM"],
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts", "remotion/**/*.ts", "remotion/**/*.tsx"],

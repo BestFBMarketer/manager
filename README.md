@@ -102,6 +102,33 @@ remotion/      kompozisyonlar (FunnyShort, HotelTour*, MapLayer)
 
 ---
 
+## Remotion kompozisyonlari
+
+| Kompozisyon | Olcu | Kullanim |
+|---|---|---|
+| `FunnyRanking` | 1080x1920 | Geri sayimli Top-5: hook → siralar → kapanis |
+| `HotelTourVertical` | 1080x1920 | Gezi teaser'i, POI yazi kartlari |
+| `HotelTourLandscape` | 1920x1080 | Uzun gezi videosu |
+
+Bilesenler: `RankBadge` (yaylanarak girip koseye cekilen sira numarasi),
+`CaptionLine` (kelime kelime vurgulanan altyazi), `HookTitle`, `PoiCard`
+(baslik + kisa not + kaynak atfi, donusumlu sag/sol yaslama).
+
+```bash
+npm run remotion:studio                       # onizleme
+npm run remotion:render -- FunnyRanking out.mp4
+npm run remotion:still  -- FunnyRanking f.png --frame=90
+```
+
+**Font:** `public/fonts/` altindaki Inter dosyalari `staticFile` ile paketlenir.
+Dosyalar yoksa render **calismaya devam eder** ve DejaVu Sans / Liberation Sans'a
+duser (ikisi de Turkce karakterleri tam destekler). `@remotion/google-fonts`
+bilerek kullanilmiyor: fontu render aninda CDN'den cektigi icin agsiz ortamda
+render'i tamamen cokertiyor. Kurulum icin `public/fonts/README.md`.
+
+**Render:** Chromium'un yeni headless modu gerekir; eski headless kaldirildi.
+`--browser-executable` ile `chrome-headless-shell` gosterilmelidir.
+
 ## Yayin saatleri — ABD + Avrupa prime time
 
 Ranking kanali gunde 3 video yayinlar ve slotlar **hedef izleyicinin kendi saatiyle**
@@ -229,7 +256,7 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M12b — ucusa gore bolumlenmis coklu soundtrack ve gecisler
 - [x] M13 — manuel eslestirme ve stok goruntu override'i
 - [ ] M2 — Whisper transkript + highlight secimi
-- [ ] M3 — Remotion `FunnyShort` kompozisyonu
+- [x] M3 — Remotion kompozisyonlari (FunnyRanking, HotelTour, POI kartlari)
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
 - [ ] M5 — kesif + Telegram onay + cron
 - [ ] M6b — otel veri saglayici zinciri (Places → scraper → elle)
