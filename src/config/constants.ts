@@ -39,6 +39,36 @@ export const VIDEO = {
   LOUDNESS_RANGE: 11,
 } as const;
 
+export const AUDIO = {
+  /** Soundtrack seviyesi - konusmanin altinda kalmali */
+  MUSIC_GAIN: 0.35,
+  VOICE_GAIN: 1.0,
+  /** Orijinal kamera sesi (drone ruzgari) - sadece istenirse karisir */
+  ORIGINAL_GAIN: 0.15,
+  FADE_IN_SEC: 1.5,
+  FADE_OUT_SEC: 2.5,
+  /** Ducking: seslendirme basladiginda muzigi bastirma ayarlari */
+  DUCK_THRESHOLD: 0.05,
+  DUCK_RATIO: 8,
+  DUCK_ATTACK_MS: 20,
+  DUCK_RELEASE_MS: 400,
+} as const;
+
+export const POI = {
+  /** Overpass'tan istenecek azami sonuc sayisi */
+  MAX_RESULTS: 60,
+  /** Ucus izinin sinir kutusunun her yone genisletilecegi mesafe (km) */
+  SEARCH_PAD_KM: 3,
+  /** Bir POI kartinin gosterilmesi icin drone'un ona yaklasmasi gereken mesafe (m) */
+  MAX_CUE_DISTANCE_M: 1_500,
+  /** Ekranda ayni anda tek kart; iki kart arasi en az bu kadar bosluk (sn) */
+  MIN_GAP_SEC: 4,
+  /** Bir kartin ekranda kalma suresi (sn) */
+  CARD_DURATION_SEC: 4,
+  /** Bir videoda gosterilecek azami kart sayisi - ekrani bogmamak icin */
+  MAX_CARDS_PER_VIDEO: 6,
+} as const;
+
 export const RANKING = {
   /** Geri sayimli ranking'te kac sira gosterilecek */
   ITEM_COUNT: 5,
