@@ -19,6 +19,8 @@ import { parseGoproTelemetry } from './telemetry/goproGpmf.js';
 import { guessSource } from './telemetry/clipSync.js';
 import { listTtsStatus, synthesizeSpeech, defaultVoiceRef } from './tts/router.js';
 import { describeAcrossZones, nextPublishTimes } from './publish/publishSlots.js';
+import { planSpeed } from './edit/speedPlanner.js';
+import { applySpeedPlan } from './edit/applySpeedPlan.js';
 import { getChannel } from './config/channels.js';
 
 interface Args {
@@ -72,6 +74,11 @@ shorts-factory - asama bazli calistirma
   npm run pipeline -- --stage llm --task metadata --input "<metin>"
       LLM zincirini test eder (once ucretsiz katman denenir).
 
+  npm run pipeline -- --stage speed --input <video.mp4> --srt <ucus.SRT> [--target 600] [--output <kurgu.mp4>]
+      Ucus telemetrisinden kurgu plani cikarir: gereksiz yerleri atar, yavas
+      gecisleri hizlandirir, guzel hizli anlari agir cekime alir.
+      --output verilmezse sadece plan yazdirilir, dosya uretilmez.
+
   npm run pipeline -- --stage schedule [--channel shorts] [--count 6]
       Sonraki yayin zamanlarini ABD/Avrupa prime time'a gore listeler.
 
@@ -108,6 +115,32 @@ async function stageDoctor(): Promise<void> {
   getDb();
   Logger.success('SQLite semasi hazir');
   Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`);
+}
+
+async function stageSpeed(args: Args): Promise<void> {
+  const { input, srt, target, output } = args.values;
+  if (!input || !srt) throw new Error('speed asamasi --input <video> --srt <SRT> gerektirir');
+
+  const info = await probe(input);
+  const track = await parseDjiSrt(srt);
+  const plan = planSpeed(track, info.durationSec, {
+    targetDurationSec: target ? Number(target) : undefined,
+  });
+
+  for (const segment of plan.segments) {
+    const outSec = segment.action === 'drop' ? 0 : (segment.endSec - segment.startSec) / segment.factor;
+    Logger.info(
+      `  ${segment.startSec.toFixed(0).padStart(4)}-${segment.endSec.toFixed(0).padStart(4)}sn ` +
+        `${segment.action.padEnd(9)} x${segment.factor.toFixed(2)} -> ${outSec.toFixed(0).padStart(4)}sn | ${segment.reason}`,
+    );
+  }
+
+  Logger.success(
+    `Plan: ${plan.sourceDurationSec.toFixed(0)}sn -> ${plan.outputDurationSec.toFixed(0)}sn`,
+  );
+
+  if (output) await applySpeedPlan({ inputPath: input, outputPath: output, plan });
+  else Logger.info('--output verilmedi, dosya uretilmedi');
 }
 
 async function stageSchedule(args: Args): Promise<void> {
@@ -238,6 +271,7 @@ async function main(): Promise<void> {
       case 'gpmf': await stageGpmf(args.values.input ?? ''); break;
       case 'tts': await stageTts(args); break;
       case 'schedule': await stageSchedule(args); break;
+      case 'speed': await stageSpeed(args); break;
       case 'llm': await stageLlm(args); break;
       case 'cost': Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`); break;
       default: printHelp();
