@@ -109,10 +109,57 @@ Komik kanal bir **ranking kanali**: geri sayimli Top 5, toplam sure <= 30 sn.
 seslendirme metni uretir; `enforceBudget` LLM ne dondururse donsun sure tavanini ve
 `#1`'in korunmasini garanti eder.
 
-Seslendirme zinciri **tamamen ucretsiz ve yerel**: once Voicebox REST API'si
-(klonlanmis karakter sesi), yoksa Piper. Ton kurali sistem promptunda sabit:
+Seslendirme zinciri **tamamen ucretsiz**: Voicebox erisilebilirse (GPU gerektirdigi
+icin VPS'te degil, tunel uzerinden kendi makinende) klonlanmis karakter sesi;
+erisim yoksa zincir sessizce **Piper**'a duser — Piper CPU'da calisir, GPU istemez
+ve VPS'in varsayilan motorudur. Ton kurali sistem promptunda sabit:
 mizahi/igneleyici/alayci, ama hakaret ve kisisel saldiri yok - dalga gecilen
 sey durum, kisi degil.
+
+## Ilgi noktalari (POI) — sadece otel degil
+
+Ucus izinin sinir kutusundan yola cikip **OpenStreetMap Overpass** ile bolgedeki
+selaleler, tarihi eserler, manzara noktalari, magaralar ve plajlar bulunur
+(anahtar gerektirmez, ucretsiz). Kisa aciklama **Vikipedi/Wikidata**'dan cekilir
+ve ekranda kaynak atfiyla gosterilir; aciklama bulunamazsa **uydurma metin uretilmez**.
+
+`poiTimeline` her karti, drone o noktaya **en cok yaklastigi anda** ekrana getirir.
+Kurallar: 1.5 km'den uzak noktalar elenir, kartlar ust uste binmez, video basi en
+fazla 6 kart, videonun son saniyelerine denk gelen kart sigacak sekilde one cekilir.
+Varsayilan sunum **yazi karti**; istenirse ayni metin seslendirmeye de verilebilir.
+
+## Soundtrack secimi (Suno)
+
+Drive'daki soundtrack kutuphanesinden **temaya, gunun saatine ve video suresine**
+gore parca secilir: sabah dingin, gunduz yukseltici, gun batimi sinematik.
+Dogrudan etiket eslesmesi (orn. `tarihi`) ton tahmininden agir basar; yakin
+zamanda kullanilan parca ciddi ceza alir, boylece ard arda ayni muzik cikmaz.
+Esit puanli adaylar arasinda rastgele secim yapilir.
+
+`audioMix` muzigi video suresine gore donguler, basta/sonda fade uygular ve
+seslendirme varken `sidechaincompress` ile **otomatik kisar (ducking)** — konusma
+her zaman anlasilir kalir.
+
+## Manuel mudahale
+
+Otomatik GPS eslestirmesi her zaman istenmeyebilir (orn. eski stok goruntu
+kullanmak). Is klasorundeki `override.json` ile:
+
+```json
+{
+  "manualPairs": [
+    { "droneClipId": "d1", "goproClipId": "g1",
+      "droneStartSec": 12, "goproStartSec": 4, "durationSec": 20 }
+  ],
+  "stockClips": [
+    { "filePath": "stock/antalya-2024.mp4", "atSec": 25, "durationSec": 5, "label": "Arsiv: 2024" }
+  ],
+  "excludeClipIds": ["d3"]
+}
+```
+
+Oncelik sirasi: **haric tutma > elle eslesme > otomatik eslesme**. Telemetrisi
+olmayan arsiv goruntuleri de bu yolla kurguya girer.
 
 ## GoPro + drone harmanlama
 
@@ -141,6 +188,9 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M6a — DJI SRT telemetri ayristirici + konum enterpolasyonu
 - [x] M6c — GoPro GPMF telemetri + drone/GoPro GPS-zaman eslestirme
 - [x] M10a — seslendirme adaptoru (Voicebox → Piper) + ranking planlayici
+- [x] M11 — POI kesfi (Overpass + Vikipedi) ve ucusa senkron kart zamanlamasi
+- [x] M12 — soundtrack secimi (tema/saat/sure) + ducking'li ses miksaji
+- [x] M13 — manuel eslestirme ve stok goruntu override'i
 - [ ] M2 — Whisper transkript + highlight secimi
 - [ ] M3 — Remotion `FunnyShort` kompozisyonu
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme

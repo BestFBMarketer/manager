@@ -13,8 +13,13 @@ import { voiceboxProvider } from './providers/voicebox.js';
 import type { TtsProvider, TtsRequest, TtsResult } from './types.js';
 
 /**
- * Zincir sirasi: Voicebox (klonlanmis karakter sesi) -> Piper (yerel yedek).
- * Ikisi de ucretsiz ve yereldir; ucretli bir saglayici eklenirse zincirin sonuna gelir.
+ * Zincir sirasi: Voicebox -> Piper.
+ *
+ * Voicebox GPU ister, bu yuzden VPS'te calismaz; erisilebilir oldugunda
+ * (orn. kullanicinin makinesinde acikken, tunel uzerinden) klonlanmis
+ * karakter sesi kullanilir. Erisim yoksa zincir sessizce Piper'a duser:
+ * Piper CPU'da calisir, GPU istemez ve VPS'in varsayilan motorudur.
+ * Ikisi de ucretsizdir.
  */
 const CHAIN: TtsProvider[] = [voiceboxProvider, piperProvider];
 
