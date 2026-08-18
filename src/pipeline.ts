@@ -18,6 +18,8 @@ import { boundingBox, parseDjiSrt } from './telemetry/djiSrtParser.js';
 import { parseGoproTelemetry } from './telemetry/goproGpmf.js';
 import { guessSource } from './telemetry/clipSync.js';
 import { listTtsStatus, synthesizeSpeech, defaultVoiceRef } from './tts/router.js';
+import { describeAcrossZones, nextPublishTimes } from './publish/publishSlots.js';
+import { getChannel } from './config/channels.js';
 
 interface Args {
   stage: string;
@@ -70,6 +72,9 @@ shorts-factory - asama bazli calistirma
   npm run pipeline -- --stage llm --task metadata --input "<metin>"
       LLM zincirini test eder (once ucretsiz katman denenir).
 
+  npm run pipeline -- --stage schedule [--channel shorts] [--count 6]
+      Sonraki yayin zamanlarini ABD/Avrupa prime time'a gore listeler.
+
   npm run pipeline -- --stage cost
       Bugunku LLM harcamasini gosterir.
 `);
@@ -103,6 +108,17 @@ async function stageDoctor(): Promise<void> {
   getDb();
   Logger.success('SQLite semasi hazir');
   Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`);
+}
+
+async function stageSchedule(args: Args): Promise<void> {
+  const channel = getChannel(args.values.channel ?? 'shorts');
+  const count = Number(args.values.count ?? 6);
+
+  Logger.info(`${channel.label}: sonraki ${count} yayin zamani`);
+  for (const { slot, publishAt } of nextPublishTimes(channel.primeTimeSlots, count)) {
+    Logger.success(`  ${slot.label}`);
+    Logger.info(`    UTC ${publishAt.toISOString()} | ${describeAcrossZones(publishAt)}`);
+  }
 }
 
 async function stageGpmf(input: string): Promise<void> {
@@ -221,6 +237,7 @@ async function main(): Promise<void> {
       case 'srt': await stageSrt(args.values.input ?? ''); break;
       case 'gpmf': await stageGpmf(args.values.input ?? ''); break;
       case 'tts': await stageTts(args); break;
+      case 'schedule': await stageSchedule(args); break;
       case 'llm': await stageLlm(args); break;
       case 'cost': Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`); break;
       default: printHelp();

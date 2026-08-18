@@ -102,6 +102,26 @@ remotion/      kompozisyonlar (FunnyShort, HotelTour*, MapLayer)
 
 ---
 
+## Yayin saatleri — ABD + Avrupa prime time
+
+Ranking kanali gunde 3 video yayinlar ve slotlar **hedef izleyicinin kendi saatiyle**
+tanimlanir, sabit UTC ile degil:
+
+| Slot | Yerel saat | Diger pazarlarda |
+|---|---|---|
+| ABD prime time | ET 20:00 | PT 17:00 · CET 02:00 |
+| Avrupa prime time | CET 20:00 | UK 19:00 · ET 14:00 |
+| ABD sabah yogunlugu | ET 08:30 | UK 13:30 · CET 14:30 |
+
+**Neden sabit UTC degil:** ABD yaz saatine mart 2. pazar, AB mart son pazar gecer
+(sonbaharda da benzer fark var). Sabit UTC saati kullanmak, yilda iki kez birkac
+haftaligina prime time'i kacirir. Slotlar IANA saat dilimiyle tanimlandigi icin
+gecisler otomatik dogru hesaplanir.
+
+```bash
+npm run pipeline -- --stage schedule --channel shorts --count 6
+```
+
 ## Ranking + seslendirme
 
 Komik kanal bir **ranking kanali**: geri sayimli Top 5, toplam sure <= 30 sn.
