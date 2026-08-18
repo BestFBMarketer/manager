@@ -1,6 +1,8 @@
 // =====================================
 // MODULE: Quota Tracker
-// Purpose: Saglayici basina dakikalik/gunluk kullanim sayimi - 429 yemeden gecis
+// Purpose: Saglayici basina kullanim/maliyet kaydi - engelleme gorevini gercek API
+//          hatasi (429/5xx) ustlenir, bu modul esas olarak raporlama ve tek gercek
+//          on-engel olan ucretli gunluk butce tavani icin kullanilir
 // Dependencies: core/db, config/llmChains
 // Author: BestMarketer Team
 // Last Modified: 2026-08-18
@@ -11,36 +13,19 @@ import { DAILY_PAID_BUDGET_USD } from '../config/llmChains.js';
 import type { LlmProvider } from './types.js';
 
 /**
- * Saglayicinin su an kota siniri icinde olup olmadigini soyler.
+ * Saglayicinin su an cagrilabilir olup olmadigini soyler.
+ *
+ * Dakikalik/gunluk istek sayisi onceden tahmin edilip engellenmez - gercek kota
+ * her saglayicida netlik gerektirmeden bilinir ve fallback zaten gercek 429/5xx
+ * hatasinda devreye giriyor (bkz. llm/router.ts). Tek gercek on-engel, ucretli
+ * saglayicilar icin gunluk butce tavanidir - bu, kota hatasindan bagimsiz bir
+ * maliyet guvenligi kontrolu oldugu icin korunur.
+ *
  * @param provider Kontrol edilecek saglayici
  * @returns true ise cagri yapilabilir
  */
 export function hasQuota(provider: LlmProvider): boolean {
-  const db = getDb();
-
-  const perMinute = db
-    .prepare(
-      `SELECT COUNT(*) AS n FROM llm_usage
-       WHERE provider = ? AND created_at >= datetime('now', '-60 seconds')`,
-    )
-    .get(provider.name) as { n: number };
-
-  if (perMinute.n >= provider.limits.requestsPerMinute) return false;
-
-  if (provider.limits.requestsPerDay > 0) {
-    const perDay = db
-      .prepare(
-        `SELECT COUNT(*) AS n FROM llm_usage
-         WHERE provider = ? AND created_at >= datetime('now', 'start of day')`,
-      )
-      .get(provider.name) as { n: number };
-
-    if (perDay.n >= provider.limits.requestsPerDay) return false;
-  }
-
-  // Ucretli saglayicilar gunluk butce tavanina takilir
   if (!provider.free && spentTodayUsd() >= DAILY_PAID_BUDGET_USD) return false;
-
   return true;
 }
 
