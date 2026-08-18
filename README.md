@@ -1,1 +1,131 @@
-# manager
+# shorts-factory
+
+Otomatik YouTube video fabrikasi: **komik Shorts** kanali ve **gezi/seyahat (drone)** kanali icin
+indirme → kesim → Remotion ile veri-odakli katman → zamanlanmis yayin hatti.
+
+> Not: Bu kod gecici olarak `manager` reposunda gelistirilmektedir; hedef repo `shorts-factory`.
+
+---
+
+## Ne yapar
+
+| Sablon | Kanal | Tempo | Cikti |
+|---|---|---|---|
+| `FunnyShort` | Komik Shorts | gunde 3 | 1080x1920, <60 sn, altyazi + hook |
+| `HotelTourLandscape` | Gezi / Seyahat | haftada 3 | 1920x1080, hedef 8-12 dk, harita + otel bilgi kartlari |
+| `HotelTourVertical` | Gezi turevleri | uzun video basina 3 | 1080x1920 teaser, uzun videoya trafik |
+
+Gezi hattinda drone goruntusunun uzerine bolge haritasi, havaalanindan otele ulasim animasyonu,
+oteli gosteren ok + isim etiketi ve otel bilgi kartlari (oda sayisi, kapasite, havaalanina mesafe,
+her sey dahil mi, yorum/oneri orani) bindirilir. DJI `.SRT` telemetrisi varsa harita, ucusun
+**gercek GPS iziyle senkron** ilerler.
+
+---
+
+## Kurulum
+
+```bash
+npm install
+cp .env.example .env      # anahtarlari doldur
+npm run pipeline -- --stage doctor
+```
+
+Sistem gereksinimleri (VPS): `ffmpeg`, `ffprobe`, `yt-dlp`, Chromium (Remotion/WebGL icin),
+Python 3 + `faster-whisper`. Onerilen: 8 vCPU / 16 GB RAM.
+
+---
+
+## Kullanim
+
+```bash
+# Ortam kontrolu: ikili dosyalar, LLM saglayicilari, kanallar, DB
+npm run pipeline -- --stage doctor
+
+# Video bilgisi
+npm run pipeline -- --stage probe --input video.mp4
+
+# Kesim + dikey cerceve + ses normalizasyonu
+npm run pipeline -- --stage cut --input video.mp4 --start 12 --end 45 \
+  --orientation vertical --framing crop --output out/short.mp4
+
+# DJI telemetrisi ayristirma
+npm run pipeline -- --stage srt --input DJI_0001.SRT
+
+# LLM zinciri testi (once ucretsiz katman denenir)
+npm run pipeline -- --stage llm --input "Kedi masadan atlarken kayiyor ve sahibine carpiyor"
+
+# Bugunku LLM harcamasi
+npm run pipeline -- --stage cost
+```
+
+---
+
+## LLM maliyet politikasi
+
+Her LLM cagrisi bir **is tipi** ile yapilir; router o tip icin tanimli zinciri sirayla dener
+(`src/config/llmChains.ts`). Kural: **ucretsiz katmanda yapilabilen is ucretli API'ye gitmez.**
+
+| Is tipi | Zincir |
+|---|---|
+| `classify`, `metadata`, `highlight` | gemini (ucretsiz) → deepseek → openai → claude |
+| `viralHook`, `shortsPlan` (kalite-kritik) | claude → openai → gemini |
+| Transkripsiyon | **yerel Whisper** — API'ye hic gitmez |
+
+Koruma katmanlari:
+- `quotaTracker` saglayici basina dakikalik/gunluk kullanimi sayar, limit dolmadan sonrakine gecer (429 yemeden).
+- Ucretli saglayicilar `DAILY_PAID_BUDGET_USD` tavanina takilir; tavan asilinca yalnizca ucretsizler calisir.
+- Sema dogrulamasini gecemeyen yanit maliyet olarak kaydedilir ve zincirde ilerlenir.
+- Claude tarafinda prompt caching (sabit sistem promptu) + dusuk `effort` ile token maliyeti kisilir.
+- Her cagri `llm_usage` tablosuna yazilir; `--stage cost` gunluk harcamayi verir.
+
+---
+
+## Proje yapisi
+
+```
+src/
+  config/      constants, env, channels, llmChains
+  core/        logger, db (SQLite), retry, exec
+  llm/         router, quotaTracker, providers/{gemini,deepseek,openai,claude}
+  ingest/      probe (+ downloader, driveWatcher)
+  telemetry/   djiSrtParser (DJI ucus izi)
+  edit/        ffmpegCut, verticalFrame
+  pipeline.ts  asama bazli CLI
+remotion/      kompozisyonlar (FunnyShort, HotelTour*, MapLayer)
+```
+
+---
+
+## DJI Neo notu
+
+DJI Neo `.SRT` telemetrisini **yalnizca** DJI Fly icinde "Video Captions / Altyazi" ayari
+cekim oncesi acikken yazar. Kapaliysa o ucus icin telemetri yoktur ve sonradan eklenemez —
+bu durumda harita, otel + havaalani koordinatindan sablon rota uretir. Kartlari Drive'a
+atarken `.MP4` yaninda `.SRT` dosyalarini da kopyalayin.
+
+Iki drone ayni dosya adini (`DJI_0001.MP4`) uretebildiginden kimlik, dosya icerik hash'i +
+cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
+
+---
+
+## Yol haritasi
+
+- [x] M0 — iskelet, config, logger, SQLite semasi, LLM router
+- [x] M1 — ingest (probe) + edit (kesim, 9:16 cerceve, loudnorm)
+- [x] M6a — DJI SRT telemetri ayristirici + konum enterpolasyonu
+- [ ] M2 — Whisper transkript + highlight secimi
+- [ ] M3 — Remotion `FunnyShort` kompozisyonu
+- [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
+- [ ] M5 — kesif + Telegram onay + cron
+- [ ] M6b — otel veri saglayici zinciri (Places → scraper → elle)
+- [ ] M7 — MapLibre harita katmani (alpha kanalli on-render)
+- [ ] M8 — `HotelTour` yatay + dikey ciktilar
+- [ ] M9 — CapCut draft disa aktarici
+
+---
+
+## Kurallar
+
+Bu proje `ecosystem-hub/GLOBAL_PROJECT_RULES.md` kurallarina tabidir: modul basina 600 satir
+siniri, basliksiz modul yok, hardcoded string yok, tum async fonksiyonlarda try-catch,
+kaynak temizligi, sabitler `config/constants.ts` icinde, sessiz hata yok.

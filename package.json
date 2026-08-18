@@ -1,0 +1,28 @@
+{
+  "name": "shorts-factory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Otomatik YouTube video fabrikasi - komik Shorts + drone/otel tanitim videolari",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pipeline": "tsx src/pipeline.ts",
+    "cost": "tsx src/llm/costReport.ts",
+    "remotion:studio": "remotion studio remotion/Root.tsx"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.117.1",
+    "better-sqlite3": "^11.5.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
