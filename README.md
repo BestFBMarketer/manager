@@ -129,6 +129,39 @@ render'i tamamen cokertiyor. Kurulum icin `public/fonts/README.md`.
 **Render:** Chromium'un yeni headless modu gerekir; eski headless kaldirildi.
 `--browser-executable` ile `chrome-headless-shell` gosterilmelidir.
 
+## YouTube yayina alma
+
+Resumable upload ile `private` yuklenir + `status.publishAt` ayarlanir; YouTube
+verilen an geldiginde otomatik olarak public yapar. Kalici hatalar (400/401/403
+- gecersiz istek, kota, yetkisiz) yeniden denenmez; 429/5xx ustel geri
+cekilmeyle tekrar denenir.
+
+**Kurulum (tek seferlik, kendi bilgisayarinizda):**
+```bash
+npx tsx scripts/authYoutube.ts shorts   # tarayici acilir, izin verilir
+npx tsx scripts/authYoutube.ts travel
+```
+Cikan refresh token'i VPS'in `.env` dosyasina yapistirin - script bir daha
+calistirilmaz.
+
+**Kullanim:**
+```bash
+# Onizleme - hangi slot secilecek, gercek API cagrisi yok
+npm run pipeline -- --stage publish --channel travel --input video.mp4 \
+  --title "Baslik" --description "Aciklama" --tags "antalya,tatil" --dry-run
+
+# Kimlik dogrulama kontrolu
+npm run pipeline -- --stage authcheck --channel travel
+
+# Gercek yukleme (--jobId verilirse DB'ye kaydedilir, sira otomatik ilerler)
+npm run pipeline -- --stage publish --channel travel --input video.mp4 \
+  --title "Baslik" --jobId 42
+```
+
+**Kuyruk mantigi:** `scheduleAndUpload` o kanalda su an bekleyen kac is oldugunu
+DB'den sayar ve yeni isi bir sonraki bos slota yerlestirir - iki is ayni ana
+denk gelmez, kuyruk kendiliginden siralanir.
+
 ## Yayin saatleri — ABD + Avrupa prime time
 
 Ranking kanali gunde 3 video yayinlar ve slotlar **hedef izleyicinin kendi saatiyle**
@@ -336,6 +369,7 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M13 — manuel eslestirme ve stok goruntu override'i
 - [x] M14 — akilli hiz optimizasyonu, zaman haritasi ve FFmpeg uygulamasi
 - [x] M15 — ucus kumeleme, bakis acisi olcumu, gunduz-gece eslestirme ve gecisler
+- [x] M4 — YouTube OAuth kurulumu, resumable upload, publishAt zamanlama, DB kuyruk
 - [ ] M2 — Whisper transkript + highlight secimi
 - [x] M3 — Remotion kompozisyonlari (FunnyRanking, HotelTour, POI kartlari)
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme

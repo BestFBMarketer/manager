@@ -41,7 +41,16 @@ export interface ChannelConfig {
   titleExamples: string[];
   /** Bu kanalin uzun videolarindan kac Shorts turetilecek (0 = kapali) */
   shortsDerivativeCount: number;
+  /** YouTube kategori kimligi - https://developers.google.com/youtube/v3/docs/videoCategories */
+  categoryId: string;
 }
+
+/** Sik kullanilan kategori kimlikleri - elle aramaktansa isimle referans verilsin. */
+export const YOUTUBE_CATEGORY = {
+  COMEDY: '23',
+  TRAVEL_AND_EVENTS: '19',
+  ENTERTAINMENT: '24',
+} as const;
 
 export const CHANNELS: Record<string, ChannelConfig> = {
   shorts: {
@@ -58,6 +67,7 @@ export const CHANNELS: Record<string, ChannelConfig> = {
     audience: 'Global short-form viewers; countdown/ranking format with sarcastic commentary',
     titleExamples: [],
     shortsDerivativeCount: 0,
+    categoryId: YOUTUBE_CATEGORY.COMEDY,
   },
   travel: {
     id: 'travel',
@@ -83,6 +93,7 @@ export const CHANNELS: Record<string, ChannelConfig> = {
       'Sandland Und Deepo Outlet Center Ausflug',
     ],
     shortsDerivativeCount: PIPELINE.SHORTS_PER_LONG_VIDEO,
+    categoryId: YOUTUBE_CATEGORY.TRAVEL_AND_EVENTS,
   },
 };
 
