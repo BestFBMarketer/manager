@@ -7,6 +7,7 @@
 // =====================================
 
 import { PIPELINE, VIDEO } from './constants.js';
+import { RANKING_SLOTS, type PrimeTimeSlot } from '../publish/publishSlots.js';
 
 export type TemplateName =
   | 'FunnyShort'
@@ -19,15 +20,18 @@ export interface ChannelConfig {
   /** .env icindeki refresh token anahtarinin adi */
   refreshTokenEnvKey: string;
   defaultTemplate: TemplateName;
-  /** Haftanin gunu (0=Pazar) ve TRT saati olarak yayin slotlari */
-  publishSlots: Array<{ weekday: number; hour: number; minute: number }>;
+  /**
+   * Yayin slotlari hedef izleyicinin kendi saat dilimiyle tanimlanir
+   * (bkz. publish/publishSlots.ts) - yaz saati gecisleri otomatik dogru olur.
+   */
+  primeTimeSlots: PrimeTimeSlot[];
+  /** Haftanin hangi gunleri yayin yapilacagi (0=Pazar). Bos = her gun. */
+  publishWeekdays: number[];
   targetDurationSec: number;
   language: 'tr' | 'en';
   /** Bu kanalin uzun videolarindan kac Shorts turetilecek (0 = kapali) */
   shortsDerivativeCount: number;
 }
-
-const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
 
 export const CHANNELS: Record<string, ChannelConfig> = {
   shorts: {
@@ -35,11 +39,9 @@ export const CHANNELS: Record<string, ChannelConfig> = {
     label: 'Komik Shorts',
     refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_SHORTS',
     defaultTemplate: 'FunnyShort',
-    publishSlots: EVERY_DAY.flatMap((weekday) => [
-      { weekday, hour: 12, minute: 0 },
-      { weekday, hour: 17, minute: 0 },
-      { weekday, hour: 21, minute: 0 },
-    ]),
+    // Gunde 3 video: ABD prime, Avrupa prime ve ABD sabah yogunlugu
+    primeTimeSlots: RANKING_SLOTS,
+    publishWeekdays: [],
     targetDurationSec: VIDEO.SHORT_MAX_SEC,
     language: 'tr',
     shortsDerivativeCount: 0,
@@ -49,12 +51,9 @@ export const CHANNELS: Record<string, ChannelConfig> = {
     label: 'Gezi / Seyahat',
     refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_TRAVEL',
     defaultTemplate: 'HotelTourLandscape',
-    // Haftada 3: Sali, Persembe, Cumartesi 19:00
-    publishSlots: [
-      { weekday: 2, hour: 19, minute: 0 },
-      { weekday: 4, hour: 19, minute: 0 },
-      { weekday: 6, hour: 19, minute: 0 },
-    ],
+    // Haftada 3 video: Avrupa prime time (gezi izleyicisinin agirligi Avrupa'da)
+    primeTimeSlots: [RANKING_SLOTS[1]!],
+    publishWeekdays: [2, 4, 6],
     targetDurationSec: 600,
     language: 'tr',
     shortsDerivativeCount: PIPELINE.SHORTS_PER_LONG_VIDEO,
