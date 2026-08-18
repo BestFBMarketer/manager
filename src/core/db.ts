@@ -97,9 +97,118 @@ CREATE TABLE IF NOT EXISTS llm_usage (
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_job_stage   ON job(stage, status);
-CREATE INDEX IF NOT EXISTS idx_usage_time  ON llm_usage(created_at);
+-- =====================================
+-- Coklu kanal admin paneli (EK 2) - kanal config'i DB'ye tasinir
+-- =====================================
+
+CREATE TABLE IF NOT EXISTS channel (
+  id                      TEXT PRIMARY KEY,
+  label                   TEXT NOT NULL,
+  channel_type            TEXT NOT NULL DEFAULT 'standard',   -- 'standard' | 'story'
+  refresh_token_env_key   TEXT NOT NULL,
+  default_template        TEXT NOT NULL,
+  target_duration_sec     INTEGER NOT NULL,
+  language                TEXT NOT NULL,
+  wiki_languages_json     TEXT NOT NULL DEFAULT '[]',
+  audience                TEXT NOT NULL DEFAULT '',
+  title_examples_json     TEXT NOT NULL DEFAULT '[]',
+  style_reference         TEXT,
+  topic_source            TEXT NOT NULL DEFAULT 'reference',  -- 'reference' | 'ai_generated' | 'both'
+  shorts_derivative_count INTEGER NOT NULL DEFAULT 0,
+  category_id             TEXT NOT NULL,
+  enabled                 INTEGER NOT NULL DEFAULT 1,
+  settings_json           TEXT NOT NULL DEFAULT '{}',
+  created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at              TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS schedule_rule (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id       TEXT NOT NULL REFERENCES channel(id),
+  kind             TEXT NOT NULL CHECK (kind IN ('weekday_list','every_n_days','count_per_period')),
+  weekdays_json    TEXT,
+  interval_days    INTEGER,
+  period_months    INTEGER,
+  count_per_period INTEGER,
+  anchor_date      TEXT NOT NULL,
+  slots_json       TEXT NOT NULL,
+  enabled          INTEGER NOT NULL DEFAULT 1,
+  created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_rule_one_active
+  ON schedule_rule(channel_id) WHERE enabled = 1;
+
+CREATE TABLE IF NOT EXISTS review_item (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id               INTEGER NOT NULL REFERENCES job(id),
+  channel_id           TEXT NOT NULL REFERENCES channel(id),
+  kind                 TEXT NOT NULL DEFAULT 'primary',  -- 'primary' | 'shorts_derivative'
+  status               TEXT NOT NULL DEFAULT 'pending_review'
+                         CHECK (status IN ('pending_review','approved','rejected','needs_changes')),
+  preview_path         TEXT,
+  proposed_title       TEXT NOT NULL,
+  proposed_description TEXT NOT NULL,
+  proposed_tags_json   TEXT NOT NULL DEFAULT '[]',
+  fact_checked_at      TEXT,
+  reviewer_note        TEXT,
+  decided_by           TEXT,
+  decided_at           TEXT,
+  created_at           TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_review_item_status ON review_item(status, created_at);
+
+-- Capraz platform - sadece veri modeli, gercek entegrasyon yok (EK 2 / F)
+CREATE TABLE IF NOT EXISTS publish_target (
+  id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id            TEXT NOT NULL REFERENCES channel(id),
+  platform              TEXT NOT NULL CHECK (platform IN ('youtube','facebook','instagram','tiktok')),
+  external_channel_ref  TEXT,
+  enabled               INTEGER NOT NULL DEFAULT 0,
+  credentials_env_key   TEXT,
+  config_json           TEXT NOT NULL DEFAULT '{}',
+  created_at            TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_publish_target_channel_platform
+  ON publish_target(channel_id, platform);
+
+-- Hikaye kanali referans kanallari - panelden, kanal bazli girilir
+CREATE TABLE IF NOT EXISTS story_reference (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id  TEXT NOT NULL REFERENCES channel(id),
+  source_url  TEXT NOT NULL,
+  label       TEXT,
+  enabled     INTEGER NOT NULL DEFAULT 1,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_stage    ON job(stage, status);
+CREATE INDEX IF NOT EXISTS idx_usage_time   ON llm_usage(created_at);
+CREATE INDEX IF NOT EXISTS idx_upload_channel_status ON upload(channel_id, status, publish_at);
 `;
+
+/**
+ * SQLite'in ADD COLUMN'u "sutun zaten var" durumunda hata firlatir; bu
+ * fonksiyon eklemeli kolon degisikliklerini tekrar tekrar calistirmaya
+ * guvenli hale getirir (CREATE TABLE IF NOT EXISTS ile ayni ruhta).
+ */
+function applyIncrementalMigrations(db: Database.Database): void {
+  const alterations: Array<{ table: string; column: string; ddl: string }> = [
+    { table: 'upload', column: 'platform', ddl: "ALTER TABLE upload ADD COLUMN platform TEXT NOT NULL DEFAULT 'youtube'" },
+    { table: 'upload', column: 'publish_target_id', ddl: 'ALTER TABLE upload ADD COLUMN publish_target_id INTEGER REFERENCES publish_target(id)' },
+    { table: 'job', column: 'batch_id', ddl: 'ALTER TABLE job ADD COLUMN batch_id TEXT' },
+  ];
+
+  for (const { table, column, ddl } of alterations) {
+    const existing = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    if (existing.some((col) => col.name === column)) continue;
+    db.exec(ddl);
+    Logger.debug(`Migrasyon uygulandi: ${table}.${column}`);
+  }
+
+  // Bu indeksler migrasyonla eklenen kolonlara bagli oldugu icin ana SCHEMA
+  // calistiktan hemen sonra degil, kolonlar kesinlikle var olduktan sonra kurulur.
+  db.exec('CREATE INDEX IF NOT EXISTS idx_job_batch ON job(batch_id) WHERE batch_id IS NOT NULL');
+}
 
 /**
  * Acik SQLite baglantisini dondurur, ilk cagrida semayi kurar.
@@ -112,7 +221,12 @@ export function getDb(): Database.Database {
     mkdirSync(dirname(DB_PATH), { recursive: true });
     connection = new Database(DB_PATH);
     connection.pragma('journal_mode = WAL');
+    // Panel (API sureci) ve worker (cron) ayni SQLite dosyasina yazar; WAL
+    // eszamanli okuyucuya izin verir ama yazicilar hala carpisabilir.
+    // busy_timeout olmadan bu carpismalar aninda SQLITE_BUSY hatasi verir.
+    connection.pragma('busy_timeout = 5000');
     connection.exec(SCHEMA);
+    applyIncrementalMigrations(connection);
     Logger.debug(`SQLite hazir: ${DB_PATH}`);
     return connection;
   } catch (error) {
