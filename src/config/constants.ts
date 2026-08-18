@@ -54,6 +54,26 @@ export const AUDIO = {
   DUCK_RELEASE_MS: 400,
 } as const;
 
+export const MUSIC_SEGMENT = {
+  /** Hiz/irtifa serisini yumusatma penceresi - anlik GPS gurultusu segment uretmesin */
+  SMOOTH_WINDOW_SEC: 5,
+  /**
+   * En kisa muzik bolumu. Bunun altindaki bolumler komsusuna katilir:
+   * her birkac saniyede muzik degistirmek izleyicide huzursuzluk yaratir.
+   */
+  MIN_SEGMENT_SEC: 12,
+  /** Bir videoda en fazla kac farkli parca kullanilabilir */
+  MAX_TRACKS_PER_VIDEO: 3,
+  /** Iki parca arasi gecis suresi (crossfade) */
+  CROSSFADE_SEC: 2,
+  /** Hiz esikleri (m/s): bunun ustu hizli gecis, alti yakin plan/hover */
+  FAST_SPEED_MPS: 10,
+  SLOW_SPEED_MPS: 3,
+  /** Irtifa esikleri (m): yuksek = genis manzara, alcak = yakin plan */
+  HIGH_ALT_M: 80,
+  LOW_ALT_M: 30,
+} as const;
+
 export const POI = {
   /** Overpass'tan istenecek azami sonuc sayisi */
   MAX_RESULTS: 60,

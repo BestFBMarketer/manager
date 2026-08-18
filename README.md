@@ -156,9 +156,25 @@ Dogrudan etiket eslesmesi (orn. `tarihi`) ton tahmininden agir basar; yakin
 zamanda kullanilan parca ciddi ceza alir, boylece ard arda ayni muzik cikmaz.
 Esit puanli adaylar arasinda rastgele secim yapilir.
 
-`audioMix` muzigi video suresine gore donguler, basta/sonda fade uygular ve
-seslendirme varken `sidechaincompress` ile **otomatik kisar (ducking)** — konusma
-her zaman anlasilir kalir.
+### Tek videoda birden fazla parca
+
+Video tek bir sarkiyla doselmez. `segmentPlanner`, ucus telemetrisinden **hiz ve
+irtifayi** okuyup videoyu enerji bolumlerine ayirir:
+
+| Bolum | Kosul | Tercih edilen tonlar |
+|---|---|---|
+| **high** | hizli gecis (>10 m/s) veya GoPro aksiyon | energetic / epic / uplifting |
+| **medium** | orta tempo veya yuksek irtifa genis manzara | uplifting / cinematic / epic |
+| **low** | yavas + alcak ucus, yakin plan | dreamy / chill / cinematic |
+
+Her bolum kendi parcasini alir ve ardisik bolumlerde ayni parca tekrarlanmaz.
+Koruma kurallari: bolumler en az 12 sn (sik muzik degisimi izleyiciyi yorar),
+video basina en fazla 3 parca, bitisik ayni enerjili bolumler birlestirilir.
+Telemetri yoksa eski davranisa donulur (tek parca).
+
+`audioMix` her bolumun parcasini gerektiginde donguler, bolum sinirlarinda
+carprazlama fade uygular ve seslendirme varken `sidechaincompress` ile muzigi
+**otomatik kisar (ducking)** — konusma her zaman anlasilir kalir.
 
 ## Manuel mudahale
 
@@ -210,6 +226,7 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M10a — seslendirme adaptoru (Voicebox → Piper) + ranking planlayici
 - [x] M11 — POI kesfi (Overpass + Vikipedi) ve ucusa senkron kart zamanlamasi
 - [x] M12 — soundtrack secimi (tema/saat/sure) + ducking'li ses miksaji
+- [x] M12b — ucusa gore bolumlenmis coklu soundtrack ve gecisler
 - [x] M13 — manuel eslestirme ve stok goruntu override'i
 - [ ] M2 — Whisper transkript + highlight secimi
 - [ ] M3 — Remotion `FunnyShort` kompozisyonu

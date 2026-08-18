@@ -110,3 +110,49 @@ export function selectTrack(library: MusicTrack[], query: MusicQuery): MusicTrac
   );
   return chosen;
 }
+
+/**
+ * Her muzik bolumune ayri parca secer.
+ *
+ * Ardisik bolumlerde ayni parcanin tekrarlanmamasi icin, secilen her parca
+ * bir sonraki bolumun "yakin zamanda kullanilanlar" listesine eklenir.
+ * Boylece tek videoda hizli gecis ve yakin plan sahneleri farkli
+ * soundtrack'lerle desteklenir.
+ *
+ * @param library Kullanilabilir parcalar
+ * @param segments planMusicSegments ciktisi
+ * @param baseQuery Tema, saat ve yakin gecmis (sure bolum basina hesaplanir)
+ * @returns Her bolum icin secilmis parca (kutuphane bossa bos dizi)
+ */
+export function selectTracksForSegments(
+  library: MusicTrack[],
+  segments: Array<{ startSec: number; endSec: number; suggestedMoods: Mood[] }>,
+  baseQuery: Omit<MusicQuery, 'videoDurationSec'>,
+): Array<{ startSec: number; endSec: number; track: MusicTrack }> {
+  const chosen: Array<{ startSec: number; endSec: number; track: MusicTrack }> = [];
+  const usedIds = [...(baseQuery.recentlyUsedIds ?? [])];
+
+  for (const segment of segments) {
+    const durationSec = segment.endSec - segment.startSec;
+
+    // Bolumun onerdigi tonlari kutuphaneye on filtre olarak uygula;
+    // hicbiri yoksa tum kutuphaneye dus (video muziksiz kalmasin).
+    const preferred = library.filter((track) => segment.suggestedMoods.includes(track.mood));
+    const pool = preferred.length > 0 ? preferred : library;
+
+    const track = selectTrack(pool, {
+      ...baseQuery,
+      videoDurationSec: durationSec,
+      recentlyUsedIds: usedIds,
+    });
+    if (!track) continue;
+
+    chosen.push({ startSec: segment.startSec, endSec: segment.endSec, track });
+    usedIds.push(track.id);
+  }
+
+  Logger.success(
+    `Bolum muzikleri: ${chosen.map((entry) => `"${entry.track.title}"`).join(' -> ') || 'secilemedi'}`,
+  );
+  return chosen;
+}
