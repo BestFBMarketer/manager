@@ -163,6 +163,40 @@ ve VPS'in varsayilan motorudur. Ton kurali sistem promptunda sabit:
 mizahi/igneleyici/alayci, ama hakaret ve kisisel saldiri yok - dalga gecilen
 sey durum, kisi degil.
 
+## Ucus kumeleme ve gunduz-gece gecisleri
+
+Ayni bolgede farkli tarihlerde yapilan cekimler ve ayni gunun seri ucuslari
+otomatik teshis edilir:
+
+- **Bolge kumeleme** — klip merkezleri 1.5 km yaricapta toplanir; ayni otelin
+  agustos ve eylul cekimleri ayni kumeye duser.
+- **Seans ayrimi** — ayni gun 45 dakikadan uzun ara varsa yeni cekim seansi
+  sayilir. DJI Neo bataryasi 7-12 dakika dayandigi icin bir bolge genelde
+  pes pese birkac ucusla cekilir; bunlar tek seans olarak gruplanir.
+
+### Ayni acidan gunduz + gece
+
+`viewpoint` her cekimin **nereden nereye baktigini** olcer (konum, irtifa ve
+GPS'ten turetilen ucus yonu). Isik kosulu ise saat araligina degil **gercek
+gunes yuksekligine** bakilarak belirlenir - Antalya'da agustosta 20:00 hala
+isikliyken ocakta gece olur:
+
+| Gunes yuksekligi | Kosul |
+|---|---|
+| > 10° | gunduz |
+| 0° – 10° | **altin saat** |
+| -6° – 0° | mavi saat |
+| < -6° | gece |
+
+Ayni noktadan ayni yone bakan bir aydinlik ve bir karanlik cekim bulunursa
+gecis adayi olur. Puanlama: mesafe (%45), yon farki (%35), irtifa farki (%20).
+`transitions` bunlari FFmpeg `xfade` ile birlestirir (fade / fadeblack /
+circleopen) - izleyici ayni manzarayi iki farkli zamanda gorur.
+
+```bash
+npm run pipeline -- --stage cluster --dir /veri/ucuslar
+```
+
 ## Akilli kurgu — hiz optimizasyonu
 
 DJI Neo bataryasi 7-12 dakika dayanir (genelde ~7). 30 dakikalik bir video, ham
@@ -301,6 +335,7 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M12b — ucusa gore bolumlenmis coklu soundtrack ve gecisler
 - [x] M13 — manuel eslestirme ve stok goruntu override'i
 - [x] M14 — akilli hiz optimizasyonu, zaman haritasi ve FFmpeg uygulamasi
+- [x] M15 — ucus kumeleme, bakis acisi olcumu, gunduz-gece eslestirme ve gecisler
 - [ ] M2 — Whisper transkript + highlight secimi
 - [x] M3 — Remotion kompozisyonlari (FunnyRanking, HotelTour, POI kartlari)
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
