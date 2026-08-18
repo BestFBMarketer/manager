@@ -7,6 +7,7 @@
 // =====================================
 
 import { Logger } from '../core/logger.js';
+import { isEligibleDay, countPerPeriodDays, type ScheduleRule } from './scheduleRules.js';
 
 /**
  * Slotlar UTC olarak degil, HEDEF BOLGENIN kendi saatiyle tanimlanir.
@@ -124,24 +125,46 @@ export function describeAcrossZones(instant: Date): string {
   }).join(' | ');
 }
 
+/** Iki anin ayni takvim gunune denk gelip gelmedigini soyler (saat bilgisi yok sayilir). */
+function isSameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
+}
+
+/** `count_per_period` icin donem-bazli, digerleri icin dogrudan `isEligibleDay` kullanir. */
+function isDayEligible(rule: ScheduleRule, day: Date): boolean {
+  if (rule.kind === 'count_per_period') {
+    return countPerPeriodDays(rule, day).some((d) => isSameCalendarDay(d, day));
+  }
+  return isEligibleDay(rule, day);
+}
+
 /**
  * Verilen andan sonraki yayin zamanlarini uretir.
  *
  * @param slots Kullanilacak prime time slotlari
  * @param count Kac yayin zamani istendigi
  * @param from Baslangic ani (varsayilan: simdi)
+ * @param rule Opsiyonel yayin sikligi kurali - verilmezse her gun uygun sayilir (eski davranis)
  * @returns Kronolojik sirali UTC yayin anlari
  */
 export function nextPublishTimes(
   slots: PrimeTimeSlot[],
   count: number,
   from: Date = new Date(),
+  rule?: ScheduleRule,
 ): Array<{ slot: PrimeTimeSlot; publishAt: Date }> {
   const results: Array<{ slot: PrimeTimeSlot; publishAt: Date }> = [];
-  const MAX_DAYS_AHEAD = 30;
+  // count_per_period gibi seyrek kurallar (orn. "3 ayda 4 video") 30 gunluk
+  // pencerede hic uygun gun bulamayabilir; bu yuzden ust sinir genis tutulur.
+  const MAX_DAYS_AHEAD = rule ? 400 : 30;
 
   for (let dayOffset = 0; dayOffset <= MAX_DAYS_AHEAD && results.length < count; dayOffset += 1) {
     const day = new Date(from.getTime() + dayOffset * 86_400_000);
+    if (rule && !isDayEligible(rule, day)) continue;
 
     const candidates = slots
       .map((slot) => {

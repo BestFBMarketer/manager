@@ -1,13 +1,14 @@
 // =====================================
 // MODULE: Channels
-// Purpose: Kanal tanimlari - yeni kanal eklemek icin sadece bu dosya degisir
-// Dependencies: constants
+// Purpose: Kanal tanimlari - DB'den okunur (panelden redeploy'suz duzenlenebilsin diye)
+// Dependencies: core/db, publish/publishSlots, publish/scheduleRules
 // Author: BestMarketer Team
 // Last Modified: 2026-08-18
 // =====================================
 
-import { PIPELINE, VIDEO } from './constants.js';
-import { RANKING_SLOTS, type PrimeTimeSlot } from '../publish/publishSlots.js';
+import { getDb } from '../core/db.js';
+import type { PrimeTimeSlot } from '../publish/publishSlots.js';
+import type { ScheduleRule } from '../publish/scheduleRules.js';
 
 export type TemplateName =
   | 'FunnyShort'
@@ -24,9 +25,9 @@ export interface ChannelConfig {
    * Yayin slotlari hedef izleyicinin kendi saat dilimiyle tanimlanir
    * (bkz. publish/publishSlots.ts) - yaz saati gecisleri otomatik dogru olur.
    */
-  primeTimeSlots: PrimeTimeSlot[];
-  /** Haftanin hangi gunleri yayin yapilacagi (0=Pazar). Bos = her gun. */
-  publishWeekdays: number[];
+  slots: PrimeTimeSlot[];
+  /** Yayin sikligi kurali - haftaici listesi / N gunde bir / M ayda N video (bkz. publish/scheduleRules.ts) */
+  scheduleRule: ScheduleRule;
   targetDurationSec: number;
   /** Kanalin yayin dili - LLM metinleri, POI aciklamalari ve altyazilar bu dilde uretilir */
   language: 'tr' | 'en' | 'de';
@@ -52,55 +53,93 @@ export const YOUTUBE_CATEGORY = {
   ENTERTAINMENT: '24',
 } as const;
 
-export const CHANNELS: Record<string, ChannelConfig> = {
-  shorts: {
-    id: 'shorts',
-    label: 'Komik Shorts',
-    refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_SHORTS',
-    defaultTemplate: 'FunnyShort',
-    // Gunde 3 video: ABD prime, Avrupa prime ve ABD sabah yogunlugu
-    primeTimeSlots: RANKING_SLOTS,
-    publishWeekdays: [],
-    targetDurationSec: VIDEO.SHORT_MAX_SEC,
-    language: 'en',
-    wikiLanguages: ['en'],
-    audience: 'Global short-form viewers; countdown/ranking format with sarcastic commentary',
-    titleExamples: [],
-    shortsDerivativeCount: 0,
-    categoryId: YOUTUBE_CATEGORY.COMEDY,
-  },
-  travel: {
-    id: 'travel',
-    label: 'Gezi / Seyahat',
-    refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_TRAVEL',
-    defaultTemplate: 'HotelTourLandscape',
-    // Haftada 3 video: Avrupa prime time (gezi izleyicisinin agirligi Avrupa'da)
-    primeTimeSlots: [RANKING_SLOTS[1]!],
-    publishWeekdays: [2, 4, 6],
-    // Kanal 18-42 dakikalik videolar yayinliyor; hedef bu araligin ortasi
-    targetDurationSec: 1_500,
-    // Kanal ALMANCA yayin yapiyor - tum metinler Almanca uretilmeli
-    language: 'de',
-    wikiLanguages: ['de', 'en', 'tr'],
-    audience:
-      'Deutschsprachige Türkei-Urlauber (DACH); Reiseziele, Ausflüge, Hotels und ' +
-      'Sehenswürdigkeiten an der türkischen Riviera',
-    titleExamples: [
-      'Die dunkle Wahrheit über Side: Piraten, Mythen und Wahrheit',
-      'The Land Of Legends Bei Tag & Nacht und Vieles Mehr',
-      'Versteckte Naturorte der Türkei ohne Rummel',
-      'Antalya\'s Digital Exhibition Center "Digiverse"',
-      'Sandland Und Deepo Outlet Center Ausflug',
-    ],
-    shortsDerivativeCount: PIPELINE.SHORTS_PER_LONG_VIDEO,
-    categoryId: YOUTUBE_CATEGORY.TRAVEL_AND_EVENTS,
-  },
-};
+interface ChannelRow {
+  id: string;
+  label: string;
+  refresh_token_env_key: string;
+  default_template: string;
+  target_duration_sec: number;
+  language: string;
+  wiki_languages_json: string;
+  audience: string;
+  title_examples_json: string;
+  shorts_derivative_count: number;
+  category_id: string;
+}
 
-export function getChannel(id: string): ChannelConfig {
-  const channel = CHANNELS[id];
-  if (!channel) {
-    throw new Error(`Bilinmeyen kanal: ${id} (tanimlilar: ${Object.keys(CHANNELS).join(', ')})`);
+interface ScheduleRuleRow {
+  kind: string;
+  weekdays_json: string | null;
+  interval_days: number | null;
+  period_months: number | null;
+  count_per_period: number | null;
+  anchor_date: string;
+  slots_json: string;
+}
+
+function toScheduleRule(row: ScheduleRuleRow): ScheduleRule {
+  const anchor = new Date(row.anchor_date);
+  switch (row.kind) {
+    case 'weekday_list':
+      return { kind: 'weekday_list', weekdays: JSON.parse(row.weekdays_json ?? '[]') as number[] };
+    case 'every_n_days':
+      return { kind: 'every_n_days', intervalDays: row.interval_days ?? 1, anchor };
+    case 'count_per_period':
+      return {
+        kind: 'count_per_period',
+        countPerPeriod: row.count_per_period ?? 1,
+        periodMonths: row.period_months ?? 1,
+        anchor,
+      };
+    default:
+      throw new Error(`Bilinmeyen schedule_rule.kind: ${row.kind}`);
   }
-  return channel;
+}
+
+function rowToChannelConfig(row: ChannelRow, ruleRow: ScheduleRuleRow): ChannelConfig {
+  return {
+    id: row.id,
+    label: row.label,
+    refreshTokenEnvKey: row.refresh_token_env_key,
+    defaultTemplate: row.default_template as TemplateName,
+    slots: JSON.parse(ruleRow.slots_json) as PrimeTimeSlot[],
+    scheduleRule: toScheduleRule(ruleRow),
+    targetDurationSec: row.target_duration_sec,
+    language: row.language as ChannelConfig['language'],
+    wikiLanguages: JSON.parse(row.wiki_languages_json) as string[],
+    audience: row.audience,
+    titleExamples: JSON.parse(row.title_examples_json) as string[],
+    shortsDerivativeCount: row.shorts_derivative_count,
+    categoryId: row.category_id,
+  };
+}
+
+/**
+ * Kanal ayarlarini DB'den okur (panel redeploy gerektirmeden duzenleyebilsin diye).
+ * Her kanalda tam olarak bir aktif `schedule_rule` satiri olmasi DB seviyesinde
+ * zorlanir (bkz. idx_schedule_rule_one_active).
+ */
+export function getChannel(id: string): ChannelConfig {
+  const db = getDb();
+  const channelRow = db.prepare('SELECT * FROM channel WHERE id = ?').get(id) as ChannelRow | undefined;
+  if (!channelRow) {
+    const known = (db.prepare('SELECT id FROM channel').all() as Array<{ id: string }>).map((r) => r.id);
+    throw new Error(`Bilinmeyen kanal: ${id} (tanimlilar: ${known.join(', ') || '(hic kanal tanimli degil)'})`);
+  }
+
+  const ruleRow = db
+    .prepare('SELECT * FROM schedule_rule WHERE channel_id = ? AND enabled = 1')
+    .get(id) as ScheduleRuleRow | undefined;
+  if (!ruleRow) {
+    throw new Error(`${id}: aktif schedule_rule bulunamadi - panelden veya migrasyon script'iyle tanimlanmali`);
+  }
+
+  return rowToChannelConfig(channelRow, ruleRow);
+}
+
+/** Tum tanimli kanallari doner (orn. stageDoctor'daki kanal listesi icin). */
+export function listChannels(): ChannelConfig[] {
+  const db = getDb();
+  const rows = db.prepare('SELECT id FROM channel').all() as Array<{ id: string }>;
+  return rows.map((r) => getChannel(r.id));
 }
