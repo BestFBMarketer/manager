@@ -43,7 +43,12 @@ export async function scheduleAndUpload(input: ScheduleInput): Promise<UploadRes
     )
     .get(input.channel.id) as { n: number };
 
-  const upcoming = nextPublishTimes(input.channel.primeTimeSlots, alreadyScheduled.n + 1);
+  const upcoming = nextPublishTimes(
+    input.channel.slots,
+    alreadyScheduled.n + 1,
+    new Date(),
+    input.channel.scheduleRule,
+  );
   const slot = upcoming[upcoming.length - 1];
   if (!slot) throw new Error(`${input.channel.id}: uygun yayin slotu bulunamadi`);
 

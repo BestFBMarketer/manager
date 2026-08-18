@@ -6,7 +6,7 @@
 // Last Modified: 2026-08-18
 // =====================================
 
-import { CHANNELS } from './config/channels.js';
+import { listChannels } from './config/channels.js';
 import { isAvailable } from './core/exec.js';
 import { getDb, closeDb } from './core/db.js';
 import { Logger } from './core/logger.js';
@@ -131,7 +131,7 @@ async function stageDoctor(): Promise<void> {
     else Logger.success(`  ${provider.name} (${tier}): hazir`);
   }
 
-  Logger.info(`Kanallar: ${Object.values(CHANNELS).map((c) => `${c.id} (${c.label})`).join(', ')}`);
+  Logger.info(`Kanallar: ${listChannels().map((c) => `${c.id} (${c.label})`).join(', ')}`);
 
   getDb();
   Logger.success('SQLite semasi hazir');
@@ -219,7 +219,7 @@ async function stagePublish(args: Args): Promise<void> {
   const tagList = tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
   if (args.flags.has('dry-run')) {
-    const [slot] = nextPublishTimes(channel.primeTimeSlots, 1);
+    const [slot] = nextPublishTimes(channel.slots, 1, new Date(), channel.scheduleRule);
     Logger.info(`[DRY RUN] ${channel.label} icin yuklenecek olan:`);
     Logger.info(`  baslik: ${title}`);
     Logger.info(`  aciklama: ${description ?? '(yok)'}`);
@@ -242,7 +242,7 @@ async function stagePublish(args: Args): Promise<void> {
     return;
   }
 
-  const [slot] = nextPublishTimes(channel.primeTimeSlots, 1);
+  const [slot] = nextPublishTimes(channel.slots, 1, new Date(), channel.scheduleRule);
   if (!slot) throw new Error('uygun yayin slotu bulunamadi');
 
   const result = await uploadVideo({
@@ -269,7 +269,7 @@ async function stageSchedule(args: Args): Promise<void> {
   const count = Number(args.values.count ?? 6);
 
   Logger.info(`${channel.label}: sonraki ${count} yayin zamani`);
-  for (const { slot, publishAt } of nextPublishTimes(channel.primeTimeSlots, count)) {
+  for (const { slot, publishAt } of nextPublishTimes(channel.slots, count, new Date(), channel.scheduleRule)) {
     Logger.success(`  ${slot.label}`);
     Logger.info(`    UTC ${publishAt.toISOString()} | ${describeAcrossZones(publishAt)}`);
   }
