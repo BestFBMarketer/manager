@@ -17,7 +17,10 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
     "better-sqlite3": "^11.5.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "egm96-universal": "^1.1.1",
+    "gopro-telemetry": "^1.2.11",
+    "gpmf-extract": "^0.3.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",

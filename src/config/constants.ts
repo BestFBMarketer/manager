@@ -39,6 +39,17 @@ export const VIDEO = {
   LOUDNESS_RANGE: 11,
 } as const;
 
+export const RANKING = {
+  /** Geri sayimli ranking'te kac sira gosterilecek */
+  ITEM_COUNT: 5,
+  /** Videonun toplam sure tavani - Shorts tempesi icin kisa tutulur */
+  MAX_TOTAL_SEC: 30,
+  MIN_ITEM_SEC: 3,
+  MAX_ITEM_SEC: 8,
+  /** Seslendirme cumlesi kelime siniri - okuma suresi klip suresine sigmali */
+  MAX_WORDS_PER_LINE: 12,
+} as const;
+
 export const PIPELINE = {
   FUNNY_DAILY_TARGET: 3,
   TRAVEL_WEEKLY_TARGET: 3,
@@ -59,4 +70,12 @@ export const TELEMETRY = {
   MAX_GAP_SEC: 5,
   /** Bu sayidan az nokta varsa telemetri kullanilmaz sayilir */
   MIN_POINTS: 5,
+  /** GoPro GPS kilidi: 0=yok, 2=2D, 3=3D. 2'nin altindaki ornekler elenir. */
+  GPS_FIX_MIN: 2,
+  /**
+   * GoPro DOP esigi (x100). Uretici 500 altini "iyi" sayar, ancak gercek
+   * kayitlarda 3D kilitli ornekler 600-700 uretebiliyor. Harita animasyonu
+   * santimetre hassasiyeti gerektirmediginden esik gevsek tutulur.
+   */
+  GPS_PRECISION_MAX: 1_000,
 } as const;

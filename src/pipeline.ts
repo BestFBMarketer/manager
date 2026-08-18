@@ -15,6 +15,9 @@ import { probe } from './ingest/probe.js';
 import { listProviderStatus, callLlmJson } from './llm/router.js';
 import { spentTodayUsd } from './llm/quotaTracker.js';
 import { boundingBox, parseDjiSrt } from './telemetry/djiSrtParser.js';
+import { parseGoproTelemetry } from './telemetry/goproGpmf.js';
+import { guessSource } from './telemetry/clipSync.js';
+import { listTtsStatus, synthesizeSpeech, defaultVoiceRef } from './tts/router.js';
 
 interface Args {
   stage: string;
@@ -58,6 +61,12 @@ shorts-factory - asama bazli calistirma
   npm run pipeline -- --stage srt --input <ucus.SRT>
       DJI telemetrisini ayristirir; nokta sayisi ve sinir kutusunu yazar.
 
+  npm run pipeline -- --stage gpmf --input <GX010001.MP4>
+      GoPro videosuna gomulu GPS telemetrisini cikarir.
+
+  npm run pipeline -- --stage tts --input "<metin>" [--voice <ses>] --output <ses.wav>
+      Seslendirme zincirini test eder (Voicebox -> Piper, ikisi de ucretsiz).
+
   npm run pipeline -- --stage llm --task metadata --input "<metin>"
       LLM zincirini test eder (once ucretsiz katman denenir).
 
@@ -75,6 +84,12 @@ async function stageDoctor(): Promise<void> {
     else Logger.warn(`${binary} BULUNAMADI - kurulmasi gerekiyor`);
   }
 
+  Logger.info('Seslendirme saglayicilari:');
+  for (const tts of await listTtsStatus()) {
+    if (tts.ready) Logger.success(`  ${tts.name}: hazir`);
+    else Logger.warn(`  ${tts.name}: hazir degil`);
+  }
+
   Logger.info('LLM saglayicilari:');
   for (const provider of listProviderStatus()) {
     const tier = provider.free ? 'ucretsiz' : 'ucretli';
@@ -88,6 +103,36 @@ async function stageDoctor(): Promise<void> {
   getDb();
   Logger.success('SQLite semasi hazir');
   Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`);
+}
+
+async function stageGpmf(input: string): Promise<void> {
+  Logger.info(`Kaynak tahmini: ${guessSource(input.split('/').pop() ?? input)}`);
+  const points = await parseGoproTelemetry(input);
+  if (points.length === 0) {
+    Logger.warn('GoPro telemetrisi yok - bu klip harita senkronuna katilmaz');
+    return;
+  }
+
+  const first = points[0]!;
+  const last = points[points.length - 1]!;
+  Logger.success(
+    `${points.length} nokta | ${first.tSec.toFixed(1)}-${last.tSec.toFixed(1)}sn | ` +
+      `baslangic ${first.lat.toFixed(5)},${first.lon.toFixed(5)} | ` +
+      `saat ${first.wallClock?.toISOString() ?? 'yok'}`,
+  );
+}
+
+async function stageTts(args: Args): Promise<void> {
+  const text = args.values.input;
+  const output = args.values.output;
+  if (!text || !output) throw new Error('tts asamasi --input "<metin>" --output <ses.wav> gerektirir');
+
+  const result = await synthesizeSpeech({
+    text,
+    voiceRef: args.values.voice ?? defaultVoiceRef(),
+    outputPath: output,
+  });
+  Logger.success(`Ses uretildi: ${result.outputPath} (${result.durationSec.toFixed(1)}sn, $${result.costUsd})`);
 }
 
 async function stageProbe(input: string): Promise<void> {
@@ -174,6 +219,8 @@ async function main(): Promise<void> {
       case 'probe': await stageProbe(args.values.input ?? ''); break;
       case 'cut': await stageCut(args); break;
       case 'srt': await stageSrt(args.values.input ?? ''); break;
+      case 'gpmf': await stageGpmf(args.values.input ?? ''); break;
+      case 'tts': await stageTts(args); break;
       case 'llm': await stageLlm(args); break;
       case 'cost': Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`); break;
       default: printHelp();

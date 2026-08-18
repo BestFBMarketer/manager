@@ -51,6 +51,12 @@ npm run pipeline -- --stage cut --input video.mp4 --start 12 --end 45 \
 # DJI telemetrisi ayristirma
 npm run pipeline -- --stage srt --input DJI_0001.SRT
 
+# GoPro telemetrisi (MP4 icine gomulu GPS)
+npm run pipeline -- --stage gpmf --input GX010001.MP4
+
+# Seslendirme testi (Voicebox -> Piper zinciri, ikisi de ucretsiz)
+npm run pipeline -- --stage tts --input "Bes numara: kediyi kim tuttu?" --output out/vo.wav
+
 # LLM zinciri testi (once ucretsiz katman denenir)
 npm run pipeline -- --stage llm --input "Kedi masadan atlarken kayiyor ve sahibine carpiyor"
 
@@ -96,6 +102,26 @@ remotion/      kompozisyonlar (FunnyShort, HotelTour*, MapLayer)
 
 ---
 
+## Ranking + seslendirme
+
+Komik kanal bir **ranking kanali**: geri sayimli Top 5, toplam sure <= 30 sn.
+`rankingPlanner` adaylardan siralamayi kurar ve her sira icin alayci tek cumlelik
+seslendirme metni uretir; `enforceBudget` LLM ne dondururse donsun sure tavanini ve
+`#1`'in korunmasini garanti eder.
+
+Seslendirme zinciri **tamamen ucretsiz ve yerel**: once Voicebox REST API'si
+(klonlanmis karakter sesi), yoksa Piper. Ton kurali sistem promptunda sabit:
+mizahi/igneleyici/alayci, ama hakaret ve kisisel saldiri yok - dalga gecilen
+sey durum, kisi degil.
+
+## GoPro + drone harmanlama
+
+GoPro (Hero5+) GPS telemetrisini MP4'un icine gomer; DJI ise yanina `.SRT` yazar.
+Ikisi de ayni `TrackPoint` yapisina normalize edilir. `clipSync` iki kaynagin GPS
+zaman damgalarini karsilastirip **ayni anin drone (genis) ve GoPro (yakin) acisini**
+otomatik eslestirir - kurgu bunlari A-roll / B-roll olarak kullanir. Eleme kurallari:
+ortak sure >= 2 sn ve kameralar arasi ortalama mesafe <= 500 m.
+
 ## DJI Neo notu
 
 DJI Neo `.SRT` telemetrisini **yalnizca** DJI Fly icinde "Video Captions / Altyazi" ayari
@@ -113,6 +139,8 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M0 — iskelet, config, logger, SQLite semasi, LLM router
 - [x] M1 — ingest (probe) + edit (kesim, 9:16 cerceve, loudnorm)
 - [x] M6a — DJI SRT telemetri ayristirici + konum enterpolasyonu
+- [x] M6c — GoPro GPMF telemetri + drone/GoPro GPS-zaman eslestirme
+- [x] M10a — seslendirme adaptoru (Voicebox → Piper) + ranking planlayici
 - [ ] M2 — Whisper transkript + highlight secimi
 - [ ] M3 — Remotion `FunnyShort` kompozisyonu
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
