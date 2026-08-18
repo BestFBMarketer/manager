@@ -54,6 +54,46 @@ export const AUDIO = {
   DUCK_RELEASE_MS: 400,
 } as const;
 
+export const TRANSITION = {
+  /** Gecisin her iki tarafinda gosterilecek sure */
+  HOLD_SEC: 4,
+  /** Capraz gecis suresi - kisa olursa kesme gibi, uzun olursa agir durur */
+  DURATION_SEC: 1.5,
+  /** Bir videoda en fazla kac gunduz-gece gecisi - fazlasi numara gibi durur */
+  MAX_PER_VIDEO: 3,
+} as const;
+
+export const CLUSTER = {
+  /** Bu yaricap icindeki cekimler ayni bolge sayilir */
+  REGION_RADIUS_M: 1_500,
+  /**
+   * Ayni gun icinde bu suredem uzun ara varsa yeni bir cekim seansi baslamis
+   * demektir. DJI Neo bataryasi ~7-12 dk oldugundan pes pese ucuslar arasinda
+   * kisa (batarya degisimi kadar) boslukar olur.
+   */
+  SESSION_GAP_MIN: 45,
+} as const;
+
+export const VIEWPOINT = {
+  /** Bakis acisi cikarma penceresi */
+  WINDOW_SEC: 4,
+  /** Yon hesabi icin gereken en az yer degistirme - hover'da yon guvenilmez */
+  MIN_MOVE_FOR_HEADING_M: 8,
+  /** "Ayni yer" sayilan azami mesafe */
+  MAX_DISTANCE_M: 120,
+  /** "Ayni yukseklik" sayilan azami fark */
+  MAX_ALT_DIFF_M: 35,
+  /** "Ayni yon" sayilan azami aci farki */
+  MAX_HEADING_DIFF_DEG: 45,
+  /** Iki taraftan biri hover ise yon puani belirsizdir - notr deger verilir */
+  HOVER_HEADING_SCORE: 0.5,
+  WEIGHT_DISTANCE: 0.45,
+  WEIGHT_ALT: 0.2,
+  WEIGHT_HEADING: 0.35,
+  /** Gunduz-gece eslesmesi icin gereken en dusuk benzerlik */
+  MIN_MATCH_SCORE: 0.62,
+} as const;
+
 export const SPEED = {
   /**
    * Hiz esikleri (m/s). DJI Neo bataryasi 7-12 dk dayandigi icin ham malzeme

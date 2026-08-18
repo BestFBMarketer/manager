@@ -21,6 +21,10 @@ import { listTtsStatus, synthesizeSpeech, defaultVoiceRef } from './tts/router.j
 import { describeAcrossZones, nextPublishTimes } from './publish/publishSlots.js';
 import { planSpeed } from './edit/speedPlanner.js';
 import { applySpeedPlan } from './edit/applySpeedPlan.js';
+import { clusterFlights } from './telemetry/flightCluster.js';
+import { findDayNightPairs } from './edit/dayNightPairing.js';
+import { readdir } from 'node:fs/promises';
+import { join, extname, basename } from 'node:path';
 import { getChannel } from './config/channels.js';
 
 interface Args {
@@ -78,6 +82,10 @@ shorts-factory - asama bazli calistirma
       Ucus telemetrisinden kurgu plani cikarir: gereksiz yerleri atar, yavas
       gecisleri hizlandirir, guzel hizli anlari agir cekime alir.
       --output verilmezse sadece plan yazdirilir, dosya uretilmez.
+
+  npm run pipeline -- --stage cluster --dir <klasor>
+      Klasordeki .SRT dosyalarini okuyup ucuslari bolgelere ayirir, ayni gunun
+      seri cekimlerini gruplar ve gunduz-gece eslesmelerini raporlar.
 
   npm run pipeline -- --stage schedule [--channel shorts] [--count 6]
       Sonraki yayin zamanlarini ABD/Avrupa prime time'a gore listeler.
@@ -141,6 +149,51 @@ async function stageSpeed(args: Args): Promise<void> {
 
   if (output) await applySpeedPlan({ inputPath: input, outputPath: output, plan });
   else Logger.info('--output verilmedi, dosya uretilmedi');
+}
+
+async function stageCluster(args: Args): Promise<void> {
+  const dir = args.values.dir;
+  if (!dir) throw new Error('cluster asamasi --dir <klasor> gerektirir');
+
+  const files = (await readdir(dir)).filter((name) => extname(name).toLowerCase() === '.srt');
+  if (files.length === 0) {
+    Logger.warn(`${dir}: .SRT dosyasi bulunamadi`);
+    return;
+  }
+
+  const tracks = [];
+  for (const file of files) {
+    const points = await parseDjiSrt(join(dir, file));
+    if (points.length === 0) continue;
+
+    const last = points[points.length - 1]!;
+    tracks.push({
+      clipId: basename(file, extname(file)),
+      filePath: join(dir, file),
+      source: 'dji' as const,
+      points,
+      startWallClock: points[0]!.wallClock,
+      durationSec: last.tSec,
+    });
+  }
+
+  Logger.info(`${tracks.length} klip telemetrisi okundu`);
+
+  for (const cluster of clusterFlights(tracks)) {
+    Logger.success(`${cluster.id}: ${cluster.clips.length} klip, ${cluster.dayKeys.length} farkli gun`);
+    Logger.info(`  gunler: ${cluster.dayKeys.join(', ') || 'zaman bilgisi yok'}`);
+    cluster.sessions.forEach((session, index) => {
+      Logger.info(`  seans ${index + 1}: ${session.map((entry) => entry.clip.clipId).join(', ')}`);
+    });
+
+    for (const pair of findDayNightPairs(cluster)) {
+      Logger.success(
+        `  GECIS ADAYI: ${pair.bright.clipId} (${pair.bright.condition}) <-> ` +
+          `${pair.dark.clipId} (${pair.dark.condition}) | ` +
+          `${pair.distanceM.toFixed(0)}m, ${pair.headingDiffDeg?.toFixed(0) ?? '-'}° yon farki, puan ${pair.score.toFixed(2)}`,
+      );
+    }
+  }
 }
 
 async function stageSchedule(args: Args): Promise<void> {
@@ -272,6 +325,7 @@ async function main(): Promise<void> {
       case 'tts': await stageTts(args); break;
       case 'schedule': await stageSchedule(args); break;
       case 'speed': await stageSpeed(args); break;
+      case 'cluster': await stageCluster(args); break;
       case 'llm': await stageLlm(args); break;
       case 'cost': Logger.info(`Bugunku LLM harcamasi: $${spentTodayUsd().toFixed(4)}`); break;
       default: printHelp();
