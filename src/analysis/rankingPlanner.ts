@@ -7,6 +7,7 @@
 // =====================================
 
 import { RANKING } from '../config/constants.js';
+import type { ChannelConfig } from '../config/channels.js';
 import { Logger } from '../core/logger.js';
 import { callLlmJson } from '../llm/router.js';
 
@@ -33,18 +34,29 @@ export interface RankingPlan {
   outroLine: string;
 }
 
-const SYSTEM_PROMPT = [
-  'Sen bir YouTube Shorts ranking kanalinin yazarisin. Ton: mizahi, ignelemeyici, alayci -',
-  'ama asla hakaret, kufur, asagilama veya kisisel saldiri yok; dalga gecilen sey durum, kisi degil.',
-  `Format: geri sayimli Top ${RANKING.ITEM_COUNT} (#${RANKING.ITEM_COUNT}'ten #1'e).`,
-  `Toplam video suresi ${RANKING.MAX_TOTAL_SEC} saniyeyi ASLA gecmemeli.`,
-  `Her sira icin klip suresi ${RANKING.MIN_ITEM_SEC}-${RANKING.MAX_ITEM_SEC} saniye arasinda olmali.`,
-  `Her seslendirme cumlesi en fazla ${RANKING.MAX_WORDS_PER_LINE} kelime - konusma hizi buna bagli.`,
-  'Hook ilk 2 saniyede izleyiciyi durdurmali. Kapanis cumlesi kanala abone olmaya itmeli ama yalvarmamali.',
-  'Yalnizca su JSON semasini dondur:',
-  '{"title": string, "hookLine": string, "items": [{"rank": number, "clipId": string,',
-  '"startSec": number, "endSec": number, "voiceLine": string}], "outroLine": string}',
-].join(' ');
+const LANGUAGE_NAMES: Record<ChannelConfig['language'], string> = {
+  de: 'Deutsch',
+  tr: 'Türkçe',
+  en: 'English',
+};
+
+function buildSystemPrompt(language: ChannelConfig['language']): string {
+  return [
+    'You write scripts for a YouTube Shorts ranking channel.',
+    `CRITICAL: Write ALL spoken lines and titles in ${LANGUAGE_NAMES[language]} (${language}).`,
+    'Tone: humorous, teasing, sarcastic - but never insults, profanity, humiliation or personal attacks.',
+    'Mock the situation, never the person.',
+    `Format: countdown Top ${RANKING.ITEM_COUNT} (from #${RANKING.ITEM_COUNT} down to #1).`,
+    `Total video duration must NEVER exceed ${RANKING.MAX_TOTAL_SEC} seconds.`,
+    `Each rank clip must be between ${RANKING.MIN_ITEM_SEC} and ${RANKING.MAX_ITEM_SEC} seconds.`,
+    `Each voice line: at most ${RANKING.MAX_WORDS_PER_LINE} words - speaking pace depends on it.`,
+    'The hook must stop the viewer within the first 2 seconds.',
+    'The outro should invite subscription without begging.',
+    'Return ONLY this JSON schema:',
+    '{"title": string, "hookLine": string, "items": [{"rank": number, "clipId": string,',
+    '"startSec": number, "endSec": number, "voiceLine": string}], "outroLine": string}',
+  ].join(' ');
+}
 
 function isRankingPlan(value: unknown): value is RankingPlan {
   if (typeof value !== 'object' || value === null) return false;
@@ -107,6 +119,7 @@ export function enforceBudget(plan: RankingPlan): RankingPlan {
 export async function planRanking(
   candidates: RankingCandidate[],
   topic: string,
+  language: ChannelConfig['language'] = 'en',
 ): Promise<RankingPlan> {
   if (candidates.length < RANKING.ITEM_COUNT) {
     throw new Error(
@@ -115,19 +128,19 @@ export async function planRanking(
   }
 
   const userPrompt = [
-    `Tema: ${topic}`,
+    `Topic: ${topic}`,
     '',
-    'Aday klipler:',
+    'Candidate clips:',
     ...candidates.map(
-      (c) => `- clipId=${c.clipId} | sure=${c.durationSec.toFixed(1)}sn | icerik: ${c.summary}`,
+      (c) => `- clipId=${c.clipId} | duration=${c.durationSec.toFixed(1)}s | content: ${c.summary}`,
     ),
     '',
-    `Bu adaylardan en iyi ${RANKING.ITEM_COUNT} tanesini sec ve geri sayimli ranking kur.`,
-    'startSec/endSec degerleri ilgili klibin KENDI sure araligi icinde olmali.',
+    `Pick the best ${RANKING.ITEM_COUNT} and build a countdown ranking.`,
+    'startSec/endSec must stay within the duration of that specific clip.',
   ].join('\n');
 
   const { data } = await callLlmJson<RankingPlan>(
-    { task: 'viralHook', system: SYSTEM_PROMPT, user: userPrompt },
+    { task: 'viralHook', system: buildSystemPrompt(language), user: userPrompt },
     isRankingPlan,
   );
 

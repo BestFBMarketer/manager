@@ -28,7 +28,17 @@ export interface ChannelConfig {
   /** Haftanin hangi gunleri yayin yapilacagi (0=Pazar). Bos = her gun. */
   publishWeekdays: number[];
   targetDurationSec: number;
-  language: 'tr' | 'en';
+  /** Kanalin yayin dili - LLM metinleri, POI aciklamalari ve altyazilar bu dilde uretilir */
+  language: 'tr' | 'en' | 'de';
+  /** Wikipedia/Wikidata aciklamalari icin dil onceligi */
+  wikiLanguages: string[];
+  /** Hedef kitle - LLM'e baglam olarak verilir */
+  audience: string;
+  /**
+   * Kanalin mevcut basliklarindan ornekler. LLM'e few-shot olarak verilir ki
+   * uretilen basliklar kanalin kurulu tarziyla ayni tonda olsun.
+   */
+  titleExamples: string[];
   /** Bu kanalin uzun videolarindan kac Shorts turetilecek (0 = kapali) */
   shortsDerivativeCount: number;
 }
@@ -43,7 +53,10 @@ export const CHANNELS: Record<string, ChannelConfig> = {
     primeTimeSlots: RANKING_SLOTS,
     publishWeekdays: [],
     targetDurationSec: VIDEO.SHORT_MAX_SEC,
-    language: 'tr',
+    language: 'en',
+    wikiLanguages: ['en'],
+    audience: 'Global short-form viewers; countdown/ranking format with sarcastic commentary',
+    titleExamples: [],
     shortsDerivativeCount: 0,
   },
   travel: {
@@ -54,8 +67,21 @@ export const CHANNELS: Record<string, ChannelConfig> = {
     // Haftada 3 video: Avrupa prime time (gezi izleyicisinin agirligi Avrupa'da)
     primeTimeSlots: [RANKING_SLOTS[1]!],
     publishWeekdays: [2, 4, 6],
-    targetDurationSec: 600,
-    language: 'tr',
+    // Kanal 18-42 dakikalik videolar yayinliyor; hedef bu araligin ortasi
+    targetDurationSec: 1_500,
+    // Kanal ALMANCA yayin yapiyor - tum metinler Almanca uretilmeli
+    language: 'de',
+    wikiLanguages: ['de', 'en', 'tr'],
+    audience:
+      'Deutschsprachige Türkei-Urlauber (DACH); Reiseziele, Ausflüge, Hotels und ' +
+      'Sehenswürdigkeiten an der türkischen Riviera',
+    titleExamples: [
+      'Die dunkle Wahrheit über Side: Piraten, Mythen und Wahrheit',
+      'The Land Of Legends Bei Tag & Nacht und Vieles Mehr',
+      'Versteckte Naturorte der Türkei ohne Rummel',
+      'Antalya\'s Digital Exhibition Center "Digiverse"',
+      'Sandland Und Deepo Outlet Center Ausflug',
+    ],
     shortsDerivativeCount: PIPELINE.SHORTS_PER_LONG_VIDEO,
   },
 };

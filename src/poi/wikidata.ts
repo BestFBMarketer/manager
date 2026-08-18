@@ -11,7 +11,16 @@ import { Logger } from '../core/logger.js';
 import type { PointOfInterest } from './types.js';
 
 const WIKIDATA_API = 'https://www.wikidata.org/w/api.php';
-const WIKIPEDIA_API = 'https://tr.wikipedia.org/api/rest_v1/page/summary';
+
+/** Wikipedia ozet API'si dile gore degisir - kanal dili neyse o oncelikli. */
+const wikipediaApi = (lang: string) => `https://${lang}.wikipedia.org/api/rest_v1/page/summary`;
+
+/** Wikipedia dil kodu -> ekranda gosterilecek kaynak adi. */
+const SOURCE_LABEL: Record<string, string> = {
+  de: 'Wikipedia',
+  en: 'Wikipedia',
+  tr: 'Vikipedi',
+};
 
 /** Ekran karti icin metin siniri - uzun metin okunmuyor. */
 const MAX_DESCRIPTION_CHARS = 140;
@@ -35,17 +44,27 @@ function trim(text: string): string {
 }
 
 /**
- * POI'ye kisa aciklama ekler. Once Wikipedia ozeti, yoksa Wikidata aciklamasi denenir.
- * Hicbiri yoksa POI aciklamasiz kalir (uydurma metin uretilmez).
+ * POI'ye kisa aciklama ekler.
+ *
+ * Diller sirayla denenir: kanalin yayin dili once gelir, bulunamazsa yedek
+ * dillere dusulur. Hicbirinde metin yoksa POI aciklamasiz kalir -
+ * **uydurma metin uretilmez**.
+ *
  * @param poi Wikidata kimligi olan ilgi noktasi
+ * @param languages Dil onceligi (orn. ['de', 'en', 'tr'])
  * @returns Aciklama eklenmis kopya
  */
-export async function enrichWithDescription(poi: PointOfInterest): Promise<PointOfInterest> {
+export async function enrichWithDescription(
+  poi: PointOfInterest,
+  languages: string[] = ['en'],
+): Promise<PointOfInterest> {
   if (!poi.wikidataId) return poi;
 
   try {
+    const langParam = languages.join('|');
     const wdResponse = await fetch(
-      `${WIKIDATA_API}?action=wbgetentities&ids=${poi.wikidataId}&props=descriptions|sitelinks&languages=tr|en&format=json&origin=*`,
+      `${WIKIDATA_API}?action=wbgetentities&ids=${poi.wikidataId}` +
+        `&props=descriptions|sitelinks&languages=${langParam}&format=json&origin=*`,
       { signal: AbortSignal.timeout(TIMEOUTS.HTTP_REQUEST_MS) },
     );
     if (!wdResponse.ok) return poi;
@@ -53,24 +72,32 @@ export async function enrichWithDescription(poi: PointOfInterest): Promise<Point
     const wdData = (await wdResponse.json()) as WikidataResponse;
     const entity = wdData.entities?.[poi.wikidataId];
 
-    // 1. tercih: Turkce Wikipedia ozeti (daha zengin metin)
-    const trTitle = entity?.sitelinks?.trwiki?.title;
-    if (trTitle) {
-      const wpResponse = await fetch(`${WIKIPEDIA_API}/${encodeURIComponent(trTitle)}`, {
+    // 1. tercih: kanal dilindeki Wikipedia ozeti (en zengin metin)
+    for (const lang of languages) {
+      const title = entity?.sitelinks?.[`${lang}wiki`]?.title;
+      if (!title) continue;
+
+      const wpResponse = await fetch(`${wikipediaApi(lang)}/${encodeURIComponent(title)}`, {
         signal: AbortSignal.timeout(TIMEOUTS.HTTP_REQUEST_MS),
       });
-      if (wpResponse.ok) {
-        const summary = (await wpResponse.json()) as WikipediaSummary;
-        if (summary.extract) {
-          return { ...poi, description: trim(summary.extract), descriptionSource: 'Vikipedi' };
-        }
+      if (!wpResponse.ok) continue;
+
+      const summary = (await wpResponse.json()) as WikipediaSummary;
+      if (summary.extract) {
+        return {
+          ...poi,
+          description: trim(summary.extract),
+          descriptionSource: SOURCE_LABEL[lang] ?? 'Wikipedia',
+        };
       }
     }
 
-    // 2. tercih: Wikidata kisa aciklamasi
-    const description = entity?.descriptions?.tr?.value ?? entity?.descriptions?.en?.value;
-    if (description) {
-      return { ...poi, description: trim(description), descriptionSource: 'Wikidata' };
+    // 2. tercih: Wikidata kisa aciklamasi (ayni dil onceligiyle)
+    for (const lang of languages) {
+      const description = entity?.descriptions?.[lang]?.value;
+      if (description) {
+        return { ...poi, description: trim(description), descriptionSource: 'Wikidata' };
+      }
     }
 
     return poi;
