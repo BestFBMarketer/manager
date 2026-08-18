@@ -54,6 +54,38 @@ export const AUDIO = {
   DUCK_RELEASE_MS: 400,
 } as const;
 
+export const SPEED = {
+  /**
+   * Hiz esikleri (m/s). DJI Neo bataryasi 7-12 dk dayandigi icin ham malzeme
+   * kisadir; 30 dakikalik video birden fazla ucusun kesilip sikistirilmasiyla
+   * elde edilir. Yavas gecisler hizlandirilir, guzel hizli anlar korunur.
+   */
+  GROUND_ALT_M: 3,
+  STATIC_SPEED_MPS: 1.5,
+  SLOW_SPEED_MPS: 3,
+  MODERATE_SPEED_MPS: 5,
+  GOOD_SPEED_MPS: 14,
+  /** Bunun ustu otomatik donus/savrulma - guzel goruntu ama cok hizli geciyor */
+  WHIP_SPEED_MPS: 18,
+
+  /** Hiz carpanlari - elle kurguda kullanilan %200-250 araligiyla ayni */
+  FACTOR_STATIC: 2.5,
+  FACTOR_SLOW: 2.0,
+  FACTOR_MODERATE: 1.5,
+  FACTOR_NORMAL: 1.0,
+  /** Savrulan guzel goruntuler hafifce yavaslatilir */
+  FACTOR_WHIP: 0.75,
+
+  /** Kurguda kullanilabilir en kisa parca - daha kisasi goz tirmalar */
+  MIN_KEEP_SEC: 2,
+  /** Analiz penceresi */
+  WINDOW_SEC: 2,
+  /** Hedef sureye ulasmak icin hizlandirma bu carpani asamaz */
+  MAX_FACTOR: 3.0,
+  /** Yerde/hareketsiz gecen bu sureden uzun bolumler tamamen atilir */
+  DROP_STATIC_LONGER_THAN_SEC: 4,
+} as const;
+
 export const MUSIC_SEGMENT = {
   /** Hiz/irtifa serisini yumusatma penceresi - anlik GPS gurultusu segment uretmesin */
   SMOOTH_WINDOW_SEC: 5,

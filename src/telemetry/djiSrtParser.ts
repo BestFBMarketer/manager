@@ -9,15 +9,13 @@
 import { readFile } from 'node:fs/promises';
 import { TELEMETRY } from '../config/constants.js';
 import { Logger } from '../core/logger.js';
+import type { TrackPoint } from './types.js';
 
-export interface FlightPoint {
-  /** Videonun basindan itibaren saniye */
-  tSec: number;
-  lat: number;
-  lon: number;
-  /** Kalkis noktasina gore yukseklik (m) - bulunamazsa 0 */
-  relAlt: number;
-}
+/** Geriye donuk uyumluluk icin eski ad - GoPro ile ortak yapiya isaret eder. */
+export type FlightPoint = TrackPoint;
+
+// SRT bloklarindaki gercek zaman satiri: "2026-08-01 11:20:31,123"
+const WALL_CLOCK = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})[.,]?(\d{0,3})/;
 
 const TIME_RANGE = /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->/;
 
@@ -35,6 +33,31 @@ function timeToSeconds(block: string): number | null {
   if (!match) return null;
   const [, h, m, s, ms] = match;
   return Number(h) * 3600 + Number(m) * 60 + Number(s) + Number(ms) / 1000;
+}
+
+/**
+ * Blok icindeki cekim zamanini okur. Bu deger GoPro kliplerinin GPS
+ * zamaniyla karsilastirilarak ayni anin iki acisi eslestirilir; olmadan
+ * drone-GoPro senkronu calismaz.
+ */
+function extractWallClock(block: string): Date | null {
+  const match = block.match(WALL_CLOCK);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second, ms] = match;
+  const date = new Date(
+    Date.UTC(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+      Number((ms ?? '').padEnd(3, '0')),
+    ),
+  );
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function extractPoint(block: string): { lat: number; lon: number; relAlt: number } | null {
@@ -76,11 +99,11 @@ function isPlausible(point: { lat: number; lon: number }): boolean {
  * @param srtPath .SRT dosyasinin yolu
  * @returns Zamana gore sirali ucus noktalari (yetersizse bos dizi)
  */
-export async function parseDjiSrt(srtPath: string): Promise<FlightPoint[]> {
+export async function parseDjiSrt(srtPath: string): Promise<TrackPoint[]> {
   try {
     const raw = await readFile(srtPath, 'utf8');
     const blocks = raw.split(/\r?\n\r?\n/).filter((block) => block.trim().length > 0);
-    const points: FlightPoint[] = [];
+    const points: TrackPoint[] = [];
 
     for (const block of blocks) {
       const tSec = timeToSeconds(block);
@@ -89,7 +112,13 @@ export async function parseDjiSrt(srtPath: string): Promise<FlightPoint[]> {
       const coords = extractPoint(block);
       if (!coords || !isPlausible(coords)) continue;
 
-      points.push({ tSec, ...coords });
+      points.push({
+        tSec,
+        lat: coords.lat,
+        lon: coords.lon,
+        alt: coords.relAlt,
+        wallClock: extractWallClock(block),
+      });
     }
 
     points.sort((a, b) => a.tSec - b.tSec);
@@ -117,7 +146,7 @@ export async function parseDjiSrt(srtPath: string): Promise<FlightPoint[]> {
  * @param tSec Video zamani (saniye)
  * @returns Konum veya bulunamazsa null
  */
-export function positionAt(points: FlightPoint[], tSec: number): FlightPoint | null {
+export function positionAt(points: TrackPoint[], tSec: number): TrackPoint | null {
   if (points.length === 0) return null;
 
   const first = points[0]!;
@@ -141,7 +170,8 @@ export function positionAt(points: FlightPoint[], tSec: number): FlightPoint | n
       tSec,
       lat: prev.lat + (next.lat - prev.lat) * ratio,
       lon: prev.lon + (next.lon - prev.lon) * ratio,
-      relAlt: prev.relAlt + (next.relAlt - prev.relAlt) * ratio,
+      alt: prev.alt + (next.alt - prev.alt) * ratio,
+      wallClock: prev.wallClock,
     };
   }
 
@@ -149,7 +179,7 @@ export function positionAt(points: FlightPoint[], tSec: number): FlightPoint | n
 }
 
 /** Ucus izinin sinir kutusu - harita zoom seviyesini belirlemek icin. */
-export function boundingBox(points: FlightPoint[]): {
+export function boundingBox(points: TrackPoint[]): {
   minLat: number; maxLat: number; minLon: number; maxLon: number;
 } | null {
   if (points.length === 0) return null;

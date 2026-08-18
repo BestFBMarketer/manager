@@ -163,6 +163,38 @@ ve VPS'in varsayilan motorudur. Ton kurali sistem promptunda sabit:
 mizahi/igneleyici/alayci, ama hakaret ve kisisel saldiri yok - dalga gecilen
 sey durum, kisi degil.
 
+## Akilli kurgu — hiz optimizasyonu
+
+DJI Neo bataryasi 7-12 dakika dayanir (genelde ~7). 30 dakikalik bir video, ham
+ucuslarin **kesilip sikistirilmasiyla** elde edilir. `speedPlanner` telemetriyi
+okuyup her bolume ne yapilacagina karar verir:
+
+| Durum | Karar | Carpan |
+|---|---|---|
+| Irtifa < 3 m (yerde, kalkis/inis oncesi) | **atilir** | — |
+| Hareketsiz hover (< 1.5 m/s) | hizlandirilir | **x2.5** |
+| Yavas gecis (< 3 m/s) | hizlandirilir | **x2.0** |
+| Orta tempo (< 5 m/s) | hizlandirilir | x1.5 |
+| Iyi tempo (5-14 m/s) | korunur | x1.0 |
+| Otomatik donus / savrulma (> 18 m/s) | **agir cekim** | x0.75 |
+
+Carpanlar elle kurguda kullanilan %200-250 araligiyla ayni. Hedef sure
+verilirse (`--target`) plan o sureye sigdirilir: once sikici bolumler daha da
+sikistirilir, iyi tempolu ve agir cekim bolumlere en son dokunulur; tavan x3.
+
+**Goruntu analizi telemetriyi ezer:** sahne degisim skoru yuksekse (kadrajda
+yakin gecis, hareketli ozne) yavas ucus bile hizlandirilmaz — "yavas ama kadraj
+hareketli" olarak korunur.
+
+**Zaman haritasi zorunlu:** kesme ve hizlandirmadan sonra kaynaktaki 150. saniye
+ciktida 84. saniyeye denk gelir. `timeMap` POI kartlarini, muzik bolumlerini ve
+ucus izini yeni zaman eksenine tasir; atilan bolumlere denk gelen olaylar elenir.
+Bu olmadan kartlar yanlis anda cikar.
+
+```bash
+npm run pipeline -- --stage speed --input DJI_0001.MP4 --srt DJI_0001.SRT --target 600 --output kurgu.mp4
+```
+
 ## Ilgi noktalari (POI) — sadece otel degil
 
 Ucus izinin sinir kutusundan yola cikip **OpenStreetMap Overpass** ile bolgedeki
@@ -268,6 +300,7 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 - [x] M12 — soundtrack secimi (tema/saat/sure) + ducking'li ses miksaji
 - [x] M12b — ucusa gore bolumlenmis coklu soundtrack ve gecisler
 - [x] M13 — manuel eslestirme ve stok goruntu override'i
+- [x] M14 — akilli hiz optimizasyonu, zaman haritasi ve FFmpeg uygulamasi
 - [ ] M2 — Whisper transkript + highlight secimi
 - [x] M3 — Remotion kompozisyonlari (FunnyRanking, HotelTour, POI kartlari)
 - [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
