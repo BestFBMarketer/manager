@@ -213,3 +213,14 @@ export const TELEMETRY = {
    */
   GPS_PRECISION_MAX: 1_000,
 } as const;
+
+export const WORKER = {
+  /** Bir cron tetiklemesinde en fazla kac is islenir - uzun render'lar sonrakini bloklasin diye */
+  BATCH_SIZE: 1,
+  /**
+   * Stale claim timeout - bu sureden uzun once claimed ama hala processing olan
+   * isler orphan sayilir ve pending'e donundurulur. render_timeout * 1.5'den
+   * buyuk olmali (RENDER_MS = 3600s, timeout = 5400s = 90 min).
+   */
+  STALE_CLAIM_TIMEOUT_MS: 5_400_000,
+} as const;
