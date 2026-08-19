@@ -9,15 +9,21 @@
 import { getDb } from '../core/db.js';
 import type { PrimeTimeSlot } from '../publish/publishSlots.js';
 import type { ScheduleRule } from '../publish/scheduleRules.js';
+import { parseChannelSettings, type ChannelSettings } from './channelSettings.js';
 
 export type TemplateName =
   | 'FunnyShort'
   | 'HotelTourLandscape'
-  | 'HotelTourVertical';
+  | 'HotelTourVertical'
+  | 'StoryNarrative';
+
+export type ChannelType = 'standard' | 'story';
+export type TopicSource = 'reference' | 'ai_generated' | 'both';
 
 export interface ChannelConfig {
   id: string;
   label: string;
+  channelType: ChannelType;
   /** .env icindeki refresh token anahtarinin adi */
   refreshTokenEnvKey: string;
   defaultTemplate: TemplateName;
@@ -40,10 +46,16 @@ export interface ChannelConfig {
    * uretilen basliklar kanalin kurulu tarziyla ayni tonda olsun.
    */
   titleExamples: string[];
+  /** Hikaye kanallari icin ton/tur/ornek video notu - topic/senaryo uretimine few-shot baglam olarak verilir */
+  styleReference: string | null;
+  /** Hikaye kanali konu kaynagi - referans kanal izleme / AI'nin kendi backlog'u / ikisi birden */
+  topicSource: TopicSource;
   /** Bu kanalin uzun videolarindan kac Shorts turetilecek (0 = kapali) */
   shortsDerivativeCount: number;
   /** YouTube kategori kimligi - https://developers.google.com/youtube/v3/docs/videoCategories */
   categoryId: string;
+  enabled: boolean;
+  settings: ChannelSettings;
 }
 
 /** Sik kullanilan kategori kimlikleri - elle aramaktansa isimle referans verilsin. */
@@ -56,6 +68,7 @@ export const YOUTUBE_CATEGORY = {
 interface ChannelRow {
   id: string;
   label: string;
+  channel_type: string;
   refresh_token_env_key: string;
   default_template: string;
   target_duration_sec: number;
@@ -63,8 +76,12 @@ interface ChannelRow {
   wiki_languages_json: string;
   audience: string;
   title_examples_json: string;
+  style_reference: string | null;
+  topic_source: string;
   shorts_derivative_count: number;
   category_id: string;
+  enabled: number;
+  settings_json: string;
 }
 
 interface ScheduleRuleRow {
@@ -100,6 +117,7 @@ function rowToChannelConfig(row: ChannelRow, ruleRow: ScheduleRuleRow): ChannelC
   return {
     id: row.id,
     label: row.label,
+    channelType: row.channel_type as ChannelType,
     refreshTokenEnvKey: row.refresh_token_env_key,
     defaultTemplate: row.default_template as TemplateName,
     slots: JSON.parse(ruleRow.slots_json) as PrimeTimeSlot[],
@@ -109,8 +127,12 @@ function rowToChannelConfig(row: ChannelRow, ruleRow: ScheduleRuleRow): ChannelC
     wikiLanguages: JSON.parse(row.wiki_languages_json) as string[],
     audience: row.audience,
     titleExamples: JSON.parse(row.title_examples_json) as string[],
+    styleReference: row.style_reference,
+    topicSource: row.topic_source as TopicSource,
     shortsDerivativeCount: row.shorts_derivative_count,
     categoryId: row.category_id,
+    enabled: row.enabled === 1,
+    settings: parseChannelSettings(row.settings_json),
   };
 }
 

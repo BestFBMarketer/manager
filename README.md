@@ -356,9 +356,41 @@ cekim tarihiyle olusturulur; ayni klip iki kez islenmez.
 
 ---
 
+## Admin panel (coklu kanal yonetimi)
+
+Kanal ekleme/duzenleme, yayin sikligi (haftaici gunleri / N gunde bir / M ayda N video)
+ve gercek yayin takvimi artik statik dosya degistirip redeploy etmeden, bir web panelinden
+yonetilir. Panel iki ayri surec: Express API (`src/panel/`) + Vite/React arayuzu (`panel-web/`),
+tek SQLite dosyasi uzerinden konusurlar.
+
+**Ilk kurulum:**
+```bash
+npm run panel:hash-password -- '<sifre>'   # ciktiyi PANEL_PASSWORD_HASH'e yapistir
+# .env dosyasina PANEL_PASSWORD_HASH, PANEL_SESSION_SECRET (rastgele uzun bir deger), PANEL_PORT ekle
+npx tsx scripts/migrateChannelsToDb.ts     # mevcut shorts/travel kanallarini DB'ye tohumlar (tek seferlik)
+```
+
+**Gelistirme:**
+```bash
+npm run panel:server           # API :4000'de (PANEL_PORT ile degistirilebilir)
+cd panel-web && npm install && npm run dev   # Vite dev server, /api istekleri otomatik proxy'lenir
+```
+
+**Uretim:** `cd panel-web && npm run build` derlenmis arayuzu `panel-web/dist/`e yazar; `npm run panel:server`
+bu klasoru otomatik statik olarak sunar (ayri bir web sunucusuna gerek yok). Panel VPS'te internete
+acilacaksa oturum cerezinin guvenligi icin TLS (nginx/Caddy + certbot) zorunludur.
+
+Yeni bir kanal eklemek (herhangi bir nis/tur icin) kod degisikligi gerektirmez: panelde
+"+ Yeni kanal" ile `channel` + `schedule_rule` satirlari olusturulur; YouTube OAuth refresh
+token'i onceden `scripts/authYoutube.ts` ile uretilip `.env`'e eklenmis olmalidir.
+
+---
+
 ## Yol haritasi
 
 - [x] M0 — iskelet, config, logger, SQLite semasi, LLM router
+- [x] EK2/M0 — kanal config'i DB'ye tasindi (`channel`/`schedule_rule`), haftaici yayin hatasi duzeltildi
+- [x] EK2/M1 — admin panel iskeleti (giris, kanal CRUD, zamanlama editoru, gercek yayin takvimi)
 - [x] M1 — ingest (probe) + edit (kesim, 9:16 cerceve, loudnorm)
 - [x] M6a — DJI SRT telemetri ayristirici + konum enterpolasyonu
 - [x] M6c — GoPro GPMF telemetri + drone/GoPro GPS-zaman eslestirme
