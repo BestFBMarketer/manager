@@ -12,7 +12,7 @@ import type { ScheduleRule } from '../publish/scheduleRules.js';
 import { parseChannelSettings, type ChannelSettings } from './channelSettings.js';
 
 export type TemplateName =
-  | 'FunnyShort'
+  | 'FunnyRanking'
   | 'HotelTourLandscape'
   | 'HotelTourVertical'
   | 'StoryNarrative';
@@ -48,6 +48,8 @@ export interface ChannelConfig {
   titleExamples: string[];
   /** Hikaye kanallari icin ton/tur/ornek video notu - topic/senaryo uretimine few-shot baglam olarak verilir */
   styleReference: string | null;
+  /** Kanal niş/kategorisi (Ör. Paranormal, Ekonomi, Gezi, Komedi) - panel'de settable, reportlarda filtrelenebilir */
+  niche: string | null;
   /** Hikaye kanali konu kaynagi - referans kanal izleme / AI'nin kendi backlog'u / ikisi birden */
   topicSource: TopicSource;
   /** Bu kanalin uzun videolarindan kac Shorts turetilecek (0 = kapali) */
@@ -77,6 +79,7 @@ interface ChannelRow {
   audience: string;
   title_examples_json: string;
   style_reference: string | null;
+  niche: string | null;
   topic_source: string;
   shorts_derivative_count: number;
   category_id: string;
@@ -128,6 +131,7 @@ function rowToChannelConfig(row: ChannelRow, ruleRow: ScheduleRuleRow): ChannelC
     audience: row.audience,
     titleExamples: JSON.parse(row.title_examples_json) as string[],
     styleReference: row.style_reference,
+    niche: row.niche,
     topicSource: row.topic_source as TopicSource,
     shortsDerivativeCount: row.shorts_derivative_count,
     categoryId: row.category_id,

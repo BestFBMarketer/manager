@@ -38,7 +38,7 @@ const SEED_CHANNELS: SeedChannel[] = [
     id: 'shorts',
     label: 'Komik Shorts',
     refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_SHORTS',
-    defaultTemplate: 'FunnyShort',
+    defaultTemplate: 'FunnyRanking',
     // Gunde 3 video: ABD prime, Avrupa prime ve ABD sabah yogunlugu
     targetDurationSec: VIDEO.SHORT_MAX_SEC,
     language: 'en',

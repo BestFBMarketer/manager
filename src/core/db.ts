@@ -205,6 +205,8 @@ function applyIncrementalMigrations(db: Database.Database): void {
     { table: 'upload', column: 'platform', ddl: "ALTER TABLE upload ADD COLUMN platform TEXT NOT NULL DEFAULT 'youtube'" },
     { table: 'upload', column: 'publish_target_id', ddl: 'ALTER TABLE upload ADD COLUMN publish_target_id INTEGER REFERENCES publish_target(id)' },
     { table: 'job', column: 'batch_id', ddl: 'ALTER TABLE job ADD COLUMN batch_id TEXT' },
+    { table: 'job', column: 'claimed_at', ddl: 'ALTER TABLE job ADD COLUMN claimed_at TEXT' },
+    { table: 'channel', column: 'niche', ddl: 'ALTER TABLE channel ADD COLUMN niche TEXT DEFAULT NULL' },
   ];
 
   for (const { table, column, ddl } of alterations) {
@@ -217,6 +219,8 @@ function applyIncrementalMigrations(db: Database.Database): void {
   // Bu indeksler migrasyonla eklenen kolonlara bagli oldugu icin ana SCHEMA
   // calistiktan hemen sonra degil, kolonlar kesinlikle var olduktan sonra kurulur.
   db.exec('CREATE INDEX IF NOT EXISTS idx_job_batch ON job(batch_id) WHERE batch_id IS NOT NULL');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_render_job_status ON render(job_id, status)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_channel_niche ON channel(niche) WHERE niche IS NOT NULL');
 }
 
 /**
