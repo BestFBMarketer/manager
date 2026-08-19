@@ -181,6 +181,15 @@ CREATE TABLE IF NOT EXISTS story_reference (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Panel oturumlari - bellek-ici varsayilan store her redeploy'da oturumu siler,
+-- bu yuzden express-session icin ozel bir SQLite store kullanilir (panel/sessionStore.ts).
+CREATE TABLE IF NOT EXISTS panel_session (
+  id          TEXT PRIMARY KEY,
+  sess        TEXT NOT NULL,
+  expires_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_panel_session_expires ON panel_session(expires_at);
+
 CREATE INDEX IF NOT EXISTS idx_job_stage    ON job(stage, status);
 CREATE INDEX IF NOT EXISTS idx_usage_time   ON llm_usage(created_at);
 CREATE INDEX IF NOT EXISTS idx_upload_channel_status ON upload(channel_id, status, publish_at);
