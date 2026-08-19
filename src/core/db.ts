@@ -207,6 +207,7 @@ function applyIncrementalMigrations(db: Database.Database): void {
     { table: 'job', column: 'batch_id', ddl: 'ALTER TABLE job ADD COLUMN batch_id TEXT' },
     { table: 'job', column: 'claimed_at', ddl: 'ALTER TABLE job ADD COLUMN claimed_at TEXT' },
     { table: 'channel', column: 'niche', ddl: 'ALTER TABLE channel ADD COLUMN niche TEXT DEFAULT NULL' },
+    { table: 'render', column: 'duration_ms', ddl: 'ALTER TABLE render ADD COLUMN duration_ms INTEGER' },
   ];
 
   for (const { table, column, ddl } of alterations) {
