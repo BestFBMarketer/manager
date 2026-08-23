@@ -17,6 +17,8 @@ export interface JobRow {
   updated_at: string;
   claimed_at: string | null;
   batch_id?: string;
+  /** Sablona ozel ekstra girdi - HotelTour icin {hotelName, hotelCity} vb. (bkz. batch.ts) */
+  input_json: string;
 }
 
 /**

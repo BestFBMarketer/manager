@@ -182,7 +182,7 @@ export interface BatchProgress {
 
 export interface BatchInput {
   count: number;
-  items?: Array<{ sourceRef: string }>;
+  items?: Array<{ sourceRef: string; hotelName?: string; hotelCity?: string }>;
 }
 
 export interface ReviewItem {

@@ -8,6 +8,7 @@
 
 import { AbsoluteFill, OffthreadVideo, Sequence, useVideoConfig } from 'remotion';
 import { PoiCard } from '../components/PoiCard';
+import { InfoChips, type InfoChip } from '../components/InfoChips';
 import { THEME, TEXT_SHADOW } from '../theme';
 
 export type PoiCueProps = {
@@ -24,6 +25,11 @@ export type HotelTourProps = {
   cues: PoiCueProps[];
   channelHandle: string;
   titleDurationSec: number;
+  /** Otel gercekleri - hotelData zincirinden gelen, kaynagi olan alanlar (bkz. src/hotelData) */
+  infoChips?: InfoChip[];
+  /** InfoChips'in ekranda kalacagi sure - genelde intro'dan hemen sonra */
+  infoChipsAtSec?: number;
+  infoChipsDurationSec?: number;
 }
 
 export const HotelTour: React.FC<HotelTourProps> = ({
@@ -32,6 +38,9 @@ export const HotelTour: React.FC<HotelTourProps> = ({
   cues,
   channelHandle,
   titleDurationSec,
+  infoChips,
+  infoChipsAtSec = 4,
+  infoChipsDurationSec = 6,
 }) => {
   const { fps } = useVideoConfig();
 
@@ -61,6 +70,12 @@ export const HotelTour: React.FC<HotelTourProps> = ({
           </div>
         </AbsoluteFill>
       </Sequence>
+
+      {infoChips && infoChips.length > 0 && (
+        <Sequence from={Math.round(infoChipsAtSec * fps)} durationInFrames={Math.round(infoChipsDurationSec * fps)}>
+          <InfoChips chips={infoChips} />
+        </Sequence>
+      )}
 
       {cues.map((cue, index) => (
         <Sequence
