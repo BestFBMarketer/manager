@@ -21,6 +21,11 @@ export const LLM_CHAINS: Record<LlmTask, string[]> = {
   // Kalite-kritik isler - viral basari dogrudan bu ciktilara bagli
   viralHook: ['claude', 'openai', 'gemini'],
   shortsPlan: ['claude', 'openai', 'deepseek'],
+
+  // Hikaye kanali - olgu ozetinin dogrulugu ve senaryonun izlenebilirligi
+  // dogrudan buradan geldigi icin ucretsiz katmanla baslamiyor (EK2/E)
+  factBrief: ['claude', 'openai', 'gemini'],
+  narrativeScript: ['claude', 'openai', 'gemini'],
 };
 
 /** Ucretli saglayicilarin gunluk maliyet tavani (USD). Asilirsa sadece ucretsizler calisir. */

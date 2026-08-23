@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, ApiError, type ChannelConfig } from '../lib/api.js';
 
-const AUTO_DISCOVERY_READY = false; // M5 topicDiscovery.ts tamamlanınca true olacak
-
 export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
   const navigate = useNavigate();
-  const isStoryAuto = channel.channelType === 'story' && channel.topicSource !== undefined && AUTO_DISCOVERY_READY;
+  // topicDiscovery.ts sadece referans kanal kataloğunu okuyabiliyor (reference/both);
+  // 'ai_generated' (referanssız, LLM'in kendi konu listesi) henüz ayrı bir M5+ adımı.
+  const isStoryAuto = channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both');
   const isHotelTour = channel.defaultTemplate === 'HotelTourLandscape' || channel.defaultTemplate === 'HotelTourVertical';
   const [count, setCount] = useState(3);
   const [sourceRefs, setSourceRefs] = useState<string[]>(['', '', '']);
@@ -58,9 +58,14 @@ export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
         <input type="number" min={1} max={50} value={count} onChange={(e) => setCountAndResize(Number(e.target.value))} style={{ width: 100 }} />
       </div>
 
-      {channel.channelType === 'story' && !AUTO_DISCOVERY_READY && (
+      {channel.channelType === 'story' && isStoryAuto && (
         <p className="muted">
-          Otomatik konu keşfi (referans kanaldan/AI'dan) henüz hazır değil (M5) - aşağıya kaynak video linklerini elle girin.
+          Bu kanal referans kanal kataloğundan otomatik konu seçecek (en çok izlenenden başlayarak) - kaynak girmenize gerek yok.
+        </p>
+      )}
+      {channel.channelType === 'story' && !isStoryAuto && (
+        <p className="muted">
+          "AI kendi konu listesini üretsin" modu henüz otomatik değil - aşağıya kaynak video linklerini elle girin.
         </p>
       )}
 
