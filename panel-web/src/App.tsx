@@ -7,6 +7,7 @@ import ChannelEdit from './pages/ChannelEdit.js';
 import NewChannel from './pages/NewChannel.js';
 import Calendar from './pages/Calendar.js';
 import Review from './pages/Review.js';
+import BatchProgress from './pages/BatchProgress.js';
 
 type AuthState = 'checking' | 'in' | 'out';
 
@@ -30,6 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<div className="muted">Soldan bir kanal sec ya da yeni kanal ekle.</div>} />
           <Route path="/review" element={<Review />} />
+          <Route path="/batches/:batchId" element={<BatchProgress />} />
           <Route path="/channels/new" element={<NewChannel />} />
           <Route path="/channels/:id" element={<ChannelEdit />} />
           <Route path="/channels/:id/calendar" element={<Calendar />} />
