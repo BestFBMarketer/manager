@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api, ApiError, type ChannelConfig, type ScheduleRuleInput } from '../lib/api.js';
 import ScheduleRuleEditor from '../components/ScheduleRuleEditor.js';
 import StoryReferences from '../components/StoryReferences.js';
+import BatchProducer from '../components/BatchProducer.js';
 
 function toRuleInput(channel: ChannelConfig): ScheduleRuleInput {
   const rule = channel.scheduleRule;
@@ -237,6 +238,8 @@ export default function ChannelEdit() {
       {channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
         <StoryReferences channelId={id} />
       )}
+
+      <BatchProducer channel={channel} />
 
       {error && <p className="error-text">{error}</p>}
       {savedAt && <p className="muted">kaydedildi</p>}
