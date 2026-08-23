@@ -6,6 +6,8 @@
 // Last Modified: 2026-08-19
 // =====================================
 
+import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
 import { TIMEOUTS } from '../config/constants.js';
@@ -36,21 +38,18 @@ export async function renderRemotion(
   const startMs = Date.now();
   Logger.debug(`[job ${jobId}] Remotion render başlıyor: ${compositionId} → ${outputPath}`);
 
+  // Remotion CLI'nin --props bayrağı ya doğrudan bir JSON string ya da bir
+  // .json dosya yolu bekler (base64 desteklemez - @remotion/cli/dist/get-input-props.js
+  // JSON.parse(props) ya da dosyayı okuyup JSON.parse eder, üçüncü bir yol yok).
+  const propsPath = join('data/work', `props_${jobId}_${Date.now()}.json`);
+
   try {
-    // Props'ları JSON olarak serialize et ve render komutuna ver
-    const propsJson = JSON.stringify(inputProps);
+    await mkdir('data/work', { recursive: true });
+    await writeFile(propsPath, JSON.stringify(inputProps));
 
     const result = await run(
       'npx',
-      [
-        'remotion',
-        'render',
-        'remotion/index.ts',
-        compositionId,
-        outputPath,
-        '--props=' + Buffer.from(propsJson).toString('base64'),
-        '--concurrency=1',
-      ],
+      ['remotion', 'render', 'remotion/index.ts', compositionId, outputPath, `--props=${propsPath}`, '--concurrency=1'],
       TIMEOUTS.RENDER_MS,
     );
 
@@ -62,6 +61,8 @@ export async function renderRemotion(
     const durationMs = Date.now() - startMs;
     Logger.error(`[job ${jobId}] Render başarısız (${(durationMs / 1000).toFixed(1)}s)`, err);
     throw err;
+  } finally {
+    await rm(propsPath, { force: true }).catch(() => undefined);
   }
 }
 

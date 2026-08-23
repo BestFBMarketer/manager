@@ -25,6 +25,7 @@ import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
 import { buildPoiCues } from '../../poi/poiTimeline.js';
 import { writeVideoMetadata } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
+import { generateThumbnail } from '../../render/thumbnail.js';
 import { resolveHotelFacts } from '../../hotelData/resolver.js';
 import type { HotelFacts } from '../../hotelData/types.js';
 import type { PoiCueProps } from '../../../remotion/compositions/HotelTour.js';
@@ -283,8 +284,22 @@ export async function runHotelTourJob(
 
     Logger.success(`[job ${jobId}] HotelTour tamamlandı (${(renderResult.durationMs / 1000).toFixed(1)}s)`);
 
+    // 13. Thumbnail - başarısız olursa video yine de onay kuyruğuna düşer (YouTube kendi karesini seçer)
+    let thumbnailPath: string | undefined;
+    try {
+      thumbnailPath = await generateThumbnail(
+        renderResult.outputPath,
+        speedPlan.outputDurationSec,
+        metadata.thumbnailText,
+        join(workDir, `thumbnail_${jobId}.jpg`),
+      );
+    } catch {
+      Logger.warn(`[job ${jobId}] Thumbnail üretilemedi, video kapak resmi olmadan onaya düşecek`);
+    }
+
     return {
       previewPath: renderResult.outputPath,
+      thumbnailPath,
       proposedTitle: metadata.title,
       proposedDescription: metadata.description,
       proposedTags: metadata.tags,

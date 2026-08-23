@@ -12,6 +12,8 @@ import { getChannel } from '../config/channels.js';
 import { scheduleAndUpload } from './publishScheduler.js';
 import type { UploadResult } from './uploader.js';
 import { writeVideoMetadata } from '../analysis/channelWriter.js';
+import { probe } from '../ingest/probe.js';
+import { generateThumbnail } from '../render/thumbnail.js';
 
 export interface ReviewItemRow {
   id: number;
@@ -20,6 +22,7 @@ export interface ReviewItemRow {
   kind: string;
   status: string;
   preview_path: string | null;
+  thumbnail_path: string | null;
   proposed_title: string;
   proposed_description: string;
   proposed_tags_json: string;
@@ -113,6 +116,7 @@ export async function approveReviewItem(reviewItemId: number, decidedBy: string)
     title: item.proposed_title,
     description: item.proposed_description,
     tags,
+    thumbnailPath: item.thumbnail_path ?? undefined,
   });
 
   db.prepare(
@@ -202,10 +206,11 @@ export async function requeueReviewItem(reviewItemId: number, changedFields?: Re
 }
 
 /**
- * Beğenilmeyen başlık/açıklama/etiket için ucuz bir "yeniden dene" yolu -
- * tüm render'ı tekrar etmez, sadece LLM'i orijinal bağlamla (metadata_context_json)
- * tekrar çağırır ve review_item.proposed_* alanlarını günceller. Onaylanmadan
- * önce istenildiği kadar tekrarlanabilir; status pending_review'da kalır.
+ * Beğenilmeyen başlık/açıklama/etiket/thumbnail için ucuz bir "yeniden dene" yolu -
+ * tüm render'ı (video/ses) tekrar etmez, sadece LLM'i orijinal bağlamla
+ * (metadata_context_json) tekrar çağırır ve yeni metne göre thumbnail'i yeniden
+ * üretir. Onaylanmadan önce istenildiği kadar tekrarlanabilir; status
+ * pending_review'da kalır.
  */
 export async function regenerateReviewItem(reviewItemId: number): Promise<ReviewItemRow> {
   const db = getDb();
@@ -220,13 +225,32 @@ export async function regenerateReviewItem(reviewItemId: number): Promise<Review
 
   const metadata = await writeVideoMetadata(channel, context);
 
+  let thumbnailPath = item.thumbnail_path;
+  const render = db
+    .prepare("SELECT output_path FROM render WHERE job_id = ? AND status = 'done'")
+    .get(item.job_id) as { output_path: string | null } | undefined;
+
+  if (render?.output_path) {
+    try {
+      const info = await probe(render.output_path);
+      thumbnailPath = await generateThumbnail(
+        render.output_path,
+        info.durationSec,
+        metadata.thumbnailText,
+        `${render.output_path}.thumb_${Date.now()}.jpg`,
+      );
+    } catch (error) {
+      Logger.warn(`[review ${reviewItemId}] Thumbnail yeniden üretilemedi, eskisi korunuyor`, error);
+    }
+  }
+
   db.prepare(
     `UPDATE review_item
-     SET proposed_title=?, proposed_description=?, proposed_tags_json=?
+     SET proposed_title=?, proposed_description=?, proposed_tags_json=?, thumbnail_path=?
      WHERE id=?`,
-  ).run(metadata.title, metadata.description, JSON.stringify(metadata.tags), reviewItemId);
+  ).run(metadata.title, metadata.description, JSON.stringify(metadata.tags), thumbnailPath, reviewItemId);
 
-  Logger.success(`[review ${reviewItemId}] Metadata yeniden oluşturuldu: "${metadata.title}"`);
+  Logger.success(`[review ${reviewItemId}] Metadata ve thumbnail yeniden oluşturuldu: "${metadata.title}"`);
 
   return db.prepare('SELECT * FROM review_item WHERE id = ?').get(reviewItemId) as ReviewItemRow;
 }

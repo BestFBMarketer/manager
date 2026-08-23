@@ -24,6 +24,8 @@ export interface UploadOptions {
   publishAt: Date;
   /** Cocuklara yonelik icerik beyani - YouTube icin zorunlu alan, varsayilan false */
   madeForKids?: boolean;
+  /** Uretilmis kapak resmi - verilmezse YouTube kendi karesini secer (Rule 11: eksikse sessizce atlanir) */
+  thumbnailPath?: string;
 }
 
 export interface UploadResult {
@@ -98,6 +100,20 @@ export async function uploadVideo(options: UploadOptions): Promise<UploadResult>
   if (!videoId) throw new Error('YouTube yanitinda video kimligi yok');
 
   Logger.success(`Yuklendi: ${videoId} (${options.channel.label})`);
+
+  if (options.thumbnailPath) {
+    try {
+      await withRetry(
+        () => youtube.thumbnails.set({ videoId, media: { body: createReadStream(options.thumbnailPath!) } }),
+        { label: 'YouTube thumbnail', isRetryable: isRetryableUploadError },
+      );
+      Logger.success(`Thumbnail ayarlandı: ${videoId}`);
+    } catch (error) {
+      // Video zaten yuklendi - thumbnail basarisizligi tum yuklemeyi geri almaz,
+      // sadece YouTube'un kendi secip koydugu kareyle kalir.
+      Logger.warn(`Thumbnail ayarlanamadı (${videoId}) - video otomatik seçilen kareyle yayınlanacak`, error);
+    }
+  }
 
   return {
     videoId,

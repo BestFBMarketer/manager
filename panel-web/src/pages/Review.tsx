@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, mediaUrl, type ReviewItem } from '../lib/api.js';
+import { api, mediaUrl, thumbnailUrl, type ReviewItem } from '../lib/api.js';
 
 function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
   return (
@@ -24,6 +24,7 @@ function ReviewCard({ item, onDecided }: { item: ReviewItem; onDecided: () => vo
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [thumbCacheBust, setThumbCacheBust] = useState(0);
 
   const dirty =
     title !== item.proposed_title ||
@@ -94,6 +95,7 @@ function ReviewCard({ item, onDecided }: { item: ReviewItem; onDecided: () => vo
       setTitle(updated.proposed_title);
       setDescription(updated.proposed_description);
       setTags(JSON.parse(updated.proposed_tags_json));
+      setThumbCacheBust(Date.now());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'yeniden olusturma basarisiz');
     } finally {
@@ -116,6 +118,19 @@ function ReviewCard({ item, onDecided }: { item: ReviewItem; onDecided: () => vo
         <video controls src={mediaUrl(item.render_id)} style={{ width: '100%', maxHeight: 420, marginTop: 12, background: '#000' }} />
       ) : (
         <p className="muted">önizleme dosyası yok</p>
+      )}
+
+      {item.thumbnail_path ? (
+        <div style={{ marginTop: 10 }}>
+          <p className="muted" style={{ marginBottom: 4 }}>Kapak resmi</p>
+          <img
+            src={`${thumbnailUrl(item.id)}?t=${thumbCacheBust}`}
+            alt="thumbnail"
+            style={{ width: 240, borderRadius: 8, display: 'block' }}
+          />
+        </div>
+      ) : (
+        <p className="muted" style={{ marginTop: 10 }}>kapak resmi üretilemedi - YouTube kendi karesini seçecek</p>
       )}
 
       <label style={{ display: 'block', marginTop: 12 }}>
@@ -142,7 +157,7 @@ function ReviewCard({ item, onDecided }: { item: ReviewItem; onDecided: () => vo
         <button disabled={busy} onClick={handleApprove}>Onayla</button>
         <button disabled={busy} className="secondary" onClick={handleReject}>Reddet</button>
         <button disabled={busy} className="secondary" onClick={handleRequestChanges}>Değişiklik gerekli</button>
-        <button disabled={busy} className="secondary" onClick={handleRegenerate}>Yeniden Oluştur (başlık/açıklama)</button>
+        <button disabled={busy} className="secondary" onClick={handleRegenerate}>Yeniden Oluştur (başlık/açıklama/kapak)</button>
       </div>
       {dirty && <p className="muted" style={{ marginTop: 6 }}>Metni düzenlediniz - "Onayla" bu haliyle kaydedip yayına planlayacak.</p>}
     </div>
