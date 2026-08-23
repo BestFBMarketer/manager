@@ -3,7 +3,7 @@
 // Purpose: Drone video → otel tanıtım klibi (M2'nin somut kısmı)
 // Dependencies: telemetry, edit, poi, music, tts, analysis, render
 // Author: BestMarketer Team
-// Last Modified: 2026-08-19
+// Last Modified: 2026-08-23
 // =====================================
 
 import Database from 'better-sqlite3';
@@ -14,18 +14,51 @@ import { Logger } from '../../core/logger.js';
 import { probe } from '../../ingest/probe.js';
 import { parseDjiSrt } from '../../telemetry/djiSrtParser.js';
 import { parseGoproTelemetry } from '../../telemetry/goproGpmf.js';
-import { planSpeed } from '../../edit/speedPlanner.js';
+import type { TrackPoint } from '../../telemetry/types.js';
+import { planSpeed, type SpeedPlan } from '../../edit/speedPlanner.js';
 import { applySpeedPlan } from '../../edit/applySpeedPlan.js';
 import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
 import { planMusicSegments, type MusicSegment } from '../../music/segmentPlanner.js';
 import { selectTracksForSegments } from '../../music/selector.js';
 import { loadMusicLibrary } from '../../music/library.js';
 import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
-import type { SpeedPlan } from '../../edit/speedPlanner.js';
 import { buildPoiCues } from '../../poi/poiTimeline.js';
 import { writeVideoMetadata } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
+import type { PoiCueProps } from '../../../remotion/compositions/HotelTour.js';
 import type { JobRow, StageResult } from './types.js';
+
+const HOTEL_TOUR_COMPOSITIONS = new Set(['HotelTourLandscape', 'HotelTourVertical']);
+
+/** SRT/GoPro her ikisi de bulunamadığında/yetersiz kaldığında bile [] döner, asla throw etmez. */
+async function detectTelemetry(
+  db: Database.Database,
+  jobId: number,
+  videoPath: string,
+): Promise<TrackPoint[]> {
+  const srtPath = videoPath.replace(/\.[^.]+$/, '.SRT');
+
+  try {
+    await access(srtPath);
+    const points = await parseDjiSrt(srtPath);
+    if (points.length > 0) {
+      db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_dji', jobId);
+      return points;
+    }
+  } catch {
+    // SRT dosyası yok - GoPro'ya düş
+  }
+
+  const goproPoints = await parseGoproTelemetry(videoPath);
+  if (goproPoints.length > 0) {
+    db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_gopro', jobId);
+    return goproPoints;
+  }
+
+  Logger.warn(`[job ${jobId}] Telemetri bulunamadı, sabit hız planı kullanılacak`);
+  db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_fallback', jobId);
+  return [];
+}
 
 /**
  * Drone video → render aşaması. Tüm bağımlı modülleri zincirler:
@@ -41,7 +74,14 @@ export async function runHotelTourJob(
   const workDir = `data/work/${jobId}`;
   const videoPath = job.source_ref;
 
-  Logger.info(`[job ${jobId}] HotelTour başlıyor: ${channel.label} → ${videoPath}`);
+  if (!HOTEL_TOUR_COMPOSITIONS.has(job.template)) {
+    throw new Error(
+      `HotelTour stage'i '${job.template}' şablonunu desteklemiyor (beklenen: HotelTourLandscape | HotelTourVertical)`,
+    );
+  }
+  const compositionId = job.template as 'HotelTourLandscape' | 'HotelTourVertical';
+
+  Logger.info(`[job ${jobId}] HotelTour başlıyor: ${channel.label} → ${videoPath} (${compositionId})`);
 
   try {
     // 1. Probe videoyu
@@ -50,28 +90,12 @@ export async function runHotelTourJob(
     const sourceDurationSec = info.durationSec;
 
     // 2. Telemetri arayışı (SRT varsa DJI, yoksa GoPro, yoksa fallback)
-    let telemetry: any = null;
-    const srtPath = videoPath.replace(/\.[^.]+$/, '.SRT');
-
-    try {
-      await access(srtPath);
-      Logger.debug(`[job ${jobId}] DJI SRT bulundu: ${srtPath}`);
-      telemetry = await parseDjiSrt(srtPath);
-      db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_dji', jobId);
-    } catch {
-      try {
-        Logger.debug(`[job ${jobId}] GoPro GPMF aranıyor`);
-        telemetry = await parseGoproTelemetry(videoPath);
-        db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_gopro', jobId);
-      } catch {
-        Logger.warn(`[job ${jobId}] Telemetri bulunamadı, şablon rota kullanılacak`);
-        db.prepare('UPDATE job SET stage=? WHERE id=?').run('telemetry_fallback', jobId);
-      }
-    }
+    const telemetry = await detectTelemetry(db, jobId, videoPath);
+    const hasTelemetry = telemetry.length > 0;
 
     // 3. Hız planlama (telemetri varsa, yoksa minimum kurgu)
     Logger.debug(`[job ${jobId}] Hız planı oluşturuluyor`);
-    const speedPlan: SpeedPlan = telemetry
+    const speedPlan: SpeedPlan = hasTelemetry
       ? planSpeed(telemetry, sourceDurationSec, { targetDurationSec: channel.targetDurationSec })
       : {
           segments: [
@@ -86,7 +110,7 @@ export async function runHotelTourJob(
             },
           ],
           sourceDurationSec,
-          outputDurationSec: channel.targetDurationSec,
+          outputDurationSec: sourceDurationSec,
         };
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('speed_planned', jobId);
@@ -102,17 +126,17 @@ export async function runHotelTourJob(
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('speed_applied', jobId);
 
-    // 5. POI zamanlaması (ilgi noktaları / bilgi kartları)
+    // 5. POI zamanlaması (ilgi noktaları / bilgi kartları) - bölgedeki POI listesi
+    // henüz ayrı bir keşif adımından gelmiyor (hotelData/M4 kapsamı); boş POI
+    // listesiyle çağrılır, sonuç da boş kart listesi olur (Rule 11: uydurma yok).
     Logger.debug(`[job ${jobId}] POI zamanlaması oluşturuluyor`);
-    const poiCues = telemetry
-      ? buildPoiCues(telemetry, [], speedPlan.outputDurationSec)
-      : [];
+    const poiCues = hasTelemetry ? buildPoiCues(telemetry, [], speedPlan.outputDurationSec) : [];
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('poi_generated', jobId);
 
     // 6. Müzik planlama
     Logger.debug(`[job ${jobId}] Müzik segmentleri planlanıyor`);
-    const musicSegments: MusicSegment[] = telemetry
+    const musicSegments: MusicSegment[] = hasTelemetry
       ? planMusicSegments(telemetry, speedPlan.outputDurationSec, 'dji')
       : [
           {
@@ -154,14 +178,16 @@ export async function runHotelTourJob(
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('voice_synthesized', jobId);
 
-    // 9. Ses karışımı
+    // 9. Ses karışımı - mixAudio hem videoyu hem miksajlanmış sesi tek dosyada
+    // birleştirir (-map 0:v + -map [out]), çıktı doğrudan Remotion'a girecek
+    // videoSrc'dir; ayrı bir muxing adımına gerek yoktur.
     Logger.debug(`[job ${jobId}] Ses katmanları karışılıyor`);
-    const mixedOutputPath = join(workDir, `mixed_${jobId}.wav`);
+    const mixedVideoPath = join(workDir, `mixed_${jobId}.mp4`);
     await mixAudio({
       videoPath: editedVideoPath,
       musicSegments: musicPlacements,
       voicePath,
-      outputPath: mixedOutputPath,
+      outputPath: mixedVideoPath,
       videoDurationSec: speedPlan.outputDurationSec,
     });
 
@@ -169,27 +195,38 @@ export async function runHotelTourJob(
 
     // 10. Metadata oluşturma
     Logger.debug(`[job ${jobId}] Metadata oluşturuluyor`);
-    const metadata = await writeVideoMetadata(channel, {
+    const metadataContext = {
       subject: 'Otel ve çevresindeki turizm noktaları',
       highlights: poiCues.map((cue) => cue.poi.name),
       durationSec: speedPlan.outputDurationSec,
-    });
+    };
+    const metadata = await writeVideoMetadata(channel, metadataContext);
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('metadata_generated', jobId);
 
-    // 11. Remotion render
-    Logger.debug(`[job ${jobId}] Remotion render başlıyor`);
+    // 11. Remotion render - HotelTourProps sözleşmesine göre
+    Logger.debug(`[job ${jobId}] Remotion render başlıyor (${compositionId})`);
     const outputPath = join(workDir, `render_${jobId}.mp4`);
-    const renderProps = {
-      videoPath: editedVideoPath,
-      audioPath: mixedOutputPath,
-      poiCues,
-      durationSec: speedPlan.outputDurationSec,
-      metadata,
-      channelId: job.channel_id,
-    };
+    const cues: PoiCueProps[] = poiCues.map((cue) => ({
+      name: cue.poi.name,
+      description: cue.poi.description,
+      source: cue.poi.descriptionSource,
+      atSec: cue.atSec,
+      durationSec: cue.durationSec,
+    }));
 
-    const renderResult = await renderRemotion('HotelTour', renderProps, outputPath, jobId);
+    const renderResult = await renderRemotion(
+      compositionId,
+      {
+        videoSrc: mixedVideoPath,
+        title: metadata.title,
+        cues,
+        channelHandle: channel.label,
+        titleDurationSec: 3,
+      },
+      outputPath,
+      jobId,
+    );
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('rendered', jobId);
 
@@ -198,7 +235,7 @@ export async function runHotelTourJob(
     db.prepare(
       `INSERT INTO render (job_id, composition, output_path, status, duration_ms)
        VALUES (?, ?, ?, ?, ?)`,
-    ).run(jobId, 'HotelTour', renderResult.outputPath, 'done', renderResult.durationMs);
+    ).run(jobId, compositionId, renderResult.outputPath, 'done', renderResult.durationMs);
 
     Logger.success(`[job ${jobId}] HotelTour tamamlandı (${(renderResult.durationMs / 1000).toFixed(1)}s)`);
 
@@ -207,6 +244,7 @@ export async function runHotelTourJob(
       proposedTitle: metadata.title,
       proposedDescription: metadata.description,
       proposedTags: metadata.tags,
+      metadataContext,
     };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);

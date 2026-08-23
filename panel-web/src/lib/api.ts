@@ -34,8 +34,49 @@ export const api = {
     request<ChannelConfig>(`/channels/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   updateSchedule: (id: string, rule: ScheduleRuleInput) =>
     request<ChannelConfig>(`/channels/${id}/schedule`, { method: 'PUT', body: JSON.stringify(rule) }),
-  getCalendar: (id: string) => request<{ kind: string; items: CalendarItem[] }>(`/channels/${id}/calendar`),
+  getCalendar: (id: string) => request<CalendarResponse>(`/channels/${id}/calendar`),
+  getBatch: (batchId: string) => request<BatchProgress>(`/batches/${batchId}`),
+  createBatch: (channelId: string, input: BatchInput) =>
+    request<{ batchId: string; jobIds: number[] }>(`/channels/${channelId}/batch`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
+  listReview: (channelId?: string) =>
+    request<ReviewItem[]>(`/review${channelId ? `?channel=${encodeURIComponent(channelId)}` : ''}`),
+  updateReviewMetadata: (id: number, edits: { proposedTitle?: string; proposedDescription?: string; proposedTags?: string[] }) =>
+    request<ReviewItem>(`/review/${id}`, { method: 'PATCH', body: JSON.stringify(edits) }),
+  approveReview: (id: number, decidedBy: string) =>
+    request<{ videoId: string; studioUrl: string; publicUrl: string }>(`/review/${id}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ decidedBy }),
+    }),
+  rejectReview: (id: number, decidedBy: string, note?: string) =>
+    request<{ ok: true }>(`/review/${id}/reject`, { method: 'POST', body: JSON.stringify({ decidedBy, note }) }),
+  requestChangesReview: (id: number, decidedBy: string, note: string) =>
+    request<{ ok: true }>(`/review/${id}/request-changes`, {
+      method: 'POST',
+      body: JSON.stringify({ decidedBy, note }),
+    }),
+  requeueReview: (id: number, changedFields?: Record<string, unknown>) =>
+    request<{ ok: true }>(`/review/${id}/requeue`, { method: 'POST', body: JSON.stringify({ changedFields }) }),
+  regenerateReview: (id: number) =>
+    request<ReviewItem>(`/review/${id}/regenerate`, { method: 'POST' }),
+
+  listStoryReferences: (channelId: string) =>
+    request<StoryReference[]>(`/channels/${channelId}/story-reference`),
+  addStoryReference: (channelId: string, sourceUrl: string, label?: string) =>
+    request<StoryReference>(`/channels/${channelId}/story-reference`, {
+      method: 'POST',
+      body: JSON.stringify({ sourceUrl, label }),
+    }),
+  removeStoryReference: (channelId: string, refId: number) =>
+    request<{ ok: true }>(`/channels/${channelId}/story-reference/${refId}`, { method: 'DELETE' }),
 };
+
+export function mediaUrl(renderId: number): string {
+  return `/api/media/${renderId}`;
+}
 
 export interface PrimeTimeSlot {
   id: string;
@@ -79,6 +120,7 @@ export interface ChannelConfig {
   audience: string;
   titleExamples: string[];
   styleReference: string | null;
+  niche: string | null;
   topicSource: 'reference' | 'ai_generated' | 'both';
   shortsDerivativeCount: number;
   categoryId: string;
@@ -97,6 +139,7 @@ export interface NewChannelInput {
   categoryId: string;
   topicSource: 'reference' | 'ai_generated' | 'both';
   styleReference: string | null;
+  niche?: string | null;
   scheduleRule: ScheduleRuleInput;
 }
 
@@ -109,4 +152,62 @@ export interface CalendarItem {
   template: string;
   source_ref: string;
   job_stage: string;
+}
+
+export interface PendingReviewSummary {
+  id: number;
+  job_id: number;
+  kind: string;
+  preview_path: string | null;
+  proposed_title: string;
+  created_at: string;
+}
+
+export interface CalendarResponse {
+  scheduled: CalendarItem[];
+  pendingReview: PendingReviewSummary[];
+}
+
+export interface BatchProgress {
+  batchId: string;
+  total: number;
+  pending: number;
+  processing: number;
+  awaitingReview: number;
+  done: number;
+  failed: number;
+  rejected: number;
+  needsChanges: number;
+}
+
+export interface BatchInput {
+  count: number;
+  items?: Array<{ sourceRef: string }>;
+}
+
+export interface ReviewItem {
+  id: number;
+  job_id: number;
+  channel_id: string;
+  channel_label: string;
+  channel_type: 'standard' | 'story';
+  kind: string;
+  status: string;
+  preview_path: string | null;
+  proposed_title: string;
+  proposed_description: string;
+  proposed_tags_json: string;
+  fact_checked_at: string | null;
+  reviewer_note: string | null;
+  render_id?: number;
+  created_at: string;
+}
+
+export interface StoryReference {
+  id: number;
+  channel_id: string;
+  source_url: string;
+  label: string | null;
+  enabled: number;
+  created_at: string;
 }

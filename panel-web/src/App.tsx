@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar.js';
 import ChannelEdit from './pages/ChannelEdit.js';
 import NewChannel from './pages/NewChannel.js';
 import Calendar from './pages/Calendar.js';
+import Review from './pages/Review.js';
 
 type AuthState = 'checking' | 'in' | 'out';
 
@@ -28,6 +29,7 @@ export default function App() {
       <div className="main">
         <Routes>
           <Route path="/" element={<div className="muted">Soldan bir kanal sec ya da yeni kanal ekle.</div>} />
+          <Route path="/review" element={<Review />} />
           <Route path="/channels/new" element={<NewChannel />} />
           <Route path="/channels/:id" element={<ChannelEdit />} />
           <Route path="/channels/:id/calendar" element={<Calendar />} />

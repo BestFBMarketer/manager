@@ -83,8 +83,8 @@ async function onJobSuccess(db: Database.Database, job: JobRow, result: StageRes
   );
 
   db.prepare(
-    `INSERT INTO review_item (job_id, channel_id, kind, status, preview_path, proposed_title, proposed_description, proposed_tags_json)
-     VALUES (?, ?, 'primary', 'pending_review', ?, ?, ?, ?)`,
+    `INSERT INTO review_item (job_id, channel_id, kind, status, preview_path, proposed_title, proposed_description, proposed_tags_json, metadata_context_json)
+     VALUES (?, ?, 'primary', 'pending_review', ?, ?, ?, ?, ?)`,
   ).run(
     job.id,
     job.channel_id,
@@ -92,6 +92,7 @@ async function onJobSuccess(db: Database.Database, job: JobRow, result: StageRes
     result.proposedTitle,
     result.proposedDescription,
     JSON.stringify(result.proposedTags),
+    JSON.stringify(result.metadataContext),
   );
 
   await notifyEmail({
