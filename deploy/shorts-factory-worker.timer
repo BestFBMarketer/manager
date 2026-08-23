@@ -1,0 +1,10 @@
+[Unit]
+Description=shorts-factory worker'i her 5 dakikada bir tetikler
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

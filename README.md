@@ -386,6 +386,70 @@ token'i onceden `scripts/authYoutube.ts` ile uretilip `.env`'e eklenmis olmalidi
 
 ---
 
+## Isletim (surekli calisma - VPS)
+
+Iki surekli surec var: **panel** (her zaman ayakta, crash'te yeniden baslamali) ve
+**worker** (`src/worker/runQueue.ts`) - tek seferlik calisip cikan, periyodik olarak
+tetiklenmesi gereken bir script (`WORKER.BATCH_SIZE=1` oldugu icin her tetiklemede
+en fazla bir is islenir, uzun bir render sonraki turu bloklamaz).
+
+### Secenek A: pm2 (onerilir, kurulumu daha kolay)
+
+```bash
+npm install -g pm2
+pm2 start ecosystem.config.cjs
+pm2 save                # sunucu yeniden baslarsa pm2'nin kendini geri getirmesi icin
+pm2 startup             # sistem baslangicinda pm2'yi otomatik baslatan servisi kurar
+pm2 install pm2-logrotate   # log dosyalari sinirsiz buyumesin diye
+```
+
+`ecosystem.config.cjs` panel'i `autorestart:true` ile surekli ayakta tutar; worker'i
+`cron_restart: '*/5 * * * *'` ile her 5 dakikada bir tetikleyip `autorestart:false`
+ile tekrar durdurur (pm2'nin "zamanlanmis gorev" kalibi).
+
+### Secenek B: systemd (pm2 kurulamayan/istemeyen VPS'ler icin)
+
+`deploy/` altindaki unit dosyalarini `/etc/systemd/system/`e kopyala (once
+`WorkingDirectory` ve `EnvironmentFile` satirlarini kendi kurulum yoluna gore duzenle):
+
+```bash
+sudo cp deploy/shorts-factory-panel.service /etc/systemd/system/
+sudo cp deploy/shorts-factory-worker.service deploy/shorts-factory-worker.timer /etc/systemd/system/
+sudo cp deploy/shorts-factory-backup.service deploy/shorts-factory-backup.timer /etc/systemd/system/
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now shorts-factory-panel.service
+sudo systemctl enable --now shorts-factory-worker.timer
+sudo systemctl enable --now shorts-factory-backup.timer
+```
+
+Loglar `journalctl -u shorts-factory-panel -f` / `journalctl -u shorts-factory-worker` ile
+izlenir - systemd/journald log rotasyonunu kendisi yapar, ek bir ayar gerekmez.
+
+### Yedekleme
+
+`scripts/backupDb.ts` SQLite'in kendi `.backup()` API'sini kullanir (WAL modunda bile
+tutarli bir kopya alir - duz `cp` bunu garanti etmez), `data/backups/`e yazar ve
+`SHORTS_DB_BACKUP_RETENTION_DAYS` (varsayilan 14 gun) sonrasini otomatik siler.
+Yukaridaki systemd timer gunde bir calistirir; pm2 kullaniyorsan ayni scripti duz bir
+crontab satiriyla ("0 3 * * * cd /opt/shorts-factory && npx tsx scripts/backupDb.ts")
+tetikleyebilirsin. Off-site senkron icin (onerilir) `rclone`/`rsync` ile
+`data/backups/`i harici bir depoya kopyalayan ikinci bir cron satiri eklenebilir.
+
+### Saglik kontrolu
+
+`GET /api/health` kimlik dogrulama gerektirmez, DB'ye gercekten erisilebildigini
+kontrol eder (`{ok:true, dbOk:true, lastJobActivity}` veya 503). UptimeRobot vb. dis
+izleme araclariyla bu adresi izlemek panel coktugunde haber almayi saglar.
+
+### VPS kaynak onerisi
+
+FFmpeg + Chromium/WebGL (Remotion render) + whisper-benzeri islemler icin **en az
+4 vCPU / 8 GB RAM**, harita katmani veya yogun StoryNarrative/hikaye render'lari
+eklenirse **8 vCPU / 16 GB RAM** onerilir.
+
+---
+
 ## Yol haritasi
 
 - [x] M0 — iskelet, config, logger, SQLite semasi, LLM router
