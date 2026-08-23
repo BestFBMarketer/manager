@@ -7,25 +7,38 @@ const AUTO_DISCOVERY_READY = false; // M5 topicDiscovery.ts tamamlanınca true o
 export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
   const navigate = useNavigate();
   const isStoryAuto = channel.channelType === 'story' && channel.topicSource !== undefined && AUTO_DISCOVERY_READY;
+  const isHotelTour = channel.defaultTemplate === 'HotelTourLandscape' || channel.defaultTemplate === 'HotelTourVertical';
   const [count, setCount] = useState(3);
   const [sourceRefs, setSourceRefs] = useState<string[]>(['', '', '']);
+  const [hotelNames, setHotelNames] = useState<string[]>(['', '', '']);
+  const [hotelCities, setHotelCities] = useState<string[]>(['', '', '']);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function resize(list: string[], n: number): string[] {
+    const next = list.slice(0, n);
+    while (next.length < n) next.push('');
+    return next;
+  }
+
   function setCountAndResize(n: number) {
     setCount(n);
-    setSourceRefs((prev) => {
-      const next = prev.slice(0, n);
-      while (next.length < n) next.push('');
-      return next;
-    });
+    setSourceRefs((prev) => resize(prev, n));
+    setHotelNames((prev) => resize(prev, n));
+    setHotelCities((prev) => resize(prev, n));
   }
 
   async function handleSubmit() {
     setBusy(true);
     setError(null);
     try {
-      const items = isStoryAuto ? undefined : sourceRefs.map((sourceRef) => ({ sourceRef }));
+      const items = isStoryAuto
+        ? undefined
+        : sourceRefs.map((sourceRef, i) => ({
+            sourceRef,
+            hotelName: isHotelTour ? hotelNames[i] : undefined,
+            hotelCity: isHotelTour ? hotelCities[i] : undefined,
+          }));
       const result = await api.createBatch(channel.id, { count, items });
       navigate(`/batches/${result.batchId}`);
     } catch (err) {
@@ -53,16 +66,36 @@ export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
 
       {!isStoryAuto && (
         <div className="field">
-          <label>Kaynak (her video için dosya yolu veya link)</label>
+          <label>Kaynak (her video için dosya yolu veya link{isHotelTour ? ' + otel adı/şehir' : ''})</label>
           {sourceRefs.map((ref, i) => (
-            <input
-              key={i}
-              placeholder={`kaynak #${i + 1}`}
-              value={ref}
-              onChange={(e) => setSourceRefs((prev) => prev.map((r, idx) => (idx === i ? e.target.value : r)))}
-              style={{ marginBottom: 6 }}
-            />
+            <div key={i} className="row" style={{ gap: 6, marginBottom: 6 }}>
+              <input
+                placeholder={`kaynak #${i + 1} (drone klasörü/dosya)`}
+                value={ref}
+                onChange={(e) => setSourceRefs((prev) => prev.map((r, idx) => (idx === i ? e.target.value : r)))}
+                style={{ flex: isHotelTour ? 2 : 1 }}
+              />
+              {isHotelTour && (
+                <>
+                  <input
+                    placeholder="otel adı"
+                    value={hotelNames[i]}
+                    onChange={(e) => setHotelNames((prev) => prev.map((r, idx) => (idx === i ? e.target.value : r)))}
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    placeholder="şehir"
+                    value={hotelCities[i]}
+                    onChange={(e) => setHotelCities((prev) => prev.map((r, idx) => (idx === i ? e.target.value : r)))}
+                    style={{ flex: 1 }}
+                  />
+                </>
+              )}
+            </div>
           ))}
+          {isHotelTour && (
+            <p className="muted">Otel adı/şehir opsiyonel - verilirse otel bilgi kartları (oda sayısı, puan vb.) otomatik çekilir.</p>
+          )}
         </div>
       )}
 

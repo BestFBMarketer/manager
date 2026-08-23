@@ -17,6 +17,8 @@ const VALID_TEMPLATES = new Set(['FunnyRanking', 'HotelTourLandscape', 'HotelTou
 
 interface BatchItem {
   sourceRef: string;
+  hotelName?: string;
+  hotelCity?: string;
 }
 
 export function batchRouter(): Router {
@@ -80,14 +82,22 @@ export function batchRouter(): Router {
       const batchId = randomUUID();
 
       const insertJob = db.prepare(
-        `INSERT INTO job (channel_id, template, source_ref, target_dur_sec, status, batch_id)
-         VALUES (?, ?, ?, ?, 'pending', ?)`,
+        `INSERT INTO job (channel_id, template, source_ref, target_dur_sec, status, batch_id, input_json)
+         VALUES (?, ?, ?, ?, 'pending', ?, ?)`,
       );
 
       const jobIds: number[] = [];
       const insertAll = db.transaction((rows: BatchItem[]) => {
         for (const row of rows) {
-          const result = insertJob.run(channel.id, channel.defaultTemplate, row.sourceRef, channel.targetDurationSec, batchId);
+          const inputJson = JSON.stringify({ hotelName: row.hotelName, hotelCity: row.hotelCity });
+          const result = insertJob.run(
+            channel.id,
+            channel.defaultTemplate,
+            row.sourceRef,
+            channel.targetDurationSec,
+            batchId,
+            inputJson,
+          );
           jobIds.push(Number(result.lastInsertRowid));
         }
       });

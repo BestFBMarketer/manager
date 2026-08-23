@@ -25,8 +25,34 @@ import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
 import { buildPoiCues } from '../../poi/poiTimeline.js';
 import { writeVideoMetadata } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
+import { resolveHotelFacts } from '../../hotelData/resolver.js';
+import type { HotelFacts } from '../../hotelData/types.js';
 import type { PoiCueProps } from '../../../remotion/compositions/HotelTour.js';
+import type { InfoChip } from '../../../remotion/components/InfoChips.js';
 import type { JobRow, StageResult } from './types.js';
+
+interface HotelTourInput {
+  hotelName?: string;
+  hotelCity?: string;
+}
+
+/** Bilinen alanlari kartlara cevirir - eksik alan hic gorunmez (uydurma yok). */
+function buildInfoChips(facts: HotelFacts): InfoChip[] {
+  const chips: InfoChip[] = [];
+
+  if (facts.roomCount) chips.push({ icon: '🛏', label: `${facts.roomCount.value} oda`, source: facts.roomCount.source });
+  if (facts.capacity) chips.push({ icon: '👥', label: `${facts.capacity.value} kişi kapasite`, source: facts.capacity.source });
+  if (facts.airportDistanceKm) {
+    chips.push({ icon: '✈️', label: `havaalanına ${facts.airportDistanceKm.value.toFixed(0)} km`, source: facts.airportDistanceKm.source });
+  }
+  if (facts.allInclusive?.value) chips.push({ icon: '🍽', label: 'her şey dahil', source: facts.allInclusive.source });
+  if (facts.rating) {
+    const recommend = facts.recommendPercent ? ` · %${facts.recommendPercent.value} önerir` : '';
+    chips.push({ icon: '⭐', label: `${facts.rating.value.toFixed(1)}${recommend}`, source: facts.rating.source });
+  }
+
+  return chips;
+}
 
 const HOTEL_TOUR_COMPOSITIONS = new Set(['HotelTourLandscape', 'HotelTourVertical']);
 
@@ -83,7 +109,20 @@ export async function runHotelTourJob(
 
   Logger.info(`[job ${jobId}] HotelTour başlıyor: ${channel.label} → ${videoPath} (${compositionId})`);
 
+  const jobInput = JSON.parse(job.input_json || '{}') as HotelTourInput;
+
   try {
+    // 0. Otel verisi - hotelName/hotelCity batch girdisinde varsa saglayici
+    // zincirinden cekilir (bkz. src/hotelData/resolver.ts); yoksa InfoChips atlanir.
+    let hotelFacts: HotelFacts = {};
+    if (jobInput.hotelName && jobInput.hotelCity) {
+      Logger.debug(`[job ${jobId}] Otel verisi çözümleniyor: ${jobInput.hotelName}`);
+      hotelFacts = await resolveHotelFacts(jobInput.hotelName, jobInput.hotelCity);
+      db.prepare('UPDATE job SET stage=? WHERE id=?').run('hotel_data_resolved', jobId);
+    } else {
+      Logger.debug(`[job ${jobId}] Otel adı/şehri verilmemiş - bilgi kartları atlanacak`);
+    }
+
     // 1. Probe videoyu
     Logger.debug(`[job ${jobId}] Video probelanıyor`);
     const info = await probe(videoPath);
@@ -196,8 +235,12 @@ export async function runHotelTourJob(
     // 10. Metadata oluşturma
     Logger.debug(`[job ${jobId}] Metadata oluşturuluyor`);
     const metadataContext = {
-      subject: 'Otel ve çevresindeki turizm noktaları',
-      highlights: poiCues.map((cue) => cue.poi.name),
+      subject: jobInput.hotelName ? `${jobInput.hotelName} ve çevresindeki turizm noktaları` : 'Otel ve çevresindeki turizm noktaları',
+      highlights: [
+        ...poiCues.map((cue) => cue.poi.name),
+        ...(hotelFacts.roomCount ? [`${hotelFacts.roomCount.value} odalı otel`] : []),
+        ...(hotelFacts.allInclusive?.value ? ['her şey dahil konsept'] : []),
+      ],
       durationSec: speedPlan.outputDurationSec,
     };
     const metadata = await writeVideoMetadata(channel, metadataContext);
@@ -223,6 +266,7 @@ export async function runHotelTourJob(
         cues,
         channelHandle: channel.label,
         titleDurationSec: 3,
+        infoChips: buildInfoChips(hotelFacts),
       },
       outputPath,
       jobId,

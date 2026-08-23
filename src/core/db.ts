@@ -206,6 +206,11 @@ function applyIncrementalMigrations(db: Database.Database): void {
     { table: 'upload', column: 'publish_target_id', ddl: 'ALTER TABLE upload ADD COLUMN publish_target_id INTEGER REFERENCES publish_target(id)' },
     { table: 'job', column: 'batch_id', ddl: 'ALTER TABLE job ADD COLUMN batch_id TEXT' },
     { table: 'job', column: 'claimed_at', ddl: 'ALTER TABLE job ADD COLUMN claimed_at TEXT' },
+    {
+      table: 'job',
+      column: 'input_json',
+      ddl: "ALTER TABLE job ADD COLUMN input_json TEXT NOT NULL DEFAULT '{}'",
+    },
     { table: 'channel', column: 'niche', ddl: 'ALTER TABLE channel ADD COLUMN niche TEXT DEFAULT NULL' },
     { table: 'render', column: 'duration_ms', ddl: 'ALTER TABLE render ADD COLUMN duration_ms INTEGER' },
     {
