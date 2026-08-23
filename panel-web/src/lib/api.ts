@@ -63,6 +63,17 @@ export const api = {
   regenerateReview: (id: number) =>
     request<ReviewItem>(`/review/${id}/regenerate`, { method: 'POST' }),
 
+  listPublishTargets: (channelId: string) => request<PublishTarget[]>(`/channels/${channelId}/publish-targets`),
+  updatePublishTarget: (
+    channelId: string,
+    platform: string,
+    input: { credentialsEnvKey: string; externalChannelRef: string; enabled: boolean },
+  ) =>
+    request<PublishTarget>(`/channels/${channelId}/publish-targets/${platform}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    }),
+
   listStoryReferences: (channelId: string) =>
     request<StoryReference[]>(`/channels/${channelId}/story-reference`),
   addStoryReference: (channelId: string, sourceUrl: string, label?: string) =>
@@ -206,6 +217,16 @@ export interface ReviewItem {
   reviewer_note: string | null;
   render_id?: number;
   created_at: string;
+}
+
+export interface PublishTarget {
+  id: number;
+  channel_id: string;
+  platform: string;
+  external_channel_ref: string | null;
+  enabled: number;
+  credentials_env_key: string | null;
+  config_json: string;
 }
 
 export interface StoryReference {
