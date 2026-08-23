@@ -110,6 +110,10 @@ export async function approveReviewItem(reviewItemId: number, decidedBy: string)
   const channel = getChannel(item.channel_id);
   const tags = JSON.parse(item.proposed_tags_json) as string[];
 
+  const jobRow = db.prepare('SELECT target_publish_at FROM job WHERE id = ?').get(item.job_id) as
+    | { target_publish_at: string | null }
+    | undefined;
+
   const result = await scheduleAndUpload({
     jobId: item.job_id,
     channel,
@@ -118,6 +122,7 @@ export async function approveReviewItem(reviewItemId: number, decidedBy: string)
     description: item.proposed_description,
     tags,
     thumbnailPath: item.thumbnail_path ?? undefined,
+    targetPublishAt: jobRow?.target_publish_at ? new Date(jobRow.target_publish_at) : undefined,
   });
 
   db.prepare(

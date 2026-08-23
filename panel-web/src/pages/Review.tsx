@@ -109,6 +109,7 @@ function ReviewCard({ item, onDecided }: { item: ReviewItem; onDecided: () => vo
         <div>
           <span className="badge">{item.channel_label}</span>
           {item.channel_type === 'story' && <span className="badge" style={{ marginLeft: 6 }}>hikaye</span>}
+          {item.kind === 'shorts_derivative' && <span className="badge" style={{ marginLeft: 6 }}>uzun videodan türev</span>}
           <span className="muted" style={{ marginLeft: 8 }}>iş #{item.job_id}</span>
         </div>
         <span className="muted">{new Date(item.created_at).toLocaleString()}</span>

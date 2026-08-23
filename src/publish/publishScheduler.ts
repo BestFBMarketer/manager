@@ -20,6 +20,12 @@ export interface ScheduleInput {
   description: string;
   tags: string[];
   thumbnailPath?: string;
+  /**
+   * Belirli bir tarihe sabitlemek icin (orn. shorts_derivative: ebeveyn videonun
+   * yayin tarihinden +N gun). Verilirse normal "bir sonraki bos slot" mantigi
+   * atlanir, video dogrudan bu ana zamanlanir.
+   */
+  targetPublishAt?: Date;
 }
 
 /**
@@ -36,24 +42,30 @@ export interface ScheduleInput {
 export async function scheduleAndUpload(input: ScheduleInput): Promise<UploadResult> {
   const db = getDb();
 
-  const alreadyScheduled = db
-    .prepare(
-      `SELECT COUNT(*) AS n FROM upload
-       WHERE channel_id = ? AND status IN ('scheduled', 'published')
-         AND publish_at >= datetime('now')`,
-    )
-    .get(input.channel.id) as { n: number };
+  let publishAt: Date;
+  if (input.targetPublishAt) {
+    publishAt = input.targetPublishAt;
+    Logger.info(`Sabit tarihe zamanlanıyor: ${describeAcrossZones(publishAt)}`);
+  } else {
+    const alreadyScheduled = db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM upload
+         WHERE channel_id = ? AND status IN ('scheduled', 'published')
+           AND publish_at >= datetime('now')`,
+      )
+      .get(input.channel.id) as { n: number };
 
-  const upcoming = nextPublishTimes(
-    input.channel.slots,
-    alreadyScheduled.n + 1,
-    new Date(),
-    input.channel.scheduleRule,
-  );
-  const slot = upcoming[upcoming.length - 1];
-  if (!slot) throw new Error(`${input.channel.id}: uygun yayin slotu bulunamadi`);
-
-  Logger.info(`Slot secildi (${alreadyScheduled.n} is zaten kuyrukta): ${slot.slot.label} -> ${describeAcrossZones(slot.publishAt)}`);
+    const upcoming = nextPublishTimes(
+      input.channel.slots,
+      alreadyScheduled.n + 1,
+      new Date(),
+      input.channel.scheduleRule,
+    );
+    const slot = upcoming[upcoming.length - 1];
+    if (!slot) throw new Error(`${input.channel.id}: uygun yayin slotu bulunamadi`);
+    publishAt = slot.publishAt;
+    Logger.info(`Slot secildi (${alreadyScheduled.n} is zaten kuyrukta): ${slot.slot.label} -> ${describeAcrossZones(publishAt)}`);
+  }
 
   const result = await uploadVideo({
     channel: input.channel,
@@ -61,19 +73,19 @@ export async function scheduleAndUpload(input: ScheduleInput): Promise<UploadRes
     title: input.title,
     description: input.description,
     tags: input.tags,
-    publishAt: slot.publishAt,
+    publishAt,
     thumbnailPath: input.thumbnailPath,
   });
 
   db.prepare(
     `INSERT INTO upload (job_id, channel_id, video_id, publish_at, status)
      VALUES (?, ?, ?, ?, 'scheduled')`,
-  ).run(input.jobId, input.channel.id, result.videoId, slot.publishAt.toISOString());
+  ).run(input.jobId, input.channel.id, result.videoId, publishAt.toISOString());
 
   db.prepare(
     `UPDATE job SET stage = 'published', status = 'done', updated_at = datetime('now') WHERE id = ?`,
   ).run(input.jobId);
 
-  Logger.success(`Yayin planlandi: ${result.publicUrl} (${slot.publishAt.toISOString()})`);
+  Logger.success(`Yayin planlandi: ${result.publicUrl} (${publishAt.toISOString()})`);
   return result;
 }

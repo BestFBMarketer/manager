@@ -219,6 +219,11 @@ function applyIncrementalMigrations(db: Database.Database): void {
       ddl: "ALTER TABLE review_item ADD COLUMN metadata_context_json TEXT NOT NULL DEFAULT '{}'",
     },
     { table: 'review_item', column: 'thumbnail_path', ddl: 'ALTER TABLE review_item ADD COLUMN thumbnail_path TEXT' },
+    {
+      table: 'job',
+      column: 'target_publish_at',
+      ddl: 'ALTER TABLE job ADD COLUMN target_publish_at TEXT',
+    },
   ];
 
   for (const { table, column, ddl } of alterations) {

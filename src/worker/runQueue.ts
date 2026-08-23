@@ -10,8 +10,9 @@ import Database from 'better-sqlite3';
 import { getDb, closeDb } from '../core/db.js';
 import { Logger } from '../core/logger.js';
 import { notifyEmail } from '../core/notify.js';
-import { WORKER } from '../config/constants.js';
+import { WORKER, PIPELINE } from '../config/constants.js';
 import { getChannel } from '../config/channels.js';
+import { planShortsDerivatives } from '../publish/repurpose.js';
 import type { JobRow, StageResult } from './stages/types.js';
 
 export type { JobRow };
@@ -84,10 +85,11 @@ async function onJobSuccess(db: Database.Database, job: JobRow, result: StageRes
 
   db.prepare(
     `INSERT INTO review_item (job_id, channel_id, kind, status, preview_path, thumbnail_path, proposed_title, proposed_description, proposed_tags_json, metadata_context_json)
-     VALUES (?, ?, 'primary', 'pending_review', ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, 'pending_review', ?, ?, ?, ?, ?, ?)`,
   ).run(
     job.id,
     job.channel_id,
+    job.template === 'ShortsDerivative' ? 'shorts_derivative' : 'primary',
     result.previewPath,
     result.thumbnailPath ?? null,
     result.proposedTitle,
@@ -142,7 +144,8 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
     let result: StageResult;
 
     switch (job.template) {
-      case 'HotelTour': {
+      case 'HotelTourLandscape':
+      case 'HotelTourVertical': {
         const { runHotelTourJob } = await import('./stages/hotelTour.js');
         result = await runHotelTourJob(db, job, channel);
         break;
@@ -157,6 +160,11 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
         result = await runStoryNarrativeJob(db, job, channel);
         break;
       }
+      case 'ShortsDerivative': {
+        const { runShortsDerivativeJob } = await import('./stages/shortsDerivative.js');
+        result = await runShortsDerivativeJob(db, job, channel);
+        break;
+      }
       default:
         throw new Error(`Bilinmeyen şablon: ${job.template}`);
     }
@@ -164,6 +172,104 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
     await onJobSuccess(db, job, result);
   } catch (err) {
     await onJobFailure(db, job, err);
+  }
+}
+
+const LONG_VIDEO_TEMPLATES = new Set(['HotelTourLandscape', 'StoryNarrative']);
+
+interface PublishedLongVideoRow {
+  job_id: number;
+  channel_id: string;
+  template: string;
+  metadata_context_json: string;
+  output_path: string;
+  video_id: string;
+  publish_at: string;
+}
+
+/**
+ * Yayınlanmış (job.status='done') uzun videolardan, henüz Shorts türevi
+ * planlanmamış olanlar için repurpose.ts'i çağırıp `count` kadar kesit
+ * planlar ve her biri için yeni bir job + shorts_derivative satırı açar.
+ * shorts_derivative(parent_job_id, slot_index) UNIQUE kısıtı aynı kesidin
+ * iki kez üretilmesini DB seviyesinde engeller - bu fonksiyon idempotenttir.
+ */
+async function planPendingRepurposing(db: Database.Database): Promise<void> {
+  const rows = db
+    .prepare(
+      `SELECT j.id AS job_id, j.channel_id, j.template, r.metadata_context_json,
+              ren.output_path, u.video_id, u.publish_at
+       FROM job j
+       JOIN review_item r ON r.job_id = j.id AND r.status = 'approved'
+       JOIN render ren ON ren.job_id = j.id AND ren.status = 'done'
+       JOIN upload u ON u.job_id = j.id AND u.status IN ('scheduled', 'published')
+       WHERE j.status = 'done'
+         AND NOT EXISTS (SELECT 1 FROM shorts_derivative sd WHERE sd.parent_job_id = j.id)`,
+    )
+    .all() as PublishedLongVideoRow[];
+
+  const eligible = rows.filter((row) => LONG_VIDEO_TEMPLATES.has(row.template));
+  if (eligible.length === 0) return;
+
+  for (const row of eligible) {
+    let channel;
+    try {
+      channel = getChannel(row.channel_id);
+    } catch {
+      continue;
+    }
+
+    if (!channel.settings.shortsDerivativeEnabled || channel.shortsDerivativeCount <= 0) continue;
+
+    const count = Math.min(channel.shortsDerivativeCount, PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS.length);
+    const context = JSON.parse(row.metadata_context_json) as { subject: string; highlights: string[]; durationSec: number };
+    const longVideoUrl = `https://youtu.be/${row.video_id}`;
+
+    Logger.info(`[repurpose] ${channel.label}: iş #${row.job_id} için ${count} Shorts kesiti planlanıyor`);
+
+    try {
+      const plans = await planShortsDerivatives(context.subject, context.highlights, context.durationSec, count);
+      const parentPublishAt = new Date(row.publish_at);
+
+      const insertJob = db.prepare(
+        `INSERT INTO job (channel_id, template, source_ref, target_dur_sec, status, input_json, target_publish_at)
+         VALUES (?, 'ShortsDerivative', ?, ?, 'pending', ?, ?)`,
+      );
+      const insertDerivative = db.prepare(
+        `INSERT INTO shorts_derivative (parent_job_id, child_job_id, start_sec, end_sec, slot_index) VALUES (?, ?, ?, ?, ?)`,
+      );
+
+      const tx = db.transaction(() => {
+        plans.forEach((plan, index) => {
+          const offsetDays = PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS[index] ?? 1;
+          const targetPublishAt = new Date(parentPublishAt.getTime() + offsetDays * 24 * 60 * 60 * 1000);
+
+          const inputJson = JSON.stringify({
+            parentVideoPath: row.output_path,
+            startSec: plan.startSec,
+            endSec: plan.endSec,
+            hook: plan.hook,
+            derivativeTitle: plan.title,
+            longVideoUrl,
+          });
+
+          const jobResult = insertJob.run(
+            channel.id,
+            row.output_path,
+            Math.round(plan.endSec - plan.startSec),
+            inputJson,
+            targetPublishAt.toISOString(),
+          );
+
+          insertDerivative.run(row.job_id, Number(jobResult.lastInsertRowid), plan.startSec, plan.endSec, index);
+        });
+      });
+      tx();
+
+      Logger.success(`[repurpose] ${channel.label}: ${plans.length} Shorts işi kuyruğa eklendi (iş #${row.job_id})`);
+    } catch (error) {
+      Logger.warn(`[repurpose] ${channel.label}: iş #${row.job_id} için planlama başarısız, sonraki turda tekrar denenecek`, error);
+    }
   }
 }
 
@@ -185,6 +291,10 @@ async function processQueue(): Promise<void> {
 
       await dispatchJob(db, job);
     }
+
+    // Adım 3: Yayınlanmış uzun videolardan otomatik Shorts türetme planla
+    // (kullanıcı isteği: kanala trafik çekmek için belirli aralıklarla otomatik).
+    await planPendingRepurposing(db);
 
     Logger.info('Worker turu tamamlandı');
   } catch (err) {
