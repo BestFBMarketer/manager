@@ -17,36 +17,26 @@ import { parseGoproTelemetry } from '../../telemetry/goproGpmf.js';
 import { planSpeed } from '../../edit/speedPlanner.js';
 import { applySpeedPlan } from '../../edit/applySpeedPlan.js';
 import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
-import { planMusicSegments } from '../../music/segmentPlanner.js';
+import { planMusicSegments, type MusicSegment } from '../../music/segmentPlanner.js';
 import { selectTracksForSegments } from '../../music/selector.js';
-import { mixAudio } from '../../edit/audioMix.js';
+import { loadMusicLibrary } from '../../music/library.js';
+import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
+import type { SpeedPlan } from '../../edit/speedPlanner.js';
 import { buildPoiCues } from '../../poi/poiTimeline.js';
 import { writeVideoMetadata } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
-
-interface JobRow {
-  id: number;
-  channel_id: string;
-  template: string;
-  source_ref: string;
-  status: string;
-  stage: string;
-  error: string | null;
-  created_at: string;
-  updated_at: string;
-  claimed_at: string | null;
-  batch_id?: string;
-}
+import type { JobRow, StageResult } from './types.js';
 
 /**
  * Drone video → render aşaması. Tüm bağımlı modülleri zincirler:
  * telemetri → kurgu → müzik → seslendirme → veri kartları → Remotion render.
+ * @returns Onay kuyruğuna yazılacak önerilen metadata + önizleme yolu
  */
 export async function runHotelTourJob(
   db: Database.Database,
   job: JobRow,
   channel: ChannelConfig,
-): Promise<void> {
+): Promise<StageResult> {
   const jobId = job.id;
   const workDir = `data/work/${jobId}`;
   const videoPath = job.source_ref;
@@ -57,7 +47,7 @@ export async function runHotelTourJob(
     // 1. Probe videoyu
     Logger.debug(`[job ${jobId}] Video probelanıyor`);
     const info = await probe(videoPath);
-    const sourceDurationSec = info.duration;
+    const sourceDurationSec = info.durationSec;
 
     // 2. Telemetri arayışı (SRT varsa DJI, yoksa GoPro, yoksa fallback)
     let telemetry: any = null;
@@ -81,7 +71,7 @@ export async function runHotelTourJob(
 
     // 3. Hız planlama (telemetri varsa, yoksa minimum kurgu)
     Logger.debug(`[job ${jobId}] Hız planı oluşturuluyor`);
-    const speedPlan = telemetry
+    const speedPlan: SpeedPlan = telemetry
       ? planSpeed(telemetry, sourceDurationSec, { targetDurationSec: channel.targetDurationSec })
       : {
           segments: [
@@ -122,18 +112,33 @@ export async function runHotelTourJob(
 
     // 6. Müzik planlama
     Logger.debug(`[job ${jobId}] Müzik segmentleri planlanıyor`);
-    const musicSegments = telemetry
+    const musicSegments: MusicSegment[] = telemetry
       ? planMusicSegments(telemetry, speedPlan.outputDurationSec, 'dji')
-      : [{ startSec: 0, endSec: speedPlan.outputDurationSec, energy: 'medium', avgSpeedMps: 0, avgAltM: 0, suggestedMoods: ['cinematic'] }];
+      : [
+          {
+            startSec: 0,
+            endSec: speedPlan.outputDurationSec,
+            energy: 'medium',
+            avgSpeedMps: 0,
+            avgAltM: 0,
+            suggestedMoods: ['cinematic'],
+          },
+        ];
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('music_planned', jobId);
 
     // 7. Müzik seçimi
     Logger.debug(`[job ${jobId}] Müzik parçaları seçiliyor`);
-    const musicPlacements = await selectTracksForSegments(musicSegments, {
-      hour: new Date().getHours(),
+    const musicLibrary = await loadMusicLibrary();
+    const selectedTracks = selectTracksForSegments(musicLibrary, musicSegments, {
       theme: 'otel',
+      hourOfDay: new Date().getHours(),
     });
+    const musicPlacements: MusicPlacement[] = selectedTracks.map((entry) => ({
+      trackPath: entry.track.filePath,
+      startSec: entry.startSec,
+      endSec: entry.endSec,
+    }));
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('music_selected', jobId);
 
@@ -143,7 +148,6 @@ export async function runHotelTourJob(
     const voicePath = join(workDir, `voice_${jobId}.wav`);
     await synthesizeSpeech({
       text: narrativeText,
-      language: channel.language,
       voiceRef: defaultVoiceRef(),
       outputPath: voicePath,
     });
@@ -197,6 +201,13 @@ export async function runHotelTourJob(
     ).run(jobId, 'HotelTour', renderResult.outputPath, 'done', renderResult.durationMs);
 
     Logger.success(`[job ${jobId}] HotelTour tamamlandı (${(renderResult.durationMs / 1000).toFixed(1)}s)`);
+
+    return {
+      previewPath: renderResult.outputPath,
+      proposedTitle: metadata.title,
+      proposedDescription: metadata.description,
+      proposedTags: metadata.tags,
+    };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     Logger.error(`[job ${jobId}] HotelTour başarısız`, error);
