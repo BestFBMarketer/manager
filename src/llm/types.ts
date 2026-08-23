@@ -12,7 +12,9 @@ export type LlmTask =
   | 'metadata'
   | 'highlight'
   | 'viralHook'
-  | 'shortsPlan';
+  | 'shortsPlan'
+  | 'factBrief'
+  | 'narrativeScript';
 
 export interface LlmRequest {
   task: LlmTask;

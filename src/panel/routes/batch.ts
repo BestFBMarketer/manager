@@ -11,6 +11,7 @@ import { Router, type Request, type Response } from 'express';
 import { getDb } from '../../core/db.js';
 import { Logger } from '../../core/logger.js';
 import { getChannel } from '../../config/channels.js';
+import { discoverNextTopics } from '../../story/topicDiscovery.js';
 
 /** Gercek Remotion kompozisyon id'leri (remotion/Root.tsx) - hatali sablon adiyla is acilmasin. */
 const VALID_TEMPLATES = new Set(['FunnyRanking', 'HotelTourLandscape', 'HotelTourVertical', 'StoryNarrative']);
@@ -48,19 +49,30 @@ export function batchRouter(): Router {
 
     let items = req.body?.items as BatchItem[] | undefined;
 
-    // story kanali + topic_source reference/both/ai_generated ise items opsiyonel olacak
-    // (M5'in topicDiscovery.ts'i kaynak secer) - o modul henuz yazilmadigi icin simdilik
-    // net bir hata donuyoruz, "sessizce uydurma" yapmiyoruz (Rule 11).
+    // story kanali + items verilmemisse topicDiscovery referans kataloglarindan
+    // secim yapar (topic_source='ai_generated' henuz kapsanmiyor - o, referans
+    // kanal olmadan LLM'in kendi konu listesini urettigi ayri bir yol, M5'in
+    // sonraki bir adimi). Sadece 'reference'/'both' + story_reference satiri
+    // varsa otomatik secim calisir; yoksa net hata (Rule 11).
     if (!items) {
-      if (channel.channelType === 'story') {
-        res.status(501).json({
-          error:
-            'Bu kanal icin otomatik konu kesfi (topicDiscovery) henuz uygulanmadi - simdilik items listesini elle verin',
-        });
+      if (channel.channelType !== 'story') {
+        res.status(400).json({ error: 'items zorunlu (her biri {sourceRef}) - kaynak uydurulmaz' });
         return;
       }
-      res.status(400).json({ error: 'items zorunlu (her biri {sourceRef}) - kaynak uydurulmaz' });
-      return;
+      try {
+        const topics = await discoverNextTopics(channel, count);
+        if (topics.length < count) {
+          res.status(409).json({
+            error: `sadece ${topics.length}/${count} yeni konu bulundu (referans kanal kataloğu tükendi veya hepsi zaten uyarlanmış)`,
+          });
+          return;
+        }
+        items = topics.map((t) => ({ sourceRef: t.sourceRef }));
+      } catch (error) {
+        Logger.error('Otomatik konu keşfi başarısız', error);
+        res.status(400).json({ error: error instanceof Error ? error.message : 'konu keşfi başarısız' });
+        return;
+      }
     }
 
     if (!Array.isArray(items) || items.length !== count || !items.every((i) => typeof i?.sourceRef === 'string' && i.sourceRef.trim())) {
