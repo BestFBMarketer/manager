@@ -12,6 +12,7 @@ import { FunnyRanking, rankingDurationInFrames, type FunnyRankingProps } from '.
 import { HotelTour, type HotelTourProps } from './compositions/HotelTour';
 import { StoryNarrative, storyNarrativeDurationInFrames, type StoryNarrativeProps } from './compositions/StoryNarrative';
 import { Thumbnail, type ThumbnailProps } from './compositions/Thumbnail';
+import { ShortsDerivative, shortsDerivativeDurationInFrames, type ShortsDerivativeProps } from './compositions/ShortsDerivative';
 
 const FPS = 30;
 const VERTICAL = { width: 1080, height: 1920 };
@@ -41,6 +42,15 @@ const STORY_DEFAULTS: StoryNarrativeProps = {
   ],
   channelHandle: '@bestmarketer',
   titleDurationSec: 3,
+};
+
+const SHORTS_DERIVATIVE_DEFAULTS: ShortsDerivativeProps = {
+  videoSrc: '',
+  durationSec: 30,
+  hookText: 'Bunu kaçırmayın',
+  hookDurationSec: 2,
+  channelHandle: '@bestmarketer',
+  ctaText: 'Tamamı kanalda',
 };
 
 const TOUR_DEFAULTS: HotelTourProps = {
@@ -98,6 +108,18 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={storyNarrativeDurationInFrames(STORY_DEFAULTS, FPS)}
         calculateMetadata={({ props }) => ({
           durationInFrames: storyNarrativeDurationInFrames(props, FPS),
+        })}
+      />
+
+      <Composition
+        id="ShortsDerivative"
+        component={ShortsDerivative}
+        defaultProps={SHORTS_DERIVATIVE_DEFAULTS}
+        fps={FPS}
+        {...VERTICAL}
+        durationInFrames={shortsDerivativeDurationInFrames(SHORTS_DERIVATIVE_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: shortsDerivativeDurationInFrames(props, FPS),
         })}
       />
 
