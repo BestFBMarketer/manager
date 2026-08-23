@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, ApiError, type ChannelConfig, type ScheduleRuleInput } from '../lib/api.js';
 import ScheduleRuleEditor from '../components/ScheduleRuleEditor.js';
+import StoryReferences from '../components/StoryReferences.js';
 
 function toRuleInput(channel: ChannelConfig): ScheduleRuleInput {
   const rule = channel.scheduleRule;
@@ -49,6 +50,7 @@ export default function ChannelEdit() {
         label: channel.label,
         audience: channel.audience,
         styleReference: channel.styleReference,
+        niche: channel.niche,
         topicSource: channel.topicSource,
         targetDurationSec: channel.targetDurationSec,
         language: channel.language,
@@ -132,6 +134,20 @@ export default function ChannelEdit() {
           />
         </div>
 
+        <div className="field">
+          <label>Niş / kategori</label>
+          <input
+            placeholder="Ör. Paranormal, Ekonomi, Gezi, Komedi"
+            value={channel.niche ?? ''}
+            onChange={(e) => setChannel({ ...channel, niche: e.target.value || null })}
+          />
+          {channel.channelType === 'story' && !channel.niche && (
+            <p className="muted" style={{ marginTop: 4 }}>
+              Boş bırakılırsa ilk referans kanal eklendiğinde otomatik doldurulabilir (M5).
+            </p>
+          )}
+        </div>
+
         {channel.channelType === 'story' && (
           <>
             <div className="field">
@@ -185,7 +201,7 @@ export default function ChannelEdit() {
         </div>
 
         <div className="field">
-          <label>Capraz platform (sadece veri modeli - gercek entegrasyon yok)</label>
+          <label>Capraz platform (Instagram/TikTok baglantisi ayri "Baglantilar" bolumunden yapilir)</label>
           <div className="row">
             {(['facebook', 'instagram', 'tiktok'] as const).map((platform) => (
               <label key={platform} className="row" style={{ gap: 6, marginBottom: 0 }}>
@@ -217,6 +233,10 @@ export default function ChannelEdit() {
           {savingSchedule ? 'kaydediliyor...' : 'Zamanlamayi kaydet'}
         </button>
       </div>
+
+      {channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
+        <StoryReferences channelId={id} />
+      )}
 
       {error && <p className="error-text">{error}</p>}
       {savedAt && <p className="muted">kaydedildi</p>}

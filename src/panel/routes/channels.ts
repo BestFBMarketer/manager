@@ -119,6 +119,7 @@ interface ChannelInput {
   audience?: string;
   titleExamples?: string[];
   styleReference?: string | null;
+  niche?: string | null;
   topicSource?: TopicSource;
   shortsDerivativeCount?: number;
   categoryId: string;
@@ -156,6 +157,7 @@ function validateChannelInput(body: unknown): ChannelInput | { error: string } {
     audience: typeof c.audience === 'string' ? c.audience : '',
     titleExamples: Array.isArray(c.titleExamples) ? c.titleExamples : [],
     styleReference: typeof c.styleReference === 'string' ? c.styleReference : null,
+    niche: typeof c.niche === 'string' ? c.niche : null,
     topicSource: c.topicSource === 'ai_generated' || c.topicSource === 'both' ? c.topicSource : 'reference',
     shortsDerivativeCount: typeof c.shortsDerivativeCount === 'number' ? c.shortsDerivativeCount : 0,
     categoryId: c.categoryId,
@@ -201,9 +203,9 @@ export function channelsRouter(): Router {
           `INSERT INTO channel (
              id, label, channel_type, refresh_token_env_key, default_template,
              target_duration_sec, language, wiki_languages_json, audience,
-             title_examples_json, style_reference, topic_source,
+             title_examples_json, style_reference, niche, topic_source,
              shorts_derivative_count, category_id, settings_json
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         ).run(
           input.id,
           input.label,
@@ -216,6 +218,7 @@ export function channelsRouter(): Router {
           input.audience,
           JSON.stringify(input.titleExamples),
           input.styleReference,
+          input.niche,
           input.topicSource,
           input.shortsDerivativeCount,
           input.categoryId,
@@ -268,6 +271,9 @@ export function channelsRouter(): Router {
     if (typeof body.audience === 'string') fields.push({ column: 'audience', value: body.audience });
     if (typeof body.styleReference === 'string' || body.styleReference === null) {
       fields.push({ column: 'style_reference', value: body.styleReference });
+    }
+    if (typeof body.niche === 'string' || body.niche === null) {
+      fields.push({ column: 'niche', value: body.niche });
     }
     if (body.topicSource === 'reference' || body.topicSource === 'ai_generated' || body.topicSource === 'both') {
       fields.push({ column: 'topic_source', value: body.topicSource });

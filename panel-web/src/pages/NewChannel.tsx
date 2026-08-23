@@ -16,12 +16,13 @@ export default function NewChannel() {
     label: '',
     channelType: 'standard' as 'standard' | 'story',
     refreshTokenEnvKey: '',
-    defaultTemplate: 'FunnyShort',
+    defaultTemplate: 'FunnyRanking',
     targetDurationSec: 60,
     language: 'de',
     categoryId: '24',
     topicSource: 'reference' as NewChannelInput['topicSource'],
     styleReference: '',
+    niche: '',
   });
   const [rule, setRule] = useState<ScheduleRuleInput>(DEFAULT_RULE);
   const [error, setError] = useState<string | null>(null);
@@ -75,8 +76,22 @@ export default function NewChannel() {
           </div>
           <div className="field" style={{ flex: 1 }}>
             <label>Sablon</label>
-            <input value={form.defaultTemplate} onChange={(e) => setForm({ ...form, defaultTemplate: e.target.value })} />
+            <select value={form.defaultTemplate} onChange={(e) => setForm({ ...form, defaultTemplate: e.target.value })}>
+              <option value="FunnyRanking">FunnyRanking (komik/ranking Shorts)</option>
+              <option value="HotelTourLandscape">HotelTourLandscape (gezi - uzun/yatay)</option>
+              <option value="HotelTourVertical">HotelTourVertical (gezi - dikey Shorts)</option>
+              <option value="StoryNarrative">StoryNarrative (hikaye anlatimi)</option>
+            </select>
           </div>
+        </div>
+
+        <div className="field">
+          <label>Niş / kategori</label>
+          <input
+            placeholder="Ör. Paranormal, Ekonomi, Gezi, Komedi"
+            value={form.niche}
+            onChange={(e) => setForm({ ...form, niche: e.target.value })}
+          />
         </div>
 
         {form.channelType === 'story' && (
