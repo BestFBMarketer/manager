@@ -4,6 +4,7 @@ import { api, ApiError, type ChannelConfig, type ScheduleRuleInput } from '../li
 import ScheduleRuleEditor from '../components/ScheduleRuleEditor.js';
 import StoryReferences from '../components/StoryReferences.js';
 import BatchProducer from '../components/BatchProducer.js';
+import Connections from '../components/Connections.js';
 
 function toRuleInput(channel: ChannelConfig): ScheduleRuleInput {
   const rule = channel.scheduleRule;
@@ -201,26 +202,6 @@ export default function ChannelEdit() {
           </label>
         </div>
 
-        <div className="field">
-          <label>Capraz platform (Instagram/TikTok baglantisi ayri "Baglantilar" bolumunden yapilir)</label>
-          <div className="row">
-            {(['facebook', 'instagram', 'tiktok'] as const).map((platform) => (
-              <label key={platform} className="row" style={{ gap: 6, marginBottom: 0 }}>
-                <input
-                  type="checkbox"
-                  checked={channel.settings.crossPost[platform]}
-                  onChange={(e) =>
-                    setChannel({
-                      ...channel,
-                      settings: { ...channel.settings, crossPost: { ...channel.settings.crossPost, [platform]: e.target.checked } },
-                    })
-                  }
-                />
-                {platform}
-              </label>
-            ))}
-          </div>
-        </div>
 
         <button type="button" onClick={saveFields} disabled={savingFields}>
           {savingFields ? 'kaydediliyor...' : 'Genel ayarlari kaydet'}
@@ -238,6 +219,8 @@ export default function ChannelEdit() {
       {channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
         <StoryReferences channelId={id} />
       )}
+
+      <Connections channelId={id} />
 
       <BatchProducer channel={channel} />
 

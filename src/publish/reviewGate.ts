@@ -14,6 +14,7 @@ import type { UploadResult } from './uploader.js';
 import { writeVideoMetadata } from '../analysis/channelWriter.js';
 import { probe } from '../ingest/probe.js';
 import { generateThumbnail } from '../render/thumbnail.js';
+import { crossPostToConnectedPlatforms } from './crossPost.js';
 
 export interface ReviewItemRow {
   id: number;
@@ -122,6 +123,21 @@ export async function approveReviewItem(reviewItemId: number, decidedBy: string)
   db.prepare(
     "UPDATE review_item SET status='approved', decided_by=?, decided_at=datetime('now') WHERE id=?",
   ).run(decidedBy, reviewItemId);
+
+  // Baglanti kurulmus Instagram/TikTok hesaplarina da yayinlar - basarisizlik
+  // YouTube yuklemesini geri almaz, sadece o platform icin loglanir.
+  const crossPostResults = await crossPostToConnectedPlatforms(
+    item.channel_id,
+    item.job_id,
+    render.output_path,
+    item.proposed_title,
+    item.proposed_description,
+  );
+  if (crossPostResults.length > 0) {
+    Logger.info(
+      `[review ${reviewItemId}] Çapraz yayın: ${crossPostResults.map((r) => `${r.platform}=${r.ok ? 'ok' : 'hata'}`).join(', ')}`,
+    );
+  }
 
   Logger.success(`[review ${reviewItemId}] Onaylandı ve yayına planlandı (${decidedBy})`);
   return result;

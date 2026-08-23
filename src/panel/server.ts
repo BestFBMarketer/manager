@@ -21,7 +21,9 @@ import { channelsRouter } from './routes/channels.js';
 import { reviewRouter } from './routes/review.js';
 import { storyReferencesRouter } from './routes/storyReferences.js';
 import { batchRouter } from './routes/batch.js';
+import { publishTargetsRouter } from './routes/publishTargets.js';
 import { SqliteSessionStore } from './sessionStore.js';
+import { PUBLIC_MEDIA_DIR } from '../publish/publicMediaHost.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIST = join(__dirname, '../../panel-web/dist');
@@ -49,11 +51,17 @@ function createApp(): express.Express {
     }),
   );
 
+  // Meta/TikTok'un sunucuları bu dosyaları kimlik doğrulama YAPAMADAN çeker
+  // (video_url akışı) - bu yüzden requireAuth'un dışında, tahmin edilemez
+  // UUID dosya adlarıyla ve kısa ömürlü olarak sunulur (bkz. publicMediaHost.ts).
+  app.use('/public-media', express.static(PUBLIC_MEDIA_DIR));
+
   app.use('/api', authRouter());
   app.use('/api', requireAuth, channelsRouter());
   app.use('/api', requireAuth, reviewRouter());
   app.use('/api', requireAuth, storyReferencesRouter());
   app.use('/api', requireAuth, batchRouter());
+  app.use('/api', requireAuth, publishTargetsRouter());
 
   if (existsSync(FRONTEND_DIST)) {
     app.use(express.static(FRONTEND_DIST));
