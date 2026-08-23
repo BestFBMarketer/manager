@@ -452,28 +452,37 @@ eklenirse **8 vCPU / 16 GB RAM** onerilir.
 
 ## Yol haritasi
 
-- [x] M0 — iskelet, config, logger, SQLite semasi, LLM router
-- [x] EK2/M0 — kanal config'i DB'ye tasindi (`channel`/`schedule_rule`), haftaici yayin hatasi duzeltildi
-- [x] EK2/M1 — admin panel iskeleti (giris, kanal CRUD, zamanlama editoru, gercek yayin takvimi)
-- [x] M1 — ingest (probe) + edit (kesim, 9:16 cerceve, loudnorm)
-- [x] M6a — DJI SRT telemetri ayristirici + konum enterpolasyonu
-- [x] M6c — GoPro GPMF telemetri + drone/GoPro GPS-zaman eslestirme
-- [x] M10a — seslendirme adaptoru (Voicebox → Piper) + ranking planlayici
-- [x] M11 — POI kesfi (Overpass + Vikipedi) ve ucusa senkron kart zamanlamasi
-- [x] M12 — soundtrack secimi (tema/saat/sure) + ducking'li ses miksaji
-- [x] M12b — ucusa gore bolumlenmis coklu soundtrack ve gecisler
-- [x] M13 — manuel eslestirme ve stok goruntu override'i
-- [x] M14 — akilli hiz optimizasyonu, zaman haritasi ve FFmpeg uygulamasi
-- [x] M15 — ucus kumeleme, bakis acisi olcumu, gunduz-gece eslestirme ve gecisler
-- [x] M4 — YouTube OAuth kurulumu, resumable upload, publishAt zamanlama, DB kuyruk
-- [ ] M2 — Whisper transkript + highlight secimi
-- [x] M3 — Remotion kompozisyonlari (FunnyRanking, HotelTour, POI kartlari)
-- [ ] M4 — YouTube OAuth + `publishAt` ile zamanlanmis yukleme
-- [ ] M5 — kesif + Telegram onay + cron
-- [ ] M6b — otel veri saglayici zinciri (Places → scraper → elle)
-- [ ] M7 — MapLibre harita katmani (alpha kanalli on-render)
-- [ ] M8 — `HotelTour` yatay + dikey ciktilar
-- [ ] M9 — CapCut draft disa aktarici
+Alt yapi tasi olarak kullanilan modul-duzeyi calisma (telemetri, kurgu, muzik, POI,
+seslendirme, Remotion kompozisyonlari, YouTube OAuth/upload) M0-M1 kapsaminda erken
+tamamlandi. Sonraki milestone'lar bunlari bir orkestratorde birlestirdi:
+
+- [x] **M0** — SQLite semasi, kanal config'i DB'ye tasindi (`channel`/`schedule_rule`),
+      zamanlama motoru (haftaici/N gunde bir/M ayda N video), LLM router (ucretsiz katman once)
+- [x] **M1** — admin panel (giris, kanal CRUD, zamanlama editoru, gercek yayin takvimi) +
+      cekirdek video araclari (ingest/probe, kesim+9:16 cerceve, telemetri ayristirma,
+      hiz optimizasyonu, POI kesfi, muzik secimi+miksaj, seslendirme, YouTube upload)
+- [x] **M2** — worker/orkestrator: atomik is kapma, crash recovery (stale-claim sweep),
+      `HotelTour` uctan uca render zinciri, e-posta bildirimleri
+- [x] **M3** — onay kuyrugu: `review_item`, panel onay ekrani (video/thumbnail onizleme,
+      duzenle, onayla/reddet/degisiklik-gerekli/yeniden-olustur), story_reference yonetimi
+- [x] **M4** — stok uretim: panelden N video icin toplu is acma, ilerleme takibi
+- [x] **M5** — hikaye kanali icerik hatti: transkript → olgu ozeti → yeni senaryo (iki
+      asamali ozgunlestirme) → sahne bazli gorsel kaynaklama (Pexels video/foto) → render;
+      referans kanal kataloglarindan otomatik konu kesfi (YouTube Data API)
+- [x] **M6** — gercek Instagram Reels + TikTok yayin adaptorleri (Facebook stub kaldi -
+      istenmedi), otel veri saglayici zinciri (Google Places → HolidayCheck → Booking → elle)
+- [x] **Ek ozellikler** — otomatik thumbnail uretimi (video karesi + Remotion still),
+      uzun videodan otomatik Shorts turetme (belirli araliklarla, kanala trafik cekmek icin),
+      niche alani (panelden ayarlanabilir/referans kanaldan devralinabilir), pm2/systemd
+      isletim yapilandirmasi, otomatik SQLite yedekleme, `/api/health`
+
+**Bilinen bosluklar** (kod degil, kapsam disi birakildi):
+- FunnyRanking (komik Shorts) kanalinin kaynak kesfi (discovery/curation) hic yazilmadi -
+  bu kanal turu icin kaynagin nereden gelecegi ayri, isimlendirilmemis bir is
+- Facebook Page yayini - veri modeli hazir (`publish_target`), gercek adapter kodu yok
+- TikTok yuklemesi tek parcayla sinirli (64MB) - cok parcali yukleme eklenmedi
+- Capraz platform (MapLibre harita katmani, CapCut draft disa aktarici) orijinal planda
+  vardi ama kullanici gereksinimleri bu yone hic gitmedi, uygulanmadi
 
 ---
 
