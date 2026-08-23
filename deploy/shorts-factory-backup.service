@@ -1,0 +1,10 @@
+[Unit]
+Description=shorts-factory SQLite yedegi
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/shorts-factory
+ExecStart=/usr/bin/npx tsx scripts/backupDb.ts
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/shorts-factory/.env

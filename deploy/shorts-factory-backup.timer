@@ -1,0 +1,10 @@
+[Unit]
+Description=shorts-factory SQLite yedegini gunde bir kere alir
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+AccuracySec=1h
+
+[Install]
+WantedBy=timers.target

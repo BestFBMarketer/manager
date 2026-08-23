@@ -51,6 +51,21 @@ function createApp(): express.Express {
     }),
   );
 
+  // Kimlik dogrulama gerektirmez - UptimeRobot vb. dis izleme araclari icin.
+  // DB'ye gercekten erisilebildigini de dogrular, sadece process ayakta mi degil.
+  app.get('/api/health', (_req: Request, res: Response) => {
+    try {
+      const db = getDb();
+      const row = db.prepare('SELECT MAX(updated_at) AS lastJobActivity FROM job').get() as
+        | { lastJobActivity: string | null }
+        | undefined;
+      res.json({ ok: true, dbOk: true, lastJobActivity: row?.lastJobActivity ?? null });
+    } catch (error) {
+      Logger.error('Health check basarisiz - DB erisilemez', error);
+      res.status(503).json({ ok: false, dbOk: false });
+    }
+  });
+
   // Meta/TikTok'un sunucuları bu dosyaları kimlik doğrulama YAPAMADAN çeker
   // (video_url akışı) - bu yüzden requireAuth'un dışında, tahmin edilemez
   // UUID dosya adlarıyla ve kısa ömürlü olarak sunulur (bkz. publicMediaHost.ts).

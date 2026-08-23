@@ -1,0 +1,16 @@
+[Unit]
+Description=shorts-factory panel API + arayuz
+After=network.target
+
+[Service]
+Type=simple
+# Kurulum yolunu kendi VPS'ine gore degistir.
+WorkingDirectory=/opt/shorts-factory
+ExecStart=/usr/bin/npx tsx src/panel/server.ts
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/shorts-factory/.env
+
+[Install]
+WantedBy=multi-user.target
