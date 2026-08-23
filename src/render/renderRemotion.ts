@@ -8,7 +8,7 @@
 
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
-import { PIPELINE } from '../config/constants.js';
+import { TIMEOUTS } from '../config/constants.js';
 
 export interface RenderProps {
   [key: string]: unknown;
@@ -51,7 +51,7 @@ export async function renderRemotion(
         '--props=' + Buffer.from(propsJson).toString('base64'),
         '--concurrency=1',
       ],
-      PIPELINE.RENDER_TIMEOUT_MS,
+      TIMEOUTS.RENDER_MS,
     );
 
     const durationMs = Date.now() - startMs;

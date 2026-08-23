@@ -12,20 +12,9 @@ import { Logger } from '../core/logger.js';
 import { notifyEmail } from '../core/notify.js';
 import { WORKER } from '../config/constants.js';
 import { getChannel } from '../config/channels.js';
+import type { JobRow, StageResult } from './stages/types.js';
 
-interface JobRow {
-  id: number;
-  channel_id: string;
-  template: string;
-  source_ref: string;
-  status: string;
-  stage: string;
-  error: string | null;
-  created_at: string;
-  updated_at: string;
-  claimed_at: string | null;
-  batch_id?: string;
-}
+export type { JobRow };
 
 /**
  * İşin ortasında ölmüş worker'ları kurtarmak için: 30+ dakika önce claimed ama
@@ -77,21 +66,37 @@ function claimNextJob(db: Database.Database): JobRow | null {
 }
 
 /**
- * İş başarıyla tamamlandı: render satırı ve review_item yazılmış, job.stage='awaiting_review'.
- * E-posta bildirimi gönder (M3 onayı bekleniyor).
+ * İş başarıyla tamamlandı: render zaten stage fonksiyonu içinde `render` tablosuna
+ * yazıldı. Burada `review_item` satırı yazılır (EK5 - onay anında LLM tekrar
+ * çalışmasın diye önerilen metadata burada kalıcı hale gelir) ve job.stage
+ * 'awaiting_review' olur - job.status bilerek 'processing' bırakılır ki
+ * claimNextJob() (WHERE status='pending') bu işi bir daha asla kapmasın,
+ * ve batch-progress bucket sorgusu status+stage kombinasyonuyla ayrıştırabilsin.
  */
-async function onJobSuccess(db: Database.Database, job: JobRow): Promise<void> {
+async function onJobSuccess(db: Database.Database, job: JobRow, result: StageResult): Promise<void> {
   const channel = getChannel(job.channel_id);
 
-  db.prepare('UPDATE job SET status=?, error=NULL, updated_at=datetime(?) WHERE id=?').run(
+  db.prepare('UPDATE job SET stage=?, error=NULL, updated_at=datetime(?) WHERE id=?').run(
     'awaiting_review',
     new Date().toISOString(),
     job.id,
   );
 
+  db.prepare(
+    `INSERT INTO review_item (job_id, channel_id, kind, status, preview_path, proposed_title, proposed_description, proposed_tags_json)
+     VALUES (?, ?, 'primary', 'pending_review', ?, ?, ?, ?)`,
+  ).run(
+    job.id,
+    job.channel_id,
+    result.previewPath,
+    result.proposedTitle,
+    result.proposedDescription,
+    JSON.stringify(result.proposedTags),
+  );
+
   await notifyEmail({
     subject: `Render tamamlandı: ${channel.label}`,
-    body: `İş #${job.id} başarıyla render edildi ve onay kuyruğunda bekleniyor.\nKanal: ${channel.label}\nŞablon: ${job.template}`,
+    body: `İş #${job.id} başarıyla render edildi ve onay kuyruğunda bekleniyor.\nKanal: ${channel.label}\nŞablon: ${job.template}\nBaşlık önerisi: ${result.proposedTitle}`,
     severity: 'info',
   });
 
@@ -132,28 +137,29 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
   Logger.info(`[job ${job.id}] İş dispatch ediliyor (${job.template})`);
 
   try {
+    let result: StageResult;
+
     switch (job.template) {
       case 'HotelTour': {
         const { runHotelTourJob } = await import('./stages/hotelTour.js');
-        await runHotelTourJob(db, job, channel);
-        await onJobSuccess(db, job);
+        result = await runHotelTourJob(db, job, channel);
         break;
       }
       case 'FunnyRanking': {
         const { runFunnyRankingJob } = await import('./stages/funnyRanking.js');
-        await runFunnyRankingJob(db, job, channel);
-        await onJobSuccess(db, job);
+        result = await runFunnyRankingJob(db, job, channel);
         break;
       }
       case 'StoryNarrative': {
         const { runStoryNarrativeJob } = await import('./stages/storyNarrative.js');
-        await runStoryNarrativeJob(db, job, channel);
-        await onJobSuccess(db, job);
+        result = await runStoryNarrativeJob(db, job, channel);
         break;
       }
       default:
         throw new Error(`Bilinmeyen şablon: ${job.template}`);
     }
+
+    await onJobSuccess(db, job, result);
   } catch (err) {
     await onJobFailure(db, job, err);
   }
