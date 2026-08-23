@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, type CalendarItem } from '../lib/api.js';
+import { api, type CalendarItem, type PendingReviewSummary } from '../lib/api.js';
 
 const STATUS_LABEL: Record<string, string> = {
   scheduled: 'planlandi',
@@ -11,16 +11,21 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function Calendar() {
   const { id } = useParams<{ id: string }>();
-  const [items, setItems] = useState<CalendarItem[] | null>(null);
+  const [scheduled, setScheduled] = useState<CalendarItem[] | null>(null);
+  const [pendingReview, setPendingReview] = useState<PendingReviewSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    setItems(null);
+    setScheduled(null);
+    setPendingReview(null);
     setError(null);
     api
       .getCalendar(id)
-      .then((r) => setItems(r.items))
+      .then((r) => {
+        setScheduled(r.scheduled);
+        setPendingReview(r.pendingReview);
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'takvim yuklenemedi'));
   }, [id]);
 
@@ -34,17 +39,44 @@ export default function Calendar() {
           </button>
         </Link>
       </div>
-      <p className="muted">
-        Asagidaki liste DB'de gercekten kayitli olan (planlanmis/yayinlanmis) videolardir - taslak veya projeksiyon degildir.
-        Onay kuyrugu devreye girdiginde ("Tumu onaya dussun"), henuz onaylanmamis videolar burada ayri bir "beklemede"
-        bolumunde gorunecek.
-      </p>
 
       {error && <p className="error-text">{error}</p>}
-      {!items && !error && <p className="muted">yukleniyor...</p>}
-      {items && items.length === 0 && <p className="muted">bu kanal icin planlanmis/yayinlanmis video yok</p>}
 
-      {items && items.length > 0 && (
+      <h3>Onay bekleyen</h3>
+      {!pendingReview && !error && <p className="muted">yukleniyor...</p>}
+      {pendingReview && pendingReview.length === 0 && <p className="muted">onay bekleyen video yok</p>}
+      {pendingReview && pendingReview.length > 0 && (
+        <table>
+          <thead>
+            <tr>
+              <th>Oluşturulma</th>
+              <th>Tür</th>
+              <th>Önerilen başlık</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {pendingReview.map((item) => (
+              <tr key={item.id}>
+                <td>{new Date(item.created_at).toLocaleString()}</td>
+                <td>{item.kind}</td>
+                <td>{item.proposed_title}</td>
+                <td>
+                  <Link to="/review">
+                    <button type="button" className="secondary">onay kuyruğuna git</button>
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h3 style={{ marginTop: 24 }}>Planlanmış / yayınlanmış</h3>
+      {!scheduled && !error && <p className="muted">yukleniyor...</p>}
+      {scheduled && scheduled.length === 0 && <p className="muted">bu kanal icin planlanmis/yayinlanmis video yok</p>}
+
+      {scheduled && scheduled.length > 0 && (
         <table>
           <thead>
             <tr>
@@ -57,7 +89,7 @@ export default function Calendar() {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {scheduled.map((item) => (
               <tr key={item.id}>
                 <td>{new Date(item.publish_at).toLocaleString()}</td>
                 <td>

@@ -373,12 +373,79 @@ export function channelsRouter(): Router {
         )
         .all(req.params.id, from, to);
 
-      // "Gercek planlanmis" ile "onaylaninca olacak" karistirilmasin diye tum satirlar
-      // bugun icin DB'de kayitli, gercek upload satirlaridir - projeksiyon degil.
-      res.json({ kind: 'scheduled', items: rows });
+      // "Gercek planlanmis" ile "onaylaninca olacak" karistirilmasin diye scheduled
+      // satirlari bugun icin DB'de kayitli, gercek upload satirlaridir - projeksiyon
+      // degil. pendingReview ise henuz karar bekleyen, planlanMAmis islerdir - takvim
+      // UI'i ikisini ayri bolumlerde gostersin diye ayri anahtarda doner.
+      const pendingReview = db
+        .prepare(
+          `SELECT id, job_id, kind, preview_path, proposed_title, created_at
+           FROM review_item
+           WHERE channel_id = ? AND status = 'pending_review'
+           ORDER BY created_at ASC`,
+        )
+        .all(req.params.id);
+
+      res.json({ scheduled: rows, pendingReview });
     } catch (error) {
       Logger.error('Takvim okunamadi', error);
       res.status(500).json({ error: 'takvim okunamadi' });
+    }
+  });
+
+  router.get('/batches/:id', (req: Request<{ id: string }>, res: Response) => {
+    try {
+      const db = getDb();
+
+      // Duz GROUP BY status yeterli degil: 'processing' hem "hala render ediliyor"
+      // hem "render bitti, onay bekliyor" durumunu kapsar (job.status kasitli olarak
+      // 'processing' kalir, ayrim job.stage='awaiting_review' ile yapilir - bkz.
+      // worker/runQueue.ts onJobSuccess). Bu yuzden status+stage kombinasyonuyla
+      // bucket'lanir (EK5/KRITIS #2).
+      const rows = db
+        .prepare(
+          `SELECT
+             CASE
+               WHEN status = 'pending' THEN 'pending'
+               WHEN status = 'processing' AND stage = 'awaiting_review' THEN 'awaitingReview'
+               WHEN status = 'processing' THEN 'processing'
+               WHEN status = 'done' THEN 'done'
+               WHEN status = 'failed' THEN 'failed'
+               WHEN status = 'rejected' THEN 'rejected'
+               WHEN status = 'needs_changes' THEN 'needsChanges'
+               ELSE status
+             END AS bucket,
+             COUNT(*) AS count
+           FROM job
+           WHERE batch_id = ?
+           GROUP BY bucket`,
+        )
+        .all(req.params.id) as Array<{ bucket: string; count: number }>;
+
+      if (rows.length === 0) {
+        res.status(404).json({ error: `batch bulunamadi: ${req.params.id}` });
+        return;
+      }
+
+      const buckets: Record<string, number> = {
+        pending: 0,
+        processing: 0,
+        awaitingReview: 0,
+        done: 0,
+        failed: 0,
+        rejected: 0,
+        needsChanges: 0,
+      };
+      let total = 0;
+      for (const row of rows) {
+        buckets[row.bucket] = row.count;
+        total += row.count;
+      }
+
+      res.json({ batchId: req.params.id, total, ...buckets });
+    } catch (error) {
+      Logger.error('Batch ilerlemesi okunamadi', error);
+      res.status(500).json({ error: 'batch ilerlemesi okunamadi' });
     }
   });
 

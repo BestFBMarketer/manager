@@ -18,6 +18,8 @@ import { getDb } from '../core/db.js';
 import { Logger } from '../core/logger.js';
 import { authRouter, requireAuth } from './auth.js';
 import { channelsRouter } from './routes/channels.js';
+import { reviewRouter } from './routes/review.js';
+import { storyReferencesRouter } from './routes/storyReferences.js';
 import { SqliteSessionStore } from './sessionStore.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -48,6 +50,8 @@ function createApp(): express.Express {
 
   app.use('/api', authRouter());
   app.use('/api', requireAuth, channelsRouter());
+  app.use('/api', requireAuth, reviewRouter());
+  app.use('/api', requireAuth, storyReferencesRouter());
 
   if (existsSync(FRONTEND_DIST)) {
     app.use(express.static(FRONTEND_DIST));

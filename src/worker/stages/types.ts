@@ -28,4 +28,15 @@ export interface StageResult {
   proposedTitle: string;
   proposedDescription: string;
   proposedTags: string[];
+  /**
+   * writeVideoMetadata'ya verilen orijinal bağlam (subject/highlights/durationSec).
+   * review_item.metadata_context_json'a yazılır ki "Yeniden Oluştur" butonu aynı
+   * bağlamla LLM'i tekrar çağırabilsin - context olmadan regenerate anlamsız
+   * (jenerik) bir sonuç üretirdi.
+   */
+  metadataContext: {
+    subject: string;
+    highlights: string[];
+    durationSec: number;
+  };
 }
