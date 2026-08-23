@@ -27,6 +27,8 @@ export interface JobRow {
  */
 export interface StageResult {
   previewPath: string;
+  /** Üretilebildiyse - başarısızlık işi düşürmez, YouTube kendi karesini seçer */
+  thumbnailPath?: string;
   proposedTitle: string;
   proposedDescription: string;
   proposedTags: string[];

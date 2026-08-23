@@ -19,6 +19,7 @@ export interface ScheduleInput {
   title: string;
   description: string;
   tags: string[];
+  thumbnailPath?: string;
 }
 
 /**
@@ -61,6 +62,7 @@ export async function scheduleAndUpload(input: ScheduleInput): Promise<UploadRes
     description: input.description,
     tags: input.tags,
     publishAt: slot.publishAt,
+    thumbnailPath: input.thumbnailPath,
   });
 
   db.prepare(

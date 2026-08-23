@@ -23,6 +23,7 @@ import { loadMusicLibrary } from '../../music/library.js';
 import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
 import { writeVideoMetadata } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
+import { generateThumbnail } from '../../render/thumbnail.js';
 import type { MusicSegment, SegmentEnergy } from '../../music/segmentPlanner.js';
 import type { Mood } from '../../music/types.js';
 import type { StoryScene } from '../../../remotion/compositions/StoryNarrative.js';
@@ -212,8 +213,16 @@ export async function runStoryNarrativeJob(
 
     Logger.success(`[job ${jobId}] StoryNarrative tamamlandı: "${script.title}"`);
 
+    let thumbnailPath: string | undefined;
+    try {
+      thumbnailPath = await generateThumbnail(finalOutputPath, totalDurationSec, metadata.thumbnailText, join(workDir, `thumbnail_${jobId}.jpg`));
+    } catch {
+      Logger.warn(`[job ${jobId}] Thumbnail üretilemedi, video kapak resmi olmadan onaya düşecek`);
+    }
+
     return {
       previewPath: finalOutputPath,
+      thumbnailPath,
       proposedTitle: metadata.title,
       proposedDescription: metadata.description,
       proposedTags: metadata.tags,

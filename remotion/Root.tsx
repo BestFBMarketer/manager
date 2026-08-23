@@ -6,11 +6,12 @@
 // Last Modified: 2026-08-18
 // =====================================
 
-import { Composition } from 'remotion';
+import { Composition, Still } from 'remotion';
 import { fontFaceCss } from './theme';
 import { FunnyRanking, rankingDurationInFrames, type FunnyRankingProps } from './compositions/FunnyRanking';
 import { HotelTour, type HotelTourProps } from './compositions/HotelTour';
 import { StoryNarrative, storyNarrativeDurationInFrames, type StoryNarrativeProps } from './compositions/StoryNarrative';
+import { Thumbnail, type ThumbnailProps } from './compositions/Thumbnail';
 
 const FPS = 30;
 const VERTICAL = { width: 1080, height: 1920 };
@@ -98,6 +99,14 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={({ props }) => ({
           durationInFrames: storyNarrativeDurationInFrames(props, FPS),
         })}
+      />
+
+      <Still
+        id="Thumbnail"
+        component={Thumbnail}
+        defaultProps={{ text: 'Başlık buraya' } as ThumbnailProps}
+        width={1280}
+        height={720}
       />
     </>
   );

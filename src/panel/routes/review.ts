@@ -144,6 +144,26 @@ export function reviewRouter(): Router {
     }
   });
 
+  router.get('/review/:id/thumbnail', (req: Request<{ id: string }>, res: Response) => {
+    try {
+      const db = getDb();
+      const item = db
+        .prepare('SELECT thumbnail_path FROM review_item WHERE id = ?')
+        .get(Number(req.params.id)) as { thumbnail_path: string | null } | undefined;
+
+      if (!item?.thumbnail_path || !existsSync(item.thumbnail_path)) {
+        res.status(404).json({ error: 'thumbnail yok' });
+        return;
+      }
+
+      res.type('image/jpeg');
+      createReadStream(item.thumbnail_path).pipe(res);
+    } catch (error) {
+      Logger.error(`Thumbnail servis edilemedi (#${req.params.id})`, error);
+      res.status(500).json({ error: 'thumbnail servis edilemedi' });
+    }
+  });
+
   // Video scrubbing icin Range header destegi zorunlu - duz res.sendFile yetersiz kalir.
   router.get('/media/:renderId', (req: Request<{ renderId: string }>, res: Response) => {
     try {

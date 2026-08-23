@@ -78,6 +78,10 @@ export function mediaUrl(renderId: number): string {
   return `/api/media/${renderId}`;
 }
 
+export function thumbnailUrl(reviewItemId: number): string {
+  return `/api/review/${reviewItemId}/thumbnail`;
+}
+
 export interface PrimeTimeSlot {
   id: string;
   timeZone: string;
@@ -194,6 +198,7 @@ export interface ReviewItem {
   kind: string;
   status: string;
   preview_path: string | null;
+  thumbnail_path: string | null;
   proposed_title: string;
   proposed_description: string;
   proposed_tags_json: string;
