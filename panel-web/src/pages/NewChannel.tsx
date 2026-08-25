@@ -77,7 +77,8 @@ export default function NewChannel() {
           <div className="field" style={{ flex: 1 }}>
             <label>Sablon</label>
             <select value={form.defaultTemplate} onChange={(e) => setForm({ ...form, defaultTemplate: e.target.value })}>
-              <option value="FunnyRanking">FunnyRanking (komik/ranking Shorts)</option>
+              <option value="FunnyRanking">FunnyRanking (referans videodan Top-5 viral an countdown)</option>
+              <option value="FunnyClip">FunnyClip (referans kanaldan tek kesit + yorum Shorts)</option>
               <option value="HotelTourLandscape">HotelTourLandscape (gezi - uzun/yatay)</option>
               <option value="HotelTourVertical">HotelTourVertical (gezi - dikey Shorts)</option>
               <option value="StoryNarrative">StoryNarrative (hikaye anlatimi)</option>

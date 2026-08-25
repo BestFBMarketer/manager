@@ -8,6 +8,7 @@
 
 import { Composition, Still } from 'remotion';
 import { fontFaceCss } from './theme';
+import { FunnyClip, funnyClipDurationInFrames, type FunnyClipProps } from './compositions/FunnyClip';
 import { FunnyRanking, rankingDurationInFrames, type FunnyRankingProps } from './compositions/FunnyRanking';
 import { HotelTour, type HotelTourProps } from './compositions/HotelTour';
 import { StoryNarrative, storyNarrativeDurationInFrames, type StoryNarrativeProps } from './compositions/StoryNarrative';
@@ -19,17 +20,26 @@ const VERTICAL = { width: 1080, height: 1920 };
 const LANDSCAPE = { width: 1920, height: 1080 };
 
 /** Studio'da onizleme icin ornek veriler - gercek render'da inputProps ezer. */
+const FUNNY_CLIP_DEFAULTS: FunnyClipProps = {
+  videoSrc: '',
+  durationSec: 25,
+  hookText: 'Bunu izlerken gülmemek imkansız',
+  hookDurationSec: 2,
+  commentaryScript: 'Yine aynı figür, yine aynı özgüven - efsane.',
+  channelHandle: '@bestmarketer',
+};
+
 const RANKING_DEFAULTS: FunnyRankingProps = {
-  hookLine: 'Bu 5 kişi bugün gerçekten şanssızdı',
+  hookLine: 'Bu 5 an gerçekten inanılmaz',
   items: [
-    { rank: 5, videoSrc: '', voiceLine: 'Beşinci sırada klasik bir merdiven şaheseri', durationSec: 6 },
-    { rank: 4, videoSrc: '', voiceLine: 'Dördüncü: kedi haklıydı, sen değildin', durationSec: 6 },
-    { rank: 3, videoSrc: '', voiceLine: 'Üçüncü sırada fizik yasaları devrede', durationSec: 6 },
-    { rank: 2, videoSrc: '', voiceLine: 'İkinci: plan mükemmeldi, uygulama değil', durationSec: 6 },
+    { rank: 5, videoSrc: '', voiceLine: 'Beşinci sırada klasik bir an', durationSec: 6 },
+    { rank: 4, videoSrc: '', voiceLine: 'Dördüncü sırada işler çığırından çıkıyor', durationSec: 6 },
+    { rank: 3, videoSrc: '', voiceLine: 'Üçüncü sırada tam bir felaket', durationSec: 6 },
+    { rank: 2, videoSrc: '', voiceLine: 'İkinci sırada nefesler tutuluyor', durationSec: 6 },
     { rank: 1, videoSrc: '', voiceLine: 'Ve birinci sıra: yorum bile gereksiz', durationSec: 6 },
   ],
-  outroLine: 'Devamı her gün, ıĞÜŞÖÇ',
-  channelHandle: '@funandrank',
+  outroLine: 'Devamı her gün burada',
+  channelHandle: '@bestmarketer',
   hookDurationSec: 2,
   outroDurationSec: 2,
 };
@@ -69,6 +79,18 @@ export const RemotionRoot: React.FC = () => {
     <>
       {/* Yerel font tanimlari - dosya yoksa yigindaki sistem fontuna dusulur */}
       <style>{fontFaceCss()}</style>
+      <Composition
+        id="FunnyClip"
+        component={FunnyClip}
+        defaultProps={FUNNY_CLIP_DEFAULTS}
+        fps={FPS}
+        {...VERTICAL}
+        durationInFrames={funnyClipDurationInFrames(FUNNY_CLIP_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: funnyClipDurationInFrames(props, FPS),
+        })}
+      />
+
       <Composition
         id="FunnyRanking"
         component={FunnyRanking}

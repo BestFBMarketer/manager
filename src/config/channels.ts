@@ -12,6 +12,7 @@ import type { ScheduleRule } from '../publish/scheduleRules.js';
 import { parseChannelSettings, type ChannelSettings } from './channelSettings.js';
 
 export type TemplateName =
+  | 'FunnyClip'
   | 'FunnyRanking'
   | 'HotelTourLandscape'
   | 'HotelTourVertical'

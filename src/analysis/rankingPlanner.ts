@@ -32,6 +32,8 @@ export interface RankingPlan {
   hookLine: string;
   items: RankingItem[];
   outroLine: string;
+  description: string;
+  tags: string[];
 }
 
 const LANGUAGE_NAMES: Record<ChannelConfig['language'], string> = {
@@ -52,9 +54,11 @@ function buildSystemPrompt(language: ChannelConfig['language']): string {
     `Each voice line: at most ${RANKING.MAX_WORDS_PER_LINE} words - speaking pace depends on it.`,
     'The hook must stop the viewer within the first 2 seconds.',
     'The outro should invite subscription without begging.',
+    'Also write a YouTube description (2-3 sentences) and 5-8 lowercase tags (no hash symbol).',
     'Return ONLY this JSON schema:',
     '{"title": string, "hookLine": string, "items": [{"rank": number, "clipId": string,',
-    '"startSec": number, "endSec": number, "voiceLine": string}], "outroLine": string}',
+    '"startSec": number, "endSec": number, "voiceLine": string}], "outroLine": string,',
+    '"description": string, "tags": string[]}',
   ].join(' ');
 }
 
@@ -64,6 +68,8 @@ function isRankingPlan(value: unknown): value is RankingPlan {
 
   if (typeof plan.title !== 'string' || typeof plan.hookLine !== 'string') return false;
   if (typeof plan.outroLine !== 'string' || !Array.isArray(plan.items)) return false;
+  if (typeof plan.description !== 'string' || !Array.isArray(plan.tags)) return false;
+  if (!plan.tags.every((t) => typeof t === 'string')) return false;
 
   return plan.items.every((item) => {
     if (typeof item !== 'object' || item === null) return false;

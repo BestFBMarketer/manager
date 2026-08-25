@@ -10,7 +10,7 @@ import { getDb, closeDb } from '../src/core/db.js';
 import { Logger } from '../src/core/logger.js';
 import { RANKING_SLOTS } from '../src/publish/publishSlots.js';
 import { YOUTUBE_CATEGORY } from '../src/config/channels.js';
-import { PIPELINE, VIDEO } from '../src/config/constants.js';
+import { PIPELINE, RANKING } from '../src/config/constants.js';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -40,10 +40,10 @@ const SEED_CHANNELS: SeedChannel[] = [
     refreshTokenEnvKey: 'YOUTUBE_REFRESH_TOKEN_SHORTS',
     defaultTemplate: 'FunnyRanking',
     // Gunde 3 video: ABD prime, Avrupa prime ve ABD sabah yogunlugu
-    targetDurationSec: VIDEO.SHORT_MAX_SEC,
-    language: 'en',
-    wikiLanguages: ['en'],
-    audience: 'Global short-form viewers; countdown/ranking format with sarcastic commentary',
+    targetDurationSec: RANKING.MAX_TOTAL_SEC,
+    language: 'tr',
+    wikiLanguages: ['tr'],
+    audience: 'Turkce izleyici; referans kanaldaki uzun videolardan Top-5 viral an + igneleyici seslendirmeli countdown',
     titleExamples: [],
     shortsDerivativeCount: 0,
     categoryId: YOUTUBE_CATEGORY.COMEDY,

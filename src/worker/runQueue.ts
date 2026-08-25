@@ -150,6 +150,11 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
         result = await runHotelTourJob(db, job, channel);
         break;
       }
+      case 'FunnyClip': {
+        const { runFunnyClipJob } = await import('./stages/funnyClip.js');
+        result = await runFunnyClipJob(db, job, channel);
+        break;
+      }
       case 'FunnyRanking': {
         const { runFunnyRankingJob } = await import('./stages/funnyRanking.js');
         result = await runFunnyRankingJob(db, job, channel);
