@@ -4,9 +4,10 @@ import { api, ApiError, type ChannelConfig } from '../lib/api.js';
 
 export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
   const navigate = useNavigate();
-  // topicDiscovery.ts sadece referans kanal kataloğunu okuyabiliyor (reference/both);
+  // topicDiscovery.ts referans kanal kataloğunu okuyabiliyor (reference/both) - bu hikaye
+  // kanallarına özel değil, FunnyRanking/FunnyClip de aynı mekanizmayı kullanıyor.
   // 'ai_generated' (referanssız, LLM'in kendi konu listesi) henüz ayrı bir M5+ adımı.
-  const isStoryAuto = channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both');
+  const isAutoDiscovery = channel.topicSource === 'reference' || channel.topicSource === 'both';
   const isHotelTour = channel.defaultTemplate === 'HotelTourLandscape' || channel.defaultTemplate === 'HotelTourVertical';
   const [count, setCount] = useState(3);
   const [sourceRefs, setSourceRefs] = useState<string[]>(['', '', '']);
@@ -32,7 +33,7 @@ export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
     setBusy(true);
     setError(null);
     try {
-      const items = isStoryAuto
+      const items = isAutoDiscovery
         ? undefined
         : sourceRefs.map((sourceRef, i) => ({
             sourceRef,
@@ -48,7 +49,7 @@ export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
     }
   }
 
-  const hasEmptyRef = !isStoryAuto && sourceRefs.some((r) => !r.trim());
+  const hasEmptyRef = !isAutoDiscovery && sourceRefs.some((r) => !r.trim());
 
   return (
     <div className="card">
@@ -58,18 +59,18 @@ export default function BatchProducer({ channel }: { channel: ChannelConfig }) {
         <input type="number" min={1} max={50} value={count} onChange={(e) => setCountAndResize(Number(e.target.value))} style={{ width: 100 }} />
       </div>
 
-      {channel.channelType === 'story' && isStoryAuto && (
+      {isAutoDiscovery && (
         <p className="muted">
           Bu kanal referans kanal kataloğundan otomatik konu seçecek (en çok izlenenden başlayarak) - kaynak girmenize gerek yok.
         </p>
       )}
-      {channel.channelType === 'story' && !isStoryAuto && (
+      {!isAutoDiscovery && (
         <p className="muted">
           "AI kendi konu listesini üretsin" modu henüz otomatik değil - aşağıya kaynak video linklerini elle girin.
         </p>
       )}
 
-      {!isStoryAuto && (
+      {!isAutoDiscovery && (
         <div className="field">
           <label>Kaynak (her video için dosya yolu veya link{isHotelTour ? ' + otel adı/şehir' : ''})</label>
           {sourceRefs.map((ref, i) => (

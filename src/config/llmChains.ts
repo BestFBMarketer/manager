@@ -26,6 +26,10 @@ export const LLM_CHAINS: Record<LlmTask, string[]> = {
   // dogrudan buradan geldigi icin ucretsiz katmanla baslamiyor (EK2/E)
   factBrief: ['claude', 'openai', 'gemini'],
   narrativeScript: ['claude', 'openai', 'gemini'],
+
+  // FunnyClip'in ignelenen yorum metni videonun tum komik degerini belirliyor -
+  // viralHook gibi kalite-kritik, ucretsiz katmanla baslamiyor.
+  clipCommentary: ['claude', 'openai', 'gemini'],
 };
 
 /** Ucretli saglayicilarin gunluk maliyet tavani (USD). Asilirsa sadece ucretsizler calisir. */

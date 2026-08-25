@@ -23,7 +23,7 @@ export interface RenderResult {
 
 /**
  * Remotion kompozisyonunu render et (npx remotion render ile subprocess olarak).
- * @param compositionId Remotion'da kayıtlı composition id (ör. 'FunnyRanking', 'HotelTourLandscape')
+ * @param compositionId Remotion'da kayıtlı composition id (ör. 'FunnyClip', 'HotelTourLandscape')
  * @param inputProps Render için input props (props.json olarak temp file'a yazılır)
  * @param outputPath Çıkış MP4 dosya yolu
  * @param jobId İşi izlemek için (log ve hata raporunda)

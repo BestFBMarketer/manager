@@ -43,6 +43,11 @@ export default function ChannelEdit() {
   if (error) return <p className="error-text">{error}</p>;
   if (!channel || !rule || !id) return <p className="muted">yukleniyor...</p>;
 
+  // Referans kanaldan konu/kaynak kesfi hikaye kanallarina ozel degil - FunnyClip
+  // (fasil/army vb. kanallardan klip kesme) de ayni mekanizmayi kullanir.
+  const usesReferenceDiscovery =
+    channel.channelType === 'story' || channel.defaultTemplate === 'FunnyClip' || channel.defaultTemplate === 'FunnyRanking';
+
   async function saveFields() {
     if (!channel || !id) return;
     setSavingFields(true);
@@ -151,28 +156,29 @@ export default function ChannelEdit() {
         </div>
 
         {channel.channelType === 'story' && (
-          <>
-            <div className="field">
-              <label>Ton/tur/stil notu (style_reference)</label>
-              <textarea
-                rows={2}
-                value={channel.styleReference ?? ''}
-                onChange={(e) => setChannel({ ...channel, styleReference: e.target.value })}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field">
-              <label>Konu kaynagi</label>
-              <select
-                value={channel.topicSource}
-                onChange={(e) => setChannel({ ...channel, topicSource: e.target.value as ChannelConfig['topicSource'] })}
-              >
-                <option value="reference">Referans kanal(lar)i izle</option>
-                <option value="ai_generated">AI kendi konu listesini uretsin</option>
-                <option value="both">Ikisi birden</option>
-              </select>
-            </div>
-          </>
+          <div className="field">
+            <label>Ton/tur/stil notu (style_reference)</label>
+            <textarea
+              rows={2}
+              value={channel.styleReference ?? ''}
+              onChange={(e) => setChannel({ ...channel, styleReference: e.target.value })}
+              style={{ width: '100%' }}
+            />
+          </div>
+        )}
+
+        {usesReferenceDiscovery && (
+          <div className="field">
+            <label>Konu kaynagi</label>
+            <select
+              value={channel.topicSource}
+              onChange={(e) => setChannel({ ...channel, topicSource: e.target.value as ChannelConfig['topicSource'] })}
+            >
+              <option value="reference">Referans kanal(lar)i izle</option>
+              <option value="ai_generated">AI kendi konu listesini uretsin</option>
+              <option value="both">Ikisi birden</option>
+            </select>
+          </div>
         )}
 
         <div className="field">
@@ -216,7 +222,7 @@ export default function ChannelEdit() {
         </button>
       </div>
 
-      {channel.channelType === 'story' && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
+      {usesReferenceDiscovery && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
         <StoryReferences channelId={id} />
       )}
 

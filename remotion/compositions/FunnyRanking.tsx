@@ -54,11 +54,13 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
       {placed.map(({ item, from, frames }) => (
         <Sequence key={item.rank} from={from} durationInFrames={frames}>
           <AbsoluteFill>
-            {/* Klip eksikse render'in tamami cokmemeli - duz zemine dusulur. */}
+            {/* Klip eksikse render'in tamami cokmemeli - duz zemine dusulur.
+                Ses ayri bir muzik/altyazi katmani degil - item.videoSrc render
+                oncesinde zaten seslendirme ile miksajlanmis geliyor (bkz.
+                worker/stages/funnyRanking.ts), bu yuzden burada mute EDILMEZ. */}
             {item.videoSrc ? (
               <OffthreadVideo
                 src={item.videoSrc}
-                muted
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (

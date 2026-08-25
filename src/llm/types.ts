@@ -14,7 +14,8 @@ export type LlmTask =
   | 'viralHook'
   | 'shortsPlan'
   | 'factBrief'
-  | 'narrativeScript';
+  | 'narrativeScript'
+  | 'clipCommentary';
 
 export interface LlmRequest {
   task: LlmTask;

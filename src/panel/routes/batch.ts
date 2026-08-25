@@ -14,12 +14,14 @@ import { getChannel } from '../../config/channels.js';
 import { discoverNextTopics } from '../../story/topicDiscovery.js';
 
 /** Gercek Remotion kompozisyon id'leri (remotion/Root.tsx) - hatali sablon adiyla is acilmasin. */
-const VALID_TEMPLATES = new Set(['FunnyRanking', 'HotelTourLandscape', 'HotelTourVertical', 'StoryNarrative']);
+const VALID_TEMPLATES = new Set(['FunnyClip', 'FunnyRanking', 'HotelTourLandscape', 'HotelTourVertical', 'StoryNarrative']);
 
 interface BatchItem {
   sourceRef: string;
   hotelName?: string;
   hotelCity?: string;
+  /** discoverNextTopics'ten geliyorsa - transkriptsiz kaldığında (fasıl/parti içeriği) tek içerik ipucu */
+  videoTitle?: string;
 }
 
 export function batchRouter(): Router {
@@ -49,14 +51,16 @@ export function batchRouter(): Router {
 
     let items = req.body?.items as BatchItem[] | undefined;
 
-    // story kanali + items verilmemisse topicDiscovery referans kataloglarindan
-    // secim yapar (topic_source='ai_generated' henuz kapsanmiyor - o, referans
-    // kanal olmadan LLM'in kendi konu listesini urettigi ayri bir yol, M5'in
-    // sonraki bir adimi). Sadece 'reference'/'both' + story_reference satiri
-    // varsa otomatik secim calisir; yoksa net hata (Rule 11).
+    // items verilmemisse topicDiscovery referans kataloglarindan secim yapar -
+    // bu hikaye kanallarina ozel bir sey degil, "referans kanaldan kaynak bul"
+    // her kanal turune uygulanabilir (FunnyClip de fasıl/army gibi referans
+    // kanallardan besleniyor). topic_source='ai_generated' henuz kapsanmiyor -
+    // referans kanal olmadan LLM'in kendi konu listesini urettigi ayri bir yol.
     if (!items) {
-      if (channel.channelType !== 'story') {
-        res.status(400).json({ error: 'items zorunlu (her biri {sourceRef}) - kaynak uydurulmaz' });
+      if (channel.topicSource === 'ai_generated') {
+        res.status(501).json({
+          error: '"AI kendi konu listesini üretsin" modu henüz otomatik değil - items listesini elle verin',
+        });
         return;
       }
       try {
@@ -67,7 +71,7 @@ export function batchRouter(): Router {
           });
           return;
         }
-        items = topics.map((t) => ({ sourceRef: t.sourceRef }));
+        items = topics.map((t) => ({ sourceRef: t.sourceRef, videoTitle: t.videoTitle }));
       } catch (error) {
         Logger.error('Otomatik konu keşfi başarısız', error);
         res.status(400).json({ error: error instanceof Error ? error.message : 'konu keşfi başarısız' });
@@ -101,7 +105,7 @@ export function batchRouter(): Router {
       const jobIds: number[] = [];
       const insertAll = db.transaction((rows: BatchItem[]) => {
         for (const row of rows) {
-          const inputJson = JSON.stringify({ hotelName: row.hotelName, hotelCity: row.hotelCity });
+          const inputJson = JSON.stringify({ hotelName: row.hotelName, hotelCity: row.hotelCity, videoTitle: row.videoTitle });
           const result = insertJob.run(
             channel.id,
             channel.defaultTemplate,
