@@ -22,6 +22,8 @@ export interface CutOptions {
   framing?: FramingMode;
   /** Sesi EBU R128 hedefine normalize et */
   normalizeAudio?: boolean;
+  /** Referans kanal/videodan kesiliyorsa true - baska kanalin logo/watermark/handle'i disari itilir/bulaniklastirilir */
+  stripWatermarks?: boolean;
 }
 
 /**
@@ -39,7 +41,7 @@ export async function cutAndFrame(options: CutOptions): Promise<string> {
 
   const videoFilter =
     options.orientation === 'vertical'
-      ? verticalFilter(options.framing ?? 'crop')
+      ? verticalFilter(options.framing ?? 'crop', options.stripWatermarks ?? false)
       : landscapeFilter();
 
   const filterFlag = videoFilter.includes(';') ? '-filter_complex' : '-vf';

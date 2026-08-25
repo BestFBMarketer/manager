@@ -96,6 +96,7 @@ export async function runFunnyRankingJob(
         orientation: 'vertical',
         framing: 'crop',
         normalizeAudio: true,
+        stripWatermarks: true,
       });
 
       const itemInfo = await probe(itemClipPath);

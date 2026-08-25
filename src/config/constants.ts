@@ -39,6 +39,14 @@ export const VIDEO = {
   LOUDNESS_TARGET_LUFS: -14,
   LOUDNESS_TRUE_PEAK: -1.5,
   LOUDNESS_RANGE: 11,
+  /**
+   * Referans kanal/videodan kesilen klipler icin: kenar/kose logo-watermark'i
+   * kare disina itmek amaciyla normal doldurma-kirpma oranindan fazla yakinlastirma.
+   */
+  WATERMARK_ZOOM: 1.15,
+  /** Yakinlastirmadan sonra ust/altta kalabilecek kalici watermark/handle barlarini bulaniklastiran serit orani (kare yuksekligine gore). */
+  WATERMARK_BLUR_TOP_RATIO: 0.05,
+  WATERMARK_BLUR_BOTTOM_RATIO: 0.09,
 } as const;
 
 export const AUDIO = {
