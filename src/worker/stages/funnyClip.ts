@@ -72,6 +72,7 @@ export async function runFunnyClipJob(
       orientation: 'vertical',
       framing: 'crop',
       normalizeAudio: true,
+      stripWatermarks: true,
     });
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('clip_cut', jobId);
