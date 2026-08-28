@@ -59,9 +59,14 @@ export async function run(command: string, args: string[], timeoutMs: number): P
 /** Komutun sistemde kurulu olup olmadigini soyler. */
 export async function isAvailable(command: string): Promise<boolean> {
   try {
-    await run(command, ['-version'], 10_000);
+    await run(command, ['--version'], 10_000);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    // Bazi Windows derlemeleri (orn. ffmpeg) surum bayragiyla tek basina cagrildiginda
+    // gecerli surum metnini basip yine de sifir olmayan cikis kodu donduruyor - gercek
+    // is (kesim/kodlama) sorunsuz calisiyor, sadece bu kontrol yaniliyor. stderr'de
+    // "version" geciyorsa binary gercekte kurulu demektir.
+    const message = error instanceof Error ? error.message : '';
+    return /version/i.test(message);
   }
 }

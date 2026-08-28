@@ -3,7 +3,7 @@
 Otomatik YouTube video fabrikasi: **komik Shorts** kanali ve **gezi/seyahat (drone)** kanali icin
 indirme → kesim → Remotion ile veri-odakli katman → zamanlanmis yayin hatti.
 
-> Not: Bu kod gecici olarak `manager` reposunda gelistirilmektedir; hedef repo `shorts-factory`.
+> Repo: `BestFBMarketer/shorts-factory` (private), branch `main`.
 
 ---
 
@@ -24,14 +24,24 @@ her sey dahil mi, yorum/oneri orani) bindirilir. DJI `.SRT` telemetrisi varsa ha
 
 ## Kurulum
 
+Proje VPS'e (Ubuntu) surekli calisir sekilde kurulmak uzere tasarlandi (bkz. "Isletim"),
+ama gelistirme/test icin Windows PC'de de calisir - sadece sistem araclarinin kurulum
+yontemi degisir.
+
 ```bash
 npm install
 cp .env.example .env      # anahtarlari doldur
 npm run pipeline -- --stage doctor
 ```
 
-Sistem gereksinimleri (VPS): `ffmpeg`, `ffprobe`, `yt-dlp`, Chromium (Remotion/WebGL icin),
-Python 3 + `faster-whisper`. Onerilen: 8 vCPU / 16 GB RAM.
+**Sistem gereksinimleri:** `ffmpeg`, `ffprobe`, `yt-dlp`, Chromium (Remotion/WebGL icin),
+Python 3 + `faster-whisper` (opsiyonel, transkript kalitesi icin).
+
+- **Windows (PC test):** `winget install Gyan.FFmpeg yt-dlp.yt-dlp` - ikisi de PATH'e
+  otomatik eklenir (shell'i yeniden ac). `better-sqlite3` Node 22/24 icin prebuilt binary
+  getirir, ayrica derleyici (Visual Studio Build Tools) gerekmez.
+- **Ubuntu (VPS/uretim):** `sudo apt install ffmpeg yt-dlp`. Onerilen kaynak: en az
+  4 vCPU / 8 GB RAM (bkz. "VPS kaynak onerisi").
 
 ---
 
@@ -392,6 +402,14 @@ Iki surekli surec var: **panel** (her zaman ayakta, crash'te yeniden baslamali) 
 **worker** (`src/worker/runQueue.ts`) - tek seferlik calisip cikan, periyodik olarak
 tetiklenmesi gereken bir script (`WORKER.BATCH_SIZE=1` oldugu icin her tetiklemede
 en fazla bir is islenir, uzun bir render sonraki turu bloklamaz).
+
+> **PC'den test icin** (surekli/otomatik degil, elle tek seferlik deneme): asagidaki
+> pm2/systemd kurulumuna gerek yok, iki ayri terminalde dogrudan calistir:
+> ```bash
+> npm run panel:server     # terminal 1 - panel http://localhost:4000 (PANEL_PORT ile degistir)
+> npm run worker            # terminal 2 - kuyrukta is varsa bir tur isler, biter
+> ```
+> `npm run worker`'i her yeni is icin elle tekrar calistirmak gerekir (cron/pm2 yok).
 
 ### Secenek A: pm2 (onerilir, kurulumu daha kolay)
 

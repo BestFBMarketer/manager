@@ -3,11 +3,29 @@
 **Durum (2026-08-23):** M0'dan M6'ya kadar tüm milestone'lar kodlandı, typecheck +
 panel-web build temiz, worker'ın atomik kuyruk mantığı (claim/sweep/review_item yazımı/
 çifte-onay koruması) gerçek bir SQLite dosyasına karşı elle test edildi. **Ama gerçek
-render hiç çalıştırılmadı** — bu sandbox'ta ffmpeg/ffprobe/yt-dlp yok, gerçek LLM/YouTube/
-Instagram/TikTok/Google Places anahtarı yok. Yani "kod doğru mu" sorusuna evet, "gerçek
-bir video üretip yayınladı mı" sorusuna henüz hayır — ilk gerçek deneme VPS'te olacak.
+render hiç çalıştırılmadı** — o sandbox'ta ffmpeg/ffprobe/yt-dlp yok, gerçek LLM/YouTube/
+Instagram/TikTok/Google Places anahtarı yok.
 
-**Repo:** `BestFBMarketer/manager` → branch `claude/youtube-shorts-automation-plan-779kjx`
+**Güncelleme (2026-08-28, Windows PC):** `npm install` çalışıyor (better-sqlite3
+`^11.5.0` → `^13.0.3`'e yükseltildi, Node 24 için prebuilt binary getiriyor — VS Build
+Tools gerekmiyor). `typecheck` temiz. `ffmpeg`/`ffprobe`/`yt-dlp` winget ile kuruldu ve
+gerçek bir test encode ile doğrulandı (çalışıyor). `npm run pipeline -- --stage doctor`
+üçünü de yeşil gösteriyor. Küçük bir kod hatası da düzeltildi: `src/core/exec.ts`
+`isAvailable()` tüm ikili dosyaları `-version` (tek tire) ile kontrol ediyordu — ffmpeg/
+ffprobe'da çalışır ama yt-dlp `-version`'ı kısa bayrak dizisi sanıp patlıyordu
+(`--version`'a çevrildi + Windows'ta bazı ffmpeg derlemelerinin sürüm bayrağıyla tek
+başına çağrıldığında verdiği tuhaf çıkış koduna karşı stderr içeriğine bakan bir yedek
+kontrol eklendi — gerçek kesim/kodlama işlemleri zaten sorunsuz çalışıyor, sadece bu
+kontrol yanılıyordu). Yani "kod doğru mu" sorusuna evet, "gerçek bir video üretip
+yayınladı mı" sorusuna henüz hayır — `.env` doldurulup ilk gerçek deneme PC'den yapılacak
+(aşağıdaki "PC'de test" bölümü).
+
+**Repo:** `BestFBMarketer/shorts-factory` (private) → branch `main`
+
+**Plan degisikligi (2026-08-28):** Ilk plan VPS'e (Ubuntu) kurup oradan test etmekti.
+Son dakika karari: once Windows PC'de calistirip test edilecek, VPS kurulumu bu asamada
+ertelendi. Asagidaki "VPS kurulumu" bolumu ileride VPS'e gecerken hala gecerli - ama
+simdilik "PC'de test" adimlarini takip et.
 
 ## Ne var, ne yok (dürüst özet)
 
@@ -34,12 +52,32 @@ bir video üretip yayınladı mı" sorusuna henüz hayır — ilk gerçek deneme
 - Instagram cross-post, PUBLIC_MEDIA_BASE_URL (VPS'te nginx/Caddy ile açılan herkese
   açık bir adres) olmadan çalışmaz — bu bir kurulum adımı, kod eksikliği değil
 
-## VPS kurulumu — sırayla
+## PC'de test — sırayla (şu anki öncelik)
+
+1. **Temel kurulum — YAPILDI:** `npm install`, `ffmpeg`/`ffprobe`/`yt-dlp` (winget),
+   `typecheck` temiz, `--stage doctor` ikili dosyalar için yeşil.
+2. **`.env` doldur** — VPS listesindeki aynı alanlar geçerli (LLM anahtarı, `NOTIFY_SMTP_*`,
+   `PANEL_PASSWORD_HASH`+`PANEL_SESSION_SECRET`, gezi kanalı için YouTube OAuth). PC'den
+   çalıştırdığın için `authYoutube.ts` adımı zaten sorunsuz (tarayıcı burada).
+3. **DB'yi kur:** `npx tsx scripts/migrateChannelsToDb.ts`, sonra
+   `npm run pipeline -- --stage doctor` ile LLM/TTS anahtarlarını da doğrula.
+4. **Panel + worker'ı elle çalıştır** (pm2/systemd yok, README'nin "Isletim" bölümündeki
+   "PC'den test icin" kutusuna bak): iki terminal, `npm run panel:server` +
+   `npm run worker`.
+5. **İlk gerçek deneme** — VPS listesindeki 5. adımla aynı sıra (önce gezi/HotelTour,
+   sonra hikaye kanalı), sadece worker'ı elle tetikliyorsun.
+6. Instagram/TikTok cross-post PC'den test edilemez (`PUBLIC_MEDIA_BASE_URL` herkese açık
+   bir adres ister) — bu adım VPS'e geçince sırada.
+
+**Not:** PC'de sadece elle/tek seferlik test için çalıştırılıyor, sürekli/otomatik
+zamanlanmış yayın (cron/pm2) burada kurulmuyor — o VPS aşamasının işi.
+
+## VPS kurulumu — sırayla (ileride, PC testleri bitince)
 
 1. **Temel kurulum**
    ```bash
-   git clone -b claude/youtube-shorts-automation-plan-779kjx https://github.com/BestFBMarketer/manager.git
-   cd manager && npm install
+   git clone https://github.com/BestFBMarketer/shorts-factory.git
+   cd shorts-factory && npm install
    sudo apt install ffmpeg yt-dlp   # veya dagitimina uygun paket yoneticisi
    cp .env.example .env
    ```

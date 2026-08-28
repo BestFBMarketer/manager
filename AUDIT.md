@@ -4,6 +4,72 @@
 
 ---
 
+## 2026-08-28 (devam) — Repo taşıma + PC bloker çözümü
+
+### Yapılan iş özeti
+
+- **Repo taşıma:** Kod `BestFBMarketer/manager`'dan yeni özel private repo
+  `BestFBMarketer/shorts-factory`'ye taşındı. `manager` reposundaki feature branch
+  (`claude/youtube-shorts-automation-plan-779kjx`, tüm M0-M6 history'si dahil) `main`'e
+  merge edildi (`--no-ff`, history korundu), yeni repoya push edildi. Eski `manager`/
+  `ecosystem-hub` repoları dokunulmadan bırakıldı.
+- **Karar değişikliği:** Proje VPS'e (Ubuntu) kurulmak üzere tasarlanmıştı; kullanıcı
+  önce Windows PC'den çalıştırıp test etme kararı aldı. README/DEVAM_NOTU.md buna göre
+  güncellendi (Windows kurulum yolu + "PC'den test" bölümü eklendi, VPS bölümü silinmedi
+  — ileride hâlâ geçerli).
+- **npm install bloker çözüldü:** `better-sqlite3` `^11.5.0` → `^13.0.3`'e yükseltildi —
+  bu sürüm Node 24 için prebuilt binary sağlıyor, VS Build Tools/nvm-windows gerekmedi.
+  (nvm-windows kurulumu denendi, UAC izni sandbox'ta tamamlanamadı ve mevcut Node.js
+  kurulumunu yarım bırakıp kaldırdı — `winget install OpenJS.NodeJS.LTS` ile geri
+  kuruldu, veri kaybı yok, sadece geçici kesinti.)
+- **ffmpeg/ffprobe/yt-dlp kuruldu** (winget: `Gyan.FFmpeg`, `yt-dlp.yt-dlp`), gerçek bir
+  test encode ile doğrulandı.
+- **Kod hatası düzeltildi** (`src/core/exec.ts` `isAvailable()`): tüm ikili dosyalar
+  `-version` (tek tire) ile kontrol ediliyordu — yt-dlp bunu kısa bayrak dizisi sanıp
+  hata veriyordu (`--version`'a çevrildi). Ayrıca Windows'ta bazı ffmpeg derlemelerinin
+  sürüm bayrağıyla **tek başına** çağrıldığında (gerçek iş yokken) tuhaf/sıfır olmayan
+  çıkış kodu döndürdüğü gözlendi — gerçek kesim/kodlama işlemi test edildi ve sorunsuz
+  çalıştığı doğrulandı (bu sadece `--version` bayrağına özgü bir kozmetik problem).
+  `isAvailable()` artık başarısız çıkış kodunda bile stderr'de "version" geçiyorsa
+  ikiliyi mevcut sayıyor.
+- `npm run typecheck` temiz, `npm run pipeline -- --stage doctor` artık ffmpeg/ffprobe/
+  yt-dlp için yeşil (LLM/TTS sağlayıcıları `.env` doldurulmadığı için hâlâ kırmızı —
+  beklenen, sıradaki adım).
+
+### Değişen dosyalar
+
+- `src/core/exec.ts` — `isAvailable()` düzeltmesi (yukarıda).
+- `package.json` — `better-sqlite3` sürüm yükseltmesi.
+- `README.md` — Kurulum bölümü Windows/Ubuntu ayrımı, Işletim bölümüne "PC'den test icin" notu, repo referansı güncellendi.
+- `DEVAM_NOTU.md` — durum notu güncellendi, yeni "PC'de test — sırayla" bölümü eklendi, VPS clone komutu yeni repoya güncellendi.
+
+### Test/doğrulama
+
+- `npm install` → 455 paket, 0 hata.
+- `npm run typecheck` → temiz.
+- `ffmpeg`/`ffprobe --version`, gerçek bir `testsrc` encode → başarılı (exit 0).
+- `yt-dlp --version` → başarılı.
+- `npm run pipeline -- --stage doctor` → ffmpeg/ffprobe/yt-dlp yeşil, SQLite şema hazır.
+- `panel-web`: `npm install` (27 paket) + `npm run build` → temiz (`tsc -b && vite build`, 231ms).
+- **Yapılmadı:** gerçek `.env` ile LLM/TTS/YouTube uçtan uca deneme — sıradaki adım.
+
+### Açık riskler / bilinen eksikler
+
+- `.env` henüz doldurulmadı — LLM/TTS/YouTube/Instagram/TikTok anahtarları yok, gerçek
+  render/publish hâlâ hiç denenmedi.
+- `isAvailable()`'daki stderr-metin-tabanlı yedek kontrol, ffmpeg'in bu spesifik Windows
+  davranışına özgü bir iş-etrafından-dolanma (workaround) — gerçek kök neden (neden
+  `--version` tek başına tuhaf çıkış kodu veriyor) tam anlaşılmadı, sadece gerçek
+  işlemlerin etkilenmediği doğrulandı. VPS/Linux'ta bu sorun muhtemelen hiç yaşanmaz.
+
+### Sonraki adım
+
+1. `.env` doldur (en az bir LLM anahtarı + panel şifre hash'i + YouTube OAuth travel kanalı için).
+2. `npx tsx scripts/migrateChannelsToDb.ts`, tekrar `--stage doctor`.
+3. `npm run panel:server` + `npm run worker` ile ilk gerçek deneme (HotelTour, tek klip).
+
+---
+
 ## 2026-08-28 — Proje Audit (M0-M6 tam kapsam durum tespiti)
 
 ### Yapılan iş özeti
