@@ -1,0 +1,53 @@
+{
+  "name": "shorts-factory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Otomatik YouTube video fabrikasi - komik Shorts + drone/otel tanitim videolari",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pipeline": "tsx src/pipeline.ts",
+    "cost": "tsx src/llm/costReport.ts",
+    "panel:server": "tsx src/panel/server.ts",
+    "panel:hash-password": "tsx scripts/hashPanelPassword.ts",
+    "worker": "tsx src/worker/runQueue.ts",
+    "remotion:studio": "remotion studio remotion/index.ts",
+    "remotion:render": "remotion render remotion/index.ts",
+    "remotion:still": "remotion still remotion/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.117.1",
+    "@remotion/cli": "^4.0.512",
+    "@remotion/renderer": "^4.0.512",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^11.5.0",
+    "cheerio": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "egm96-universal": "^1.1.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "express-session": "^1.19.0",
+    "googleapis": "^175.0.0",
+    "gopro-telemetry": "^1.2.11",
+    "gpmf-extract": "^0.3.3",
+    "nodemailer": "^9.0.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "remotion": "^4.0.512"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.19.0",
+    "@types/node": "^22.9.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

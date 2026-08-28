@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM"],
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts", "remotion/**/*.ts", "remotion/**/*.tsx", "scripts/**/*.ts"],
+  "exclude": ["node_modules", "dist", "data"]
+}

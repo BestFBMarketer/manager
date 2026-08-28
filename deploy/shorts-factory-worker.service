@@ -1,0 +1,10 @@
+[Unit]
+Description=shorts-factory worker - kuyruktaki isleri isler (tek seferlik, timer tarafindan tetiklenir)
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/shorts-factory
+ExecStart=/usr/bin/npx tsx src/worker/runQueue.ts
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/shorts-factory/.env
