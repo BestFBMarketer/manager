@@ -120,14 +120,21 @@ export async function mixAudio(options: MixOptions): Promise<string> {
   if (options.voicePath) {
     inputs.push('-i', options.voicePath);
     const index = nextInput++;
-    // asplit sart: seslendirme hem ducking yan zincirinde hem nihai miksta
-    // kullanilir; ayni etiketi iki kez tuketmek filtergraph hatasi verir.
-    filters.push(
-      `[${index}:a]${NORMALIZE},volume=${AUDIO.VOICE_GAIN},apad=whole_dur=${duration},` +
-        `asplit=2[voice_duck][voice_mix]`,
-    );
-    voiceDuckLabel = '[voice_duck]';
-    voiceMixLabel = '[voice_mix]';
+    const voiceBase =
+      `[${index}:a]${NORMALIZE},volume=${AUDIO.VOICE_GAIN},apad=whole_dur=${duration}`;
+
+    if (musicLabel) {
+      // asplit sart: muzik varsa seslendirme hem ducking yan zincirinde hem
+      // nihai miksta kullanilir; ayni etiketi iki kez tuketmek filtergraph
+      // hatasi verir. Muzik yoksa split gereksiz - kullanilmayan cikis
+      // "unconnected" filtergraph hatasina yol acar.
+      filters.push(`${voiceBase},asplit=2[voice_duck][voice_mix]`);
+      voiceDuckLabel = '[voice_duck]';
+      voiceMixLabel = '[voice_mix]';
+    } else {
+      filters.push(`${voiceBase}[voice_only]`);
+      voiceMixLabel = '[voice_only]';
+    }
   }
 
   let mixLabel: string;
@@ -144,9 +151,8 @@ export async function mixAudio(options: MixOptions): Promise<string> {
   } else if (musicLabel) {
     mixLabel = musicLabel;
   } else {
-    // Sadece seslendirme var: yan zincir kopyasi kullanilmaz.
-    filters.push(`${voiceDuckLabel!}anull[voiceonly]`);
-    mixLabel = '[voiceonly]';
+    // Sadece seslendirme var: split yok, dogrudan kullan.
+    mixLabel = voiceMixLabel!;
   }
 
   // Orijinal video sesi istenirse en son karistirilir.

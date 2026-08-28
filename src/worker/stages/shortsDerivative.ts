@@ -76,6 +76,7 @@ export async function runShortsDerivativeJob(
     const renderResult = await renderRemotion(
       'ShortsDerivative',
       {
+        // renderRemotion --public-dir=<proje koku> ile cagriliyor - goreli yol yeterli.
         videoSrc: clipPath,
         durationSec: info.durationSec,
         hookText: input.hook,

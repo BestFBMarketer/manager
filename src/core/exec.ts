@@ -19,13 +19,28 @@ export interface ExecResult {
  * @param command Calistirilacak ikili (orn. 'ffmpeg')
  * @param args Argumanlar
  * @param timeoutMs Zaman asimi
+ * @param stdinText Verilirse surece stdin olarak yazilir (shell pipe kullanmadan - Windows'ta
+ *                  ters slash'li yollarin POSIX shell'de kacis karakteri sayilip bozulmasini onler)
+ * @param useShell Windows'ta .cmd/.bat betiklerini (orn. npx) calistirmak icin gerekir -
+ *                 gercek .exe ikili dosyalari (ffmpeg, yt-dlp, piper) buna ihtiyac duymaz,
+ *                 sadece gerektiginde acilmali (path/apostrof gibi ozel karakterlerin
+ *                 shell tarafindan farkli yorumlanma riskini sadece gereken cagriyla sinirlar).
  * @returns stdout ve stderr
  */
-export async function run(command: string, args: string[], timeoutMs: number): Promise<ExecResult> {
+export async function run(
+  command: string,
+  args: string[],
+  timeoutMs: number,
+  stdinText?: string,
+  useShell = false,
+): Promise<ExecResult> {
   Logger.debug(`exec: ${command} ${args.join(' ')}`);
 
   return new Promise<ExecResult>((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(command, args, {
+      stdio: [stdinText !== undefined ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+      shell: useShell,
+    });
     let stdout = '';
     let stderr = '';
     let settled = false;
@@ -44,13 +59,22 @@ export async function run(command: string, args: string[], timeoutMs: number): P
       fn();
     };
 
-    child.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
-    child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+    if (stdinText !== undefined) {
+      child.stdin?.end(stdinText, 'utf8');
+    }
+
+    child.stdout?.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
+    child.stderr?.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
     child.on('error', (error) => finish(() => reject(error)));
     child.on('close', (code) => {
       finish(() => {
         if (code === 0) resolve({ stdout, stderr });
-        else reject(new Error(`${command} cikis kodu ${code}: ${stderr.slice(-2000)}`));
+        else {
+          // Bazi CLI'lar (npx/remotion) gercek hatayi stdout'a yazar, stderr'i bos birakir -
+          // ikisi de dahil edilmezse hata mesaji sessizce yanlis yonlendirir.
+          const combined = [stdout, stderr].filter(Boolean).join('\n---stderr---\n');
+          reject(new Error(`${command} cikis kodu ${code}: ${combined.slice(-4000)}`));
+        }
       });
     });
   });

@@ -262,6 +262,8 @@ export async function runHotelTourJob(
     const renderResult = await renderRemotion(
       compositionId,
       {
+        // renderRemotion --public-dir=<proje koku> ile cagriliyor, bu yuzden
+        // proje kokune goreli yol Remotion'un statik sunucusunda dogru cozulur.
         videoSrc: mixedVideoPath,
         title: metadata.title,
         cues,

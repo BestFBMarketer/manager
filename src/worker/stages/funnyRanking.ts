@@ -113,6 +113,7 @@ export async function runFunnyRankingJob(
         keepOriginalAudio: true,
       });
 
+      // renderRemotion --public-dir=<proje koku> ile cagriliyor - goreli yol yeterli.
       items.push({ rank: item.rank, videoSrc: mixedItemPath, voiceLine: item.voiceLine, durationSec: itemInfo.durationSec });
     }
 

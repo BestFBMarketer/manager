@@ -105,6 +105,7 @@ export async function runFunnyClipJob(
     const renderResult = await renderRemotion(
       'FunnyClip',
       {
+        // renderRemotion --public-dir=<proje koku> ile cagriliyor - goreli yol yeterli.
         videoSrc: mixedPath,
         durationSec: clipInfo.durationSec,
         hookText: plan.hookText,

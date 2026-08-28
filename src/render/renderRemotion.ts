@@ -7,7 +7,7 @@
 // =====================================
 
 import { mkdir, writeFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
 import { TIMEOUTS } from '../config/constants.js';
@@ -47,10 +47,31 @@ export async function renderRemotion(
     await mkdir('data/work', { recursive: true });
     await writeFile(propsPath, JSON.stringify(inputProps));
 
+    // Windows'ta npx bir .cmd betigidir - Node'un spawn()'i shell olmadan
+    // bunu calistiramaz (ENOENT/EINVAL), bu yuzden Windows'ta shell:true gerekir.
+    //
+    // --public-dir: is'e ozel dosyalar (data/work/<jobId>/...) Remotion'un
+    // public/ klasorunun disinda uretiliyor. public-dir proje koku olarak
+    // verilmezse Remotion'un dahili statik sunucusu bu dosyalari kendi gecici
+    // webpack bundle dizinine gore aramaya calisir (404) - mutlak yol vermek
+    // de cozum degil, cunku Remotion onu file:// URI'sine cevirip kendi
+    // downloader'inda reddediyor (sadece http(s) kabul eder). Dogru yol:
+    // goreli path + public-dir proje koku.
     const result = await run(
       'npx',
-      ['remotion', 'render', 'remotion/index.ts', compositionId, outputPath, `--props=${propsPath}`, '--concurrency=1'],
+      [
+        'remotion',
+        'render',
+        'remotion/index.ts',
+        compositionId,
+        outputPath,
+        `--props=${propsPath}`,
+        `--public-dir=${resolve('.')}`,
+        '--concurrency=1',
+      ],
       TIMEOUTS.RENDER_MS,
+      undefined,
+      process.platform === 'win32',
     );
 
     const durationMs = Date.now() - startMs;

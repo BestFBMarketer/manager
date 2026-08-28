@@ -32,8 +32,9 @@ export const piperProvider: TtsProvider = {
       args.push('--length_scale', String(1 / request.speed));
     }
 
-    const command = `printf %s ${JSON.stringify(request.text)} | ${PIPER_BIN} ${args.join(' ')}`;
-    await run('sh', ['-c', command], TIMEOUTS.FFMPEG_MS);
+    // Metin dogrudan stdin'e yazilir - shell pipe kullanilmaz (Windows'ta
+    // ters slash'li yollar POSIX shell'de kacis karakteri sayilip bozuluyordu).
+    await run(PIPER_BIN, args, TIMEOUTS.FFMPEG_MS, request.text);
 
     const info = await probe(request.outputPath);
     return { outputPath: request.outputPath, durationSec: info.durationSec, provider: 'piper', costUsd: 0 };

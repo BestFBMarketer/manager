@@ -11,7 +11,7 @@ import { TIMEOUTS } from '../../config/constants.js';
 import { ProviderUnavailableError, type LlmProvider, type LlmRequest, type LlmResult } from '../types.js';
 
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_MODEL = 'gemini-3.6-flash';
 const DEFAULT_MAX_TOKENS = 4_096;
 
 // Ucretsiz katman limitleri saglayici tarafindan degistirilebilir; .env ile ezilebilir.

@@ -130,6 +130,7 @@ export async function runStoryNarrativeJob(
         mood: scene.mood,
         durationSec: voiceResult.durationSec,
         scene: {
+          // renderRemotion --public-dir=<proje koku> ile cagriliyor - goreli yol yeterli.
           visualSrc: visual.localPath,
           visualKind: visual.kind,
           text: scene.text,

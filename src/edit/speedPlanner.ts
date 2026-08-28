@@ -263,9 +263,28 @@ export function planSpeed(
     segments = fitToTarget(segments, options.targetDurationSec);
   }
 
-  const outputDurationSec = segments.reduce((sum, segment) => sum + outputSpan(segment), 0);
+  let outputDurationSec = segments.reduce((sum, segment) => sum + outputSpan(segment), 0);
+  let kept = segments.filter((segment) => segment.action !== 'drop');
 
-  const kept = segments.filter((segment) => segment.action !== 'drop');
+  // Tum bolumler "yerde/kalkis oncesi" sayilip atildiysa (orn. dusuk irtifada
+  // seyreden gercek bir cekim) is'i cokertmek yerine ham klibi oldugu gibi
+  // kullan - telemetri-yok yolundaki fallback ile ayni mantik.
+  if (kept.length === 0) {
+    Logger.warn('Hiz plani tum bolumleri atti (dusuk irtifa) - klip oldugu gibi kullanilacak');
+    segments = [
+      {
+        startSec: 0,
+        endSec: sourceDurationSec,
+        action: 'keep',
+        factor: 1,
+        speedMps: 0,
+        altM: 0,
+        reason: 'tum bolumler atilmisti, ham klip korundu',
+      },
+    ];
+    outputDurationSec = sourceDurationSec;
+    kept = segments;
+  }
   Logger.info(
     `Hiz plani: ${sourceDurationSec.toFixed(0)}sn -> ${outputDurationSec.toFixed(0)}sn ` +
       `(${segments.length - kept.length} bolum atildi, ` +
