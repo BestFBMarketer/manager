@@ -11,6 +11,7 @@ import { dirname, join } from 'node:path';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
 import { TIMEOUTS } from '../config/constants.js';
+import { startAssetServer, rewriteAssetPaths } from './renderRemotion.js';
 
 /**
  * Videodan bir kare çıkarır, sonra Remotion'ın Thumbnail still kompozisyonuyla
@@ -33,6 +34,7 @@ export async function generateThumbnail(
   const frameTimestampSec = Math.max(0.5, videoDurationSec * 0.3);
   const framePath = outputPath.replace(/\.jpg$/, '_frame.jpg');
   const propsPath = join('data/work', `thumb_props_${Date.now()}.json`);
+  let assetServer: { port: number; close: () => Promise<void> } | undefined;
 
   try {
     Logger.debug(`Thumbnail için kare çıkarılıyor: ${videoPath} @ ${frameTimestampSec.toFixed(1)}s`);
@@ -43,13 +45,19 @@ export async function generateThumbnail(
     );
 
     // Remotion CLI'nin --props bayrağı base64 desteklemez, JSON dosya yolu bekler.
+    // imageSrc yerel HTTP sunucusu uzerinden servis edilir (renderRemotion.ts ile ayni gerekce).
     await mkdir('data/work', { recursive: true });
-    await writeFile(propsPath, JSON.stringify({ imageSrc: framePath, text: thumbnailText }));
+    assetServer = await startAssetServer(process.cwd());
+    const props = rewriteAssetPaths({ imageSrc: framePath, text: thumbnailText }, `http://127.0.0.1:${assetServer.port}`);
+    await writeFile(propsPath, JSON.stringify(props));
 
+    // Windows'ta npx bir .cmd betigidir - shell:true olmadan spawn EINVAL verir.
     await run(
       'npx',
       ['remotion', 'still', 'remotion/index.ts', 'Thumbnail', outputPath, `--props=${propsPath}`],
       TIMEOUTS.RENDER_MS,
+      undefined,
+      process.platform === 'win32',
     );
 
     Logger.success(`Thumbnail hazır: ${outputPath}`);
@@ -59,5 +67,6 @@ export async function generateThumbnail(
     throw error;
   } finally {
     await rm(propsPath, { force: true }).catch(() => undefined);
+    await assetServer?.close();
   }
 }

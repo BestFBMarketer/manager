@@ -12,6 +12,7 @@ import { TIMEOUTS, VIDEO } from '../config/constants.js';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
 import type { SpeedPlan } from './speedPlanner.js';
+import { videoEncoderArgs } from './videoEncoder.js';
 
 export interface ApplyOptions {
   inputPath: string;
@@ -19,6 +20,14 @@ export interface ApplyOptions {
   plan: SpeedPlan;
   /** Orijinal ses korunacaksa tempo da ayarlanir (drone ruzgari genelde atilir) */
   keepAudio?: boolean;
+  /**
+   * Verilirse ciktiyi bu boyuta indirger (orn. drone kaynagi 4K, hedef 1920x1080).
+   * Kaynagi gereksiz yere yuksek cozunurlukte tasimak sonraki adimlari (ozellikle
+   * Remotion'un OffthreadVideo ile frame-frame decode etmesini) ciddi yavaslatir -
+   * zaten hicbir yerde 4K olarak kullanilmiyorsa burada indirgemek kalite kaybetmez.
+   */
+  targetWidth?: number;
+  targetHeight?: number;
 }
 
 /**
@@ -90,8 +99,13 @@ export async function applySpeedPlan(options: ApplyOptions): Promise<string> {
       `[outv]${options.keepAudio ? '[outa]' : ''}`,
   );
 
-  // Hizlandirma sonrasi kare tekrarlarini duzeltmek icin sabit fps'e oturtulur.
-  filters.push(`[outv]fps=${VIDEO.FPS},format=${VIDEO.PIXEL_FORMAT}[outvf]`);
+  // Hizlandirma sonrasi kare tekrarlarini duzeltmek icin sabit fps'e oturtulur;
+  // hedef boyut verilmisse burada indirgenir (bkz. targetWidth/targetHeight aciklamasi).
+  const scaleStep = options.targetWidth && options.targetHeight
+    ? `scale=${options.targetWidth}:${options.targetHeight}:force_original_aspect_ratio=decrease,` +
+      `pad=${options.targetWidth}:${options.targetHeight}:(ow-iw)/2:(oh-ih)/2,`
+    : '';
+  filters.push(`[outv]${scaleStep}fps=${VIDEO.FPS},format=${VIDEO.PIXEL_FORMAT}[outvf]`);
 
   const args = [
     '-hide_banner',
@@ -105,9 +119,7 @@ export async function applySpeedPlan(options: ApplyOptions): Promise<string> {
   else args.push('-an');
 
   args.push(
-    '-c:v', 'libx264',
-    '-preset', 'medium',
-    '-crf', '19',
+    ...videoEncoderArgs(19),
     '-movflags', '+faststart',
     options.outputPath,
   );

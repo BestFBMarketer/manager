@@ -130,7 +130,7 @@ export async function runStoryNarrativeJob(
         mood: scene.mood,
         durationSec: voiceResult.durationSec,
         scene: {
-          // renderRemotion --public-dir=<proje koku> ile cagriliyor - goreli yol yeterli.
+          // renderRemotion goreli gorsel yolunu kendi yerel HTTP sunucusu uzerinden servis eder.
           visualSrc: visual.localPath,
           visualKind: visual.kind,
           text: scene.text,

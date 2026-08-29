@@ -23,7 +23,7 @@ import { selectTracksForSegments } from '../../music/selector.js';
 import { loadMusicLibrary } from '../../music/library.js';
 import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
 import { buildPoiCues } from '../../poi/poiTimeline.js';
-import { writeVideoMetadata } from '../../analysis/channelWriter.js';
+import { writeVideoMetadata, writeIntroNarration } from '../../analysis/channelWriter.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
 import { generateThumbnail } from '../../render/thumbnail.js';
 import { resolveHotelFacts } from '../../hotelData/resolver.js';
@@ -31,6 +31,7 @@ import type { HotelFacts } from '../../hotelData/types.js';
 import type { PoiCueProps } from '../../../remotion/compositions/HotelTour.js';
 import type { InfoChip } from '../../../remotion/components/InfoChips.js';
 import type { JobRow, StageResult } from './types.js';
+import { VIDEO } from '../../config/constants.js';
 
 interface HotelTourInput {
   hotelName?: string;
@@ -158,10 +159,16 @@ export async function runHotelTourJob(
     // 4. Kurguyu uygula
     Logger.debug(`[job ${jobId}] Kurgu uygulanıyor`);
     const editedVideoPath = join(workDir, `edited_${jobId}.mp4`);
+    // Kaynak (drone) genelde 4K - Remotion'a hedeften daha yuksek cozunurluk
+    // vermek kaliteyi artirmiyor, sadece OffthreadVideo'nun frame-frame decode
+    // suresini kata kata uzatiyor (bkz. applySpeedPlan.ts targetWidth/Height notu).
+    const isVertical = compositionId === 'HotelTourVertical';
     await applySpeedPlan({
       inputPath: videoPath,
       outputPath: editedVideoPath,
       plan: speedPlan,
+      targetWidth: isVertical ? VIDEO.VERTICAL_WIDTH : VIDEO.LANDSCAPE_WIDTH,
+      targetHeight: isVertical ? VIDEO.VERTICAL_HEIGHT : VIDEO.LANDSCAPE_HEIGHT,
     });
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('speed_applied', jobId);
@@ -206,34 +213,9 @@ export async function runHotelTourJob(
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('music_selected', jobId);
 
-    // 8. Seslendirme
-    Logger.debug(`[job ${jobId}] Seslendirme yapılıyor`);
-    const narrativeText = `Hoş geldiniz! Bu muhteşem otel ve çevresini keşfetmeye hazır mısınız?`;
-    const voicePath = join(workDir, `voice_${jobId}.wav`);
-    await synthesizeSpeech({
-      text: narrativeText,
-      voiceRef: defaultVoiceRef(),
-      outputPath: voicePath,
-    });
-
-    db.prepare('UPDATE job SET stage=? WHERE id=?').run('voice_synthesized', jobId);
-
-    // 9. Ses karışımı - mixAudio hem videoyu hem miksajlanmış sesi tek dosyada
-    // birleştirir (-map 0:v + -map [out]), çıktı doğrudan Remotion'a girecek
-    // videoSrc'dir; ayrı bir muxing adımına gerek yoktur.
-    Logger.debug(`[job ${jobId}] Ses katmanları karışılıyor`);
-    const mixedVideoPath = join(workDir, `mixed_${jobId}.mp4`);
-    await mixAudio({
-      videoPath: editedVideoPath,
-      musicSegments: musicPlacements,
-      voicePath,
-      outputPath: mixedVideoPath,
-      videoDurationSec: speedPlan.outputDurationSec,
-    });
-
-    db.prepare('UPDATE job SET stage=? WHERE id=?').run('audio_mixed', jobId);
-
-    // 10. Metadata oluşturma
+    // 8. Metadata + acilis anlatimi - TTS'ten once uretilir cunku seslendirme
+    // metni kanalin dilinde (channel.language) olmali; ikisi ayni baglami
+    // (metadataContext) kullanir, tek LLM turu icin degil ama tutarlilik icin.
     Logger.debug(`[job ${jobId}] Metadata oluşturuluyor`);
     const metadataContext = {
       subject: jobInput.hotelName ? `${jobInput.hotelName} ve çevresindeki turizm noktaları` : 'Otel ve çevresindeki turizm noktaları',
@@ -247,6 +229,35 @@ export async function runHotelTourJob(
     const metadata = await writeVideoMetadata(channel, metadataContext);
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('metadata_generated', jobId);
+
+    // 9. Seslendirme - anlatim metni kanalin diline gore LLM'den gelir
+    // (sabit tek-dilli metin TTS'e yanlis dilde metin vererek bozuk/robotik
+    // sese yol aciyordu - orn. Almanca kanalda Turkce metin).
+    Logger.debug(`[job ${jobId}] Seslendirme yapılıyor`);
+    const narrativeText = await writeIntroNarration(channel, metadataContext);
+    const voicePath = join(workDir, `voice_${jobId}.wav`);
+    await synthesizeSpeech({
+      text: narrativeText,
+      voiceRef: defaultVoiceRef(),
+      outputPath: voicePath,
+    });
+
+    db.prepare('UPDATE job SET stage=? WHERE id=?').run('voice_synthesized', jobId);
+
+    // 10. Ses karışımı - mixAudio hem videoyu hem miksajlanmış sesi tek dosyada
+    // birleştirir (-map 0:v + -map [out]), çıktı doğrudan Remotion'a girecek
+    // videoSrc'dir; ayrı bir muxing adımına gerek yoktur.
+    Logger.debug(`[job ${jobId}] Ses katmanları karışılıyor`);
+    const mixedVideoPath = join(workDir, `mixed_${jobId}.mp4`);
+    await mixAudio({
+      videoPath: editedVideoPath,
+      musicSegments: musicPlacements,
+      voicePath,
+      outputPath: mixedVideoPath,
+      videoDurationSec: speedPlan.outputDurationSec,
+    });
+
+    db.prepare('UPDATE job SET stage=? WHERE id=?').run('audio_mixed', jobId);
 
     // 11. Remotion render - HotelTourProps sözleşmesine göre
     Logger.debug(`[job ${jobId}] Remotion render başlıyor (${compositionId})`);
@@ -262,13 +273,12 @@ export async function runHotelTourJob(
     const renderResult = await renderRemotion(
       compositionId,
       {
-        // renderRemotion --public-dir=<proje koku> ile cagriliyor, bu yuzden
-        // proje kokune goreli yol Remotion'un statik sunucusunda dogru cozulur.
         videoSrc: mixedVideoPath,
         title: metadata.title,
         cues,
         channelHandle: channel.label,
         titleDurationSec: 3,
+        totalDurationSec: speedPlan.outputDurationSec,
         infoChips: buildInfoChips(hotelFacts),
       },
       outputPath,

@@ -11,6 +11,7 @@ import { dirname } from 'node:path';
 import { TIMEOUTS, TRANSITION, VIDEO } from '../config/constants.js';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
+import { videoEncoderArgs } from './videoEncoder.js';
 
 /**
  * FFmpeg xfade gecis tipleri.
@@ -75,9 +76,7 @@ export async function renderDayNightTransition(options: TransitionOptions): Prom
     '-filter_complex', filters.join(';'),
     '-map', '[out]',
     '-an',
-    '-c:v', 'libx264',
-    '-preset', 'medium',
-    '-crf', '19',
+    ...videoEncoderArgs(19),
     '-movflags', '+faststart',
     options.outputPath,
   ];

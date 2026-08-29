@@ -12,6 +12,7 @@ import { TIMEOUTS, VIDEO } from '../config/constants.js';
 import { run } from '../core/exec.js';
 import { Logger } from '../core/logger.js';
 import { landscapeFilter, verticalFilter, type FramingMode } from './verticalFrame.js';
+import { videoEncoderArgs } from './videoEncoder.js';
 
 export interface CutOptions {
   inputPath: string;
@@ -64,9 +65,7 @@ export async function cutAndFrame(options: CutOptions): Promise<string> {
   }
 
   args.push(
-    '-c:v', 'libx264',
-    '-preset', 'medium',
-    '-crf', '18',
+    ...videoEncoderArgs(18),
     '-pix_fmt', VIDEO.PIXEL_FORMAT,
     '-c:a', 'aac',
     '-b:a', '192k',

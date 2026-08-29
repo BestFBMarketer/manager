@@ -119,6 +119,47 @@ export async function writeVideoMetadata(
   return data;
 }
 
+function isIntroNarration(value: unknown): value is { narration: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).narration === 'string' &&
+    (value as Record<string, unknown>).narration !== ''
+  );
+}
+
+/**
+ * Videonun acilisinda seslendirilecek kisa, dogal karsilama metnini kanalin
+ * dilinde uretir - TTS'e verilecek metin bu yuzden altyazi/aciklama gibi
+ * degil, yuksek sesle soylenecek konusma dilinde olmali.
+ *
+ * @param channel Hedef kanal (dil ve ses tonu icin)
+ * @param context Videonun konusu ve icerigi
+ * @returns Kanal dilinde, 1-2 cumlelik konusma metni
+ */
+export async function writeIntroNarration(channel: ChannelConfig, context: WriteContext): Promise<string> {
+  const langName = LANGUAGE_NAMES[channel.language];
+
+  const system = [
+    `You write a short SPOKEN video intro narration for the channel "${channel.label}", in ${langName} (${channel.language}).`,
+    `Audience: ${channel.audience}`,
+    '1-2 natural, welcoming sentences a narrator would say out loud at the start of the video - not a caption or description.',
+    'No hashtags, no emoji, no bullet points, no quotation marks.',
+    'Return ONLY this JSON: {"narration": string}',
+  ].join('\n');
+
+  const userPrompt = [`Subject: ${context.subject}`, 'Shown in the video:', ...context.highlights.map((item) => `- ${item}`)]
+    .filter(Boolean)
+    .join('\n');
+
+  const { data } = await callLlmJson<{ narration: string }>(
+    { task: 'metadata', system, user: userPrompt },
+    isIntroNarration,
+  );
+
+  return data.narration;
+}
+
 /**
  * POI ekran kartlari icin kisa not uretir.
  *

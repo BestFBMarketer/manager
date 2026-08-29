@@ -10,7 +10,7 @@ import { Composition, Still } from 'remotion';
 import { fontFaceCss } from './theme';
 import { FunnyClip, funnyClipDurationInFrames, type FunnyClipProps } from './compositions/FunnyClip';
 import { FunnyRanking, rankingDurationInFrames, type FunnyRankingProps } from './compositions/FunnyRanking';
-import { HotelTour, type HotelTourProps } from './compositions/HotelTour';
+import { HotelTour, hotelTourDurationInFrames, type HotelTourProps } from './compositions/HotelTour';
 import { StoryNarrative, storyNarrativeDurationInFrames, type StoryNarrativeProps } from './compositions/StoryNarrative';
 import { Thumbnail, type ThumbnailProps } from './compositions/Thumbnail';
 import { ShortsDerivative, shortsDerivativeDurationInFrames, type ShortsDerivativeProps } from './compositions/ShortsDerivative';
@@ -72,6 +72,7 @@ const TOUR_DEFAULTS: HotelTourProps = {
   ],
   channelHandle: '@bestmarketer',
   titleDurationSec: 3,
+  totalDurationSec: 30,
 };
 
 export const RemotionRoot: React.FC = () => {
@@ -109,7 +110,10 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={TOUR_DEFAULTS}
         fps={FPS}
         {...VERTICAL}
-        durationInFrames={FPS * 30}
+        durationInFrames={hotelTourDurationInFrames(TOUR_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: hotelTourDurationInFrames(props, FPS),
+        })}
       />
 
       <Composition
@@ -118,7 +122,10 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={TOUR_DEFAULTS}
         fps={FPS}
         {...LANDSCAPE}
-        durationInFrames={FPS * 60}
+        durationInFrames={hotelTourDurationInFrames(TOUR_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: hotelTourDurationInFrames(props, FPS),
+        })}
       />
 
       <Composition

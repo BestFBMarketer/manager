@@ -25,11 +25,17 @@ export type HotelTourProps = {
   cues: PoiCueProps[];
   channelHandle: string;
   titleDurationSec: number;
+  /** Kurgulanmis videoSrc'nin gercek suresi - composition'in durationInFrames'i buna gore hesaplanir. */
+  totalDurationSec: number;
   /** Otel gercekleri - hotelData zincirinden gelen, kaynagi olan alanlar (bkz. src/hotelData) */
   infoChips?: InfoChip[];
   /** InfoChips'in ekranda kalacagi sure - genelde intro'dan hemen sonra */
   infoChipsAtSec?: number;
   infoChipsDurationSec?: number;
+}
+
+export function hotelTourDurationInFrames(props: HotelTourProps, fps: number): number {
+  return Math.round(props.totalDurationSec * fps);
 }
 
 export const HotelTour: React.FC<HotelTourProps> = ({
