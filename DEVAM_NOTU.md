@@ -20,6 +20,17 @@ kontrol yanılıyordu). Yani "kod doğru mu" sorusuna evet, "gerçek bir video �
 yayınladı mı" sorusuna henüz hayır — `.env` doldurulup ilk gerçek deneme PC'den yapılacak
 (aşağıdaki "PC'de test" bölümü).
 
+**Güncelleme (2026-08-29):** İlk gerçek uçtan uca render başarılı — gerçek DJI drone
+klibi (GPS telemetrili), gerçek Gemini API, gerçek Piper TTS ile HotelTour videosu
+üretildi ve onay kuyruğuna düştü (1920x1080, 106sn, thumbnail dahil). Yolda 9 gerçek
+kod hatası bulunup düzeltildi (detay: `AUDIT.md` 2026-08-29 girişi + commit `1429822`)
+— en önemlileri: HotelTour composition süresi sabit 60sn'ye kilitliymiş (gerçek video
+süresi kırpılıyordu), TTS her zaman sabit Türkçe metin okuyordu (kanal dili ne olursa
+olsun — düzeltildi, artık LLM kanalın dilinde üretiyor), ve 4K kaynak gereksiz yere
+Remotion'a olduğu gibi veriliyordu (1080p'ye indirgeyince render **4.5x hızlandı**,
+kalite kaybı yok). Kullanıcı düzeltilmiş örneği inceliyor, sonraki adım YouTube
+OAuth kurulumu + ilk gerçek yayın denemesi.
+
 **Repo:** `BestFBMarketer/shorts-factory` (private) → branch `main`
 
 **Plan degisikligi (2026-08-28):** Ilk plan VPS'e (Ubuntu) kurup oradan test etmekti.

@@ -4,6 +4,81 @@
 
 ---
 
+## 2026-08-29 — İlk gerçek uçtan uca render (HotelTour, drone klip) + hız/doğruluk düzeltmeleri
+
+### Yapılan iş özeti
+
+Gerçek bir DJI drone klibiyle (`DJI_20260516135216_0008_D.MP4`, GPS telemetrili, 106sn)
+HotelTour worker stage'i ilk kez gerçek şekilde uçtan uca çalıştırıldı: telemetri parse →
+hız planı → kesim → ses miksajı (Piper TTS) → LLM metadata → Remotion render → thumbnail →
+onay kuyruğu. Süreçte **9 gerçek kod hatası** bulunup düzeltildi (detay: commit `1429822`,
+mesajında tek tek listelendi). Özet:
+
+1. `isAvailable()` yt-dlp'yi yanlış bayrakla (`-version`) kontrol ediyordu → yanlış negatif.
+2. Piper TTS shell pipe üzerinden çağrılıyordu, Windows path'lerindeki ters slash'lar
+   POSIX shell'de kaçış karakteri sayılıp yolu bozuyordu → stdin'e doğrudan yazmaya geçildi.
+3. `audioMix.ts`: müziksiz durumda `asplit` filtresinin bir çıkışı kullanılmıyordu →
+   ffmpeg filtergraph hatası. Müzik yoksa split hiç yapılmıyor artık.
+4. `npx` Windows'ta `.cmd` dosyası, `spawn()` `shell:true` olmadan ENOENT/EINVAL veriyor.
+5. Remotion'a mutlak/göreli yerel dosya yolu verilemiyor (public-dir tüm proje kökünü
+   GB'larca kopyalıyor, kopyalama bitmeden istek gelirse 404) → `renderRemotion.ts` artık
+   kendi hafif HTTP asset sunucusunu açıyor, dosyaları talep üzerine (kopyasız) sunuyor.
+6. **`HotelTourLandscape`/`HotelTourVertical` composition'ı `durationInFrames`'i sabit
+   60sn/30sn'ye kilitlemişti** (diğer tüm composition'larda `calculateMetadata` ile
+   dinamik hesaplanıyordu, HotelTour'da unutulmuş) → 106sn'lik gerçek video 60sn'ye
+   kırpılıyordu. `totalDurationSec` prop'u + `calculateMetadata` eklendi.
+7. **TTS'e her zaman sabit Türkçe metin veriliyordu**, kanal dili ne olursa olsun (mevcut
+   kanalların ikisi de de/en) → Almanca ses modeliyle Türkçe metin okutulunca bozuk/robotik
+   çıkıyordu. `writeIntroNarration()` eklendi (writeVideoMetadata ile aynı desende),
+   anlatım artık kanalın dilinde LLM'den geliyor.
+8. **Asıl render-hızı darboğazı GPU değil çözünürlüktü**: 4K drone kaynağı, hedef 1080p
+   olduğu halde olduğu gibi Remotion'a veriliyordu — OffthreadVideo 4 kat fazla piksel
+   decode ediyordu. `applySpeedPlan.ts`'e `targetWidth/targetHeight` eklendi, kesim
+   adımında 1080p'ye indirgeniyor. Sonuç: 4K+concurrency=1 → 1118.6sn render;
+   1080p+concurrency=10+NVENC → 248.6sn (**~4.5x hızlanma**), kalite kaybı yok (zaten
+   hedef 1080p).
+9. Tamamen düşük irtifada seyreden gerçek bir klip `speedPlanner.ts`'de tüm bölümleri
+   "yerde" sayıp atıyor, `applySpeedPlan` "kurgulanacak görüntü kalmadı" ile hard-fail
+   oluyordu → tüm bölümler atılırsa artık ham klip fallback'i devreye giriyor (telemetri-yok
+   yolundakiyle aynı mantık).
+
+Ayrıca: `videoEncoder.ts` (yeni) — `VIDEO_HW_ENCODER=h264_nvenc` ile bu makinenin
+RTX 3060'ı opsiyonel olarak devreye alınabiliyor (VPS'te boş bırakılırsa CPU/libx264
+kalır, davranış değişmez). `REMOTION_CONCURRENCY` de aynı şekilde opsiyonel/env-driven.
+
+### Test/doğrulama
+
+- **Gerçek, tam uçtan uca başarılı render** (2 kez, biri düzeltilmiş anlatımla): 1920x1080,
+  106.03sn (kaynakla birebir), ses+görüntü doğru, thumbnail üretildi, onay kuyruğuna düştü.
+- LLM metadata + anlatım: gerçek Gemini çağrısıyla doğru Almanca çıktı doğrulandı.
+- `npm run typecheck` ve `panel-web` build temiz.
+- Kullanıcıya iki örnek video gönderildi (ilk sürüm: yanlış süre+dil; düzeltilmiş sürüm:
+  doğru süre+dil) — görsel/işitsel olarak doğrudan doğrulandı.
+
+### Açık riskler / bilinen eksikler
+
+- Müzik kütüphanesi (`data/music/library.json`) hâlâ boş — video şu an müziksiz üretiliyor
+  (nazikçe atlanıyor, crash etmiyor, ama gerçek yayın için müzik dosyaları eklenmeli).
+- Piper (CPU TTS) ses kalitesi Voicebox'a (GPU, kurulu değil) göre daha robotik — dil hatası
+  düzeltildi ama ses tonu kalitesi ayrı bir konu, kullanıcı henüz yeni sesi değerlendirmedi.
+- Bu oturumda job'u elle `pending`'e resetleyip tekrar tekrar test etmek `render` tablosunun
+  `(job_id, status)` unique index'ine bir kez çarptı (aynı job için ikinci "done" satırı) —
+  gerçek üretim akışında bir job normalde başarılı olduktan sonra tekrar kuyruklanmaz, bu
+  sadece test metodolojisinin bir yan etkisiydi, kod tarafında bir şey değiştirilmedi.
+- VPS'e ne zaman/nasıl geçileceği (14 canlı WordPress sitesiyle aynı sunucu, kaynak
+  paylaşımı) henüz kararlaştırılmadı — kullanıcı kendi VPS'i, risk tamamen kendi tercihi.
+- CapCut ile yarı-otomatik hibrit fikri brainstorm seviyesinde kaldı, resmi API yok
+  (topluluk tersine mühendislik draft formatı var, kırılgan) — uygulanmadı.
+
+### Sonraki adım
+
+1. Kullanıcının yeni (düzeltilmiş) örnek videoyu değerlendirmesi — ses tonu/kalite yeterli mi.
+2. Yeterliyse: gerçek YouTube OAuth kurulumu (`authYoutube.ts travel`) ve ilk gerçek yayın denemesi.
+3. Müzik kütüphanesi doldurulması (`MUSIC_LIBRARY_DIR`).
+4. VPS'e geçiş kararı ve zamanlaması.
+
+---
+
 ## 2026-08-28 (devam) — Repo taşıma + PC bloker çözümü
 
 ### Yapılan iş özeti
