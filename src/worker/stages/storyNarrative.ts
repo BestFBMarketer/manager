@@ -17,7 +17,7 @@ import { transcribeSource } from '../../story/transcribeSource.js';
 import { extractFactBrief } from '../../story/factBrief.js';
 import { writeNarrativeScript, type NarrativeScene } from '../../story/scriptWriter.js';
 import { sourceVisualForScene } from '../../story/visualSourcing.js';
-import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
+import { synthesizeSpeech, resolveChannelVoice } from '../../tts/router.js';
 import { selectTracksForSegments } from '../../music/selector.js';
 import { loadMusicLibrary } from '../../music/library.js';
 import { mixAudio, type MusicPlacement } from '../../edit/audioMix.js';
@@ -117,11 +117,15 @@ export async function runStoryNarrativeJob(
     Logger.debug(`[job ${jobId}] Sahneler seslendiriliyor ve görsel kaynaklanıyor`);
     const sceneResults: Array<{ mood: NarrativeScene['mood']; durationSec: number; scene: StoryScene }> = [];
     const voicePaths: string[] = [];
+    const voice = resolveChannelVoice(channel);
 
     for (let i = 0; i < script.scenes.length; i += 1) {
       const scene = script.scenes[i]!;
       const voicePath = join(workDir, `scene_voice_${i}.wav`);
-      const voiceResult = await synthesizeSpeech({ text: scene.text, voiceRef: defaultVoiceRef(), outputPath: voicePath });
+      const voiceResult = await synthesizeSpeech(
+        { text: scene.text, voiceRef: voice.voiceRef, outputPath: voicePath, language: channel.language },
+        voice.provider,
+      );
       voicePaths.push(voicePath);
 
       const visual = await sourceVisualForScene(scene.sceneKeyword, join(workDir, 'visuals'), i);

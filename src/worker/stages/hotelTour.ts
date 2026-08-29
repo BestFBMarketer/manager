@@ -17,7 +17,7 @@ import { parseGoproTelemetry } from '../../telemetry/goproGpmf.js';
 import type { TrackPoint } from '../../telemetry/types.js';
 import { planSpeed, type SpeedPlan } from '../../edit/speedPlanner.js';
 import { applySpeedPlan } from '../../edit/applySpeedPlan.js';
-import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
+import { synthesizeSpeech, resolveChannelVoice } from '../../tts/router.js';
 import { planMusicSegments, type MusicSegment } from '../../music/segmentPlanner.js';
 import { selectTracksForSegments } from '../../music/selector.js';
 import { loadMusicLibrary } from '../../music/library.js';
@@ -236,11 +236,11 @@ export async function runHotelTourJob(
     Logger.debug(`[job ${jobId}] Seslendirme yapılıyor`);
     const narrativeText = await writeIntroNarration(channel, metadataContext);
     const voicePath = join(workDir, `voice_${jobId}.wav`);
-    await synthesizeSpeech({
-      text: narrativeText,
-      voiceRef: defaultVoiceRef(),
-      outputPath: voicePath,
-    });
+    const voice = resolveChannelVoice(channel);
+    await synthesizeSpeech(
+      { text: narrativeText, voiceRef: voice.voiceRef, outputPath: voicePath, language: channel.language },
+      voice.provider,
+    );
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('voice_synthesized', jobId);
 

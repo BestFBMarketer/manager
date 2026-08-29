@@ -13,6 +13,8 @@ export interface TtsRequest {
   outputPath: string;
   /** 1.0 normal; ranking hattinda tempo icin hafif hizlandirilir */
   speed?: number;
+  /** Metnin dili (orn. channel.language) - Voicebox bunu gerektirir, Piper yok sayar */
+  language?: string;
 }
 
 export interface TtsResult {

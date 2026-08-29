@@ -17,7 +17,7 @@ import { fetchTimedCaptions } from '../../story/transcribeSource.js';
 import { findCandidates } from '../../analysis/candidateFinder.js';
 import { planRanking } from '../../analysis/rankingPlanner.js';
 import { cutAndFrame } from '../../edit/ffmpegCut.js';
-import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
+import { synthesizeSpeech, resolveChannelVoice } from '../../tts/router.js';
 import { mixAudio } from '../../edit/audioMix.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
 import { generateThumbnail } from '../../render/thumbnail.js';
@@ -77,6 +77,7 @@ export async function runFunnyRankingJob(
 
     // 5. Her sıra için: mutlak zamana çevir, kes, seslendir, karış
     const items: RankingItemProps[] = [];
+    const voice = resolveChannelVoice(channel);
     for (const item of plan.items) {
       const scored = scoredCandidates.find((c) => c.candidate.clipId === item.clipId);
       if (!scored) {
@@ -102,7 +103,10 @@ export async function runFunnyRankingJob(
       const itemInfo = await probe(itemClipPath);
 
       const voicePath = join(workDir, `voice_rank${item.rank}_${jobId}.wav`);
-      await synthesizeSpeech({ text: item.voiceLine, voiceRef: defaultVoiceRef(), outputPath: voicePath });
+      await synthesizeSpeech(
+        { text: item.voiceLine, voiceRef: voice.voiceRef, outputPath: voicePath, language: channel.language },
+        voice.provider,
+      );
 
       const mixedItemPath = join(workDir, `mixed_rank${item.rank}_${jobId}.mp4`);
       await mixAudio({

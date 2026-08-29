@@ -16,7 +16,7 @@ import { probe } from '../../ingest/probe.js';
 import { fetchTimedCaptions } from '../../story/transcribeSource.js';
 import { planFunnyClip } from '../../analysis/highlightPicker.js';
 import { cutAndFrame } from '../../edit/ffmpegCut.js';
-import { synthesizeSpeech, defaultVoiceRef } from '../../tts/router.js';
+import { synthesizeSpeech, resolveChannelVoice } from '../../tts/router.js';
 import { mixAudio } from '../../edit/audioMix.js';
 import { renderRemotion } from '../../render/renderRemotion.js';
 import { generateThumbnail } from '../../render/thumbnail.js';
@@ -81,7 +81,11 @@ export async function runFunnyClipJob(
     // 5. Yorum seslendirmesi
     Logger.debug(`[job ${jobId}] Yorum seslendiriliyor`);
     const voicePath = join(workDir, `voice_${jobId}.wav`);
-    await synthesizeSpeech({ text: plan.commentaryScript, voiceRef: defaultVoiceRef(), outputPath: voicePath });
+    const voice = resolveChannelVoice(channel);
+    await synthesizeSpeech(
+      { text: plan.commentaryScript, voiceRef: voice.voiceRef, outputPath: voicePath, language: channel.language },
+      voice.provider,
+    );
 
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('voice_synthesized', jobId);
 

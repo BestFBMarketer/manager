@@ -19,11 +19,21 @@ export interface ChannelSettings {
     instagram: boolean;
     tiktok: boolean;
   };
+  /**
+   * Bu kanal icin panelde secilmis ses (Ses sekmesi). Bos ise TTS_VOICE_REF
+   * (.env, tum kanallarda paylasilan tek varsayilan) + zincirin ilk hazir
+   * saglayicisi (Voicebox -> Piper) kullanilir.
+   */
+  ttsProvider: 'voicebox' | 'piper' | null;
+  /** ttsProvider='voicebox' ise profil id'si; 'piper' ise .onnx dosya yolu. */
+  voiceRef: string | null;
 }
 
 export const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
   shortsDerivativeEnabled: true,
   crossPost: { facebook: false, instagram: false, tiktok: false },
+  ttsProvider: null,
+  voiceRef: null,
 };
 
 /** Bilinmeyen/eksik alanlar sessizce varsayilana duser - eski satirlar da calisir kalir. */
@@ -51,6 +61,8 @@ export function parseChannelSettings(json: string): ChannelSettings {
       instagram: typeof crossPostRaw.instagram === 'boolean' ? crossPostRaw.instagram : false,
       tiktok: typeof crossPostRaw.tiktok === 'boolean' ? crossPostRaw.tiktok : false,
     },
+    ttsProvider: obj.ttsProvider === 'voicebox' || obj.ttsProvider === 'piper' ? obj.ttsProvider : null,
+    voiceRef: typeof obj.voiceRef === 'string' ? obj.voiceRef : null,
   };
 }
 

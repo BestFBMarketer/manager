@@ -84,6 +84,11 @@ export const api = {
       body: JSON.stringify({ platform, externalId }),
     }),
 
+  listVoices: () => request<VoicesResponse>('/voices'),
+  voiceboxPreviewUrl: (profileId: string) => `/api/voices/voicebox/${encodeURIComponent(profileId)}/preview`,
+  piperPreviewUrl: (modelPath: string, language: string) =>
+    `/api/voices/piper/preview?modelPath=${encodeURIComponent(modelPath)}&language=${encodeURIComponent(language)}`,
+
   listStoryReferences: (channelId: string) =>
     request<StoryReference[]>(`/channels/${channelId}/story-reference`),
   addStoryReference: (channelId: string, sourceUrl: string, label?: string) =>
@@ -147,6 +152,8 @@ export interface ScheduleRuleInput {
 export interface ChannelSettings {
   shortsDerivativeEnabled: boolean;
   crossPost: { facebook: boolean; instagram: boolean; tiktok: boolean };
+  ttsProvider: 'voicebox' | 'piper' | null;
+  voiceRef: string | null;
 }
 
 export interface ChannelConfig {
@@ -263,6 +270,23 @@ export interface MetaPage {
   id: string;
   name: string;
   instagramBusinessAccountId?: string;
+}
+
+export interface VoiceboxProfile {
+  id: string;
+  name: string;
+  language: string;
+}
+
+export interface PiperVoice {
+  modelPath: string;
+  label: string;
+  language: string;
+}
+
+export interface VoicesResponse {
+  voicebox: { available: boolean; profiles: VoiceboxProfile[]; error?: string };
+  piper: PiperVoice[];
 }
 
 export interface StoryReference {

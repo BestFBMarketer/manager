@@ -26,12 +26,18 @@ const CHAIN: TtsProvider[] = [voiceboxProvider, piperProvider];
 /**
  * Metni sese cevirir; zincirdeki ilk calisir saglayiciyi kullanir.
  * @param request Metin, ses kimligi ve cikti yolu
+ * @param preferredProvider Verilirse (kanalin settings.ttsProvider'i) o saglayici
+ *                          once denenir - yine de hazir degilse/hata verirse zincir
+ *                          normal sirasinda devam eder, is asla bu yuzden durmaz.
  * @returns Uretilen ses dosyasi ve suresi
  */
-export async function synthesizeSpeech(request: TtsRequest): Promise<TtsResult> {
+export async function synthesizeSpeech(request: TtsRequest, preferredProvider?: string | null): Promise<TtsResult> {
   const skipped: string[] = [];
+  const chain = preferredProvider
+    ? [...CHAIN].sort((a, b) => Number(b.name === preferredProvider) - Number(a.name === preferredProvider))
+    : CHAIN;
 
-  for (const provider of CHAIN) {
+  for (const provider of chain) {
     if (!(await provider.isConfigured())) {
       skipped.push(`${provider.name} (hazir degil)`);
       continue;
@@ -53,6 +59,21 @@ export async function synthesizeSpeech(request: TtsRequest): Promise<TtsResult> 
 /** Yapilandirilmis karakter sesi kimligi (.env: TTS_VOICE_REF). */
 export function defaultVoiceRef(): string {
   return optionalEnv('TTS_VOICE_REF') ?? '';
+}
+
+/**
+ * Kanalin panelde secilmis sesini (Ses sekmesi -> settings.ttsProvider/voiceRef)
+ * .env varsayilanina dusen bir cift olarak doner - worker stage'leri bunu tek
+ * yerden cagirir, boylece her stage kendi fallback mantigini tekrar etmez.
+ */
+export function resolveChannelVoice(channel: { settings: { ttsProvider: string | null; voiceRef: string | null } }): {
+  voiceRef: string;
+  provider: string | null;
+} {
+  return {
+    voiceRef: channel.settings.voiceRef ?? defaultVoiceRef(),
+    provider: channel.settings.ttsProvider,
+  };
 }
 
 export async function listTtsStatus(): Promise<Array<{ name: string; free: boolean; ready: boolean }>> {

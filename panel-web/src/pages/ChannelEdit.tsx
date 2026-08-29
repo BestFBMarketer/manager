@@ -5,6 +5,7 @@ import ScheduleRuleEditor from '../components/ScheduleRuleEditor.js';
 import StoryReferences from '../components/StoryReferences.js';
 import BatchProducer from '../components/BatchProducer.js';
 import Connections from '../components/Connections.js';
+import VoiceSettings from '../components/VoiceSettings.js';
 
 function toRuleInput(channel: ChannelConfig): ScheduleRuleInput {
   const rule = channel.scheduleRule;
@@ -232,6 +233,8 @@ export default function ChannelEdit() {
       {usesReferenceDiscovery && (channel.topicSource === 'reference' || channel.topicSource === 'both') && (
         <StoryReferences channelId={id} />
       )}
+
+      <VoiceSettings channel={channel} onChannelUpdate={setChannel} />
 
       <Connections channelId={id} />
 
