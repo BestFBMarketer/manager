@@ -22,6 +22,7 @@ import { reviewRouter } from './routes/review.js';
 import { storyReferencesRouter } from './routes/storyReferences.js';
 import { batchRouter } from './routes/batch.js';
 import { publishTargetsRouter } from './routes/publishTargets.js';
+import { repurposeRouter } from './routes/repurpose.js';
 import { SqliteSessionStore } from './sessionStore.js';
 import { PUBLIC_MEDIA_DIR } from '../publish/publicMediaHost.js';
 
@@ -77,6 +78,7 @@ function createApp(): express.Express {
   app.use('/api', requireAuth, storyReferencesRouter());
   app.use('/api', requireAuth, batchRouter());
   app.use('/api', requireAuth, publishTargetsRouter());
+  app.use('/api', requireAuth, repurposeRouter());
 
   if (existsSync(FRONTEND_DIST)) {
     app.use(express.static(FRONTEND_DIST));

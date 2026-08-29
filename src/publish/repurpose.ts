@@ -1,13 +1,17 @@
 // =====================================
 // MODULE: Repurpose
 // Purpose: Yayınlanmış uzun videodan N adet Shorts kesiti planlar (LLM shortsPlan görevi)
-// Dependencies: llm/router, core/logger
+//          ve is kuyruguna yazar - hem otomatik zamanlayici (worker/runQueue.ts) hem de
+//          panelden manuel tetikleme (panel/routes/repurpose.ts) ayni fonksiyonu kullanir.
+// Dependencies: llm/router, core/logger, core/db
 // Author: BestMarketer Team
-// Last Modified: 2026-08-23
+// Last Modified: 2026-08-29
 // =====================================
 
+import type Database from 'better-sqlite3';
 import { callLlmJson } from '../llm/router.js';
 import { Logger } from '../core/logger.js';
+import { PIPELINE } from '../config/constants.js';
 
 export interface DerivativePlan {
   startSec: number;
@@ -82,4 +86,78 @@ export async function planShortsDerivatives(
 
   Logger.success(`${clamped.length}/${count} Shorts kesiti planlandı (${subject})`);
   return clamped;
+}
+
+export interface QueueDerivativesInput {
+  parentJobId: number;
+  channelId: string;
+  outputPath: string;
+  videoId: string;
+  publishAt: string;
+  subject: string;
+  highlights: string[];
+  durationSec: number;
+  count: number;
+  /** Verilmezse PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS kullanilir. */
+  offsetDays?: number[];
+}
+
+/**
+ * Bir uzun video icin N Shorts kesiti planlar ve her biri icin yeni bir
+ * job + shorts_derivative satiri acar. Ayni ebeveyn icin birden fazla kez
+ * cagrilabilir (otomatik zamanlayici + panelden manuel tetikleme ayni
+ * fonksiyonu kullanir) - slot_index her zaman mevcut en yuksek degerin
+ * ustune eklenir, boylece shorts_derivative(parent_job_id, slot_index)
+ * UNIQUE kisiti hicbir zaman ihlal edilmez.
+ * @returns Kuyruga eklenen is sayisi
+ */
+export async function queueShortsDerivatives(db: Database.Database, input: QueueDerivativesInput): Promise<number> {
+  const plans = await planShortsDerivatives(input.subject, input.highlights, input.durationSec, input.count);
+  if (plans.length === 0) return 0;
+
+  const offsetDays = input.offsetDays ?? [...PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS];
+  const parentPublishAt = new Date(input.publishAt);
+  const longVideoUrl = `https://youtu.be/${input.videoId}`;
+
+  const { maxSlot } = db
+    .prepare('SELECT COALESCE(MAX(slot_index), -1) AS maxSlot FROM shorts_derivative WHERE parent_job_id = ?')
+    .get(input.parentJobId) as { maxSlot: number };
+
+  const insertJob = db.prepare(
+    `INSERT INTO job (channel_id, template, source_ref, target_dur_sec, status, input_json, target_publish_at)
+     VALUES (?, 'ShortsDerivative', ?, ?, 'pending', ?, ?)`,
+  );
+  const insertDerivative = db.prepare(
+    `INSERT INTO shorts_derivative (parent_job_id, child_job_id, start_sec, end_sec, slot_index) VALUES (?, ?, ?, ?, ?)`,
+  );
+
+  const tx = db.transaction(() => {
+    plans.forEach((plan, index) => {
+      const offsetDay = offsetDays[index] ?? offsetDays[offsetDays.length - 1] ?? 1;
+      const targetPublishAt = new Date(parentPublishAt.getTime() + offsetDay * 24 * 60 * 60 * 1000);
+
+      const inputJson = JSON.stringify({
+        parentVideoPath: input.outputPath,
+        startSec: plan.startSec,
+        endSec: plan.endSec,
+        hook: plan.hook,
+        derivativeTitle: plan.title,
+        longVideoUrl,
+      });
+
+      const jobResult = insertJob.run(
+        input.channelId,
+        input.outputPath,
+        Math.round(plan.endSec - plan.startSec),
+        inputJson,
+        targetPublishAt.toISOString(),
+      );
+
+      insertDerivative.run(input.parentJobId, Number(jobResult.lastInsertRowid), plan.startSec, plan.endSec, maxSlot + 1 + index);
+    });
+  });
+  tx();
+
+  Logger.success(`[repurpose] iş #${input.parentJobId} için ${plans.length} Shorts işi kuyruğa eklendi`);
+  return plans.length;
 }

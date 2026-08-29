@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar.js';
 import ChannelEdit from './pages/ChannelEdit.js';
 import NewChannel from './pages/NewChannel.js';
 import Calendar from './pages/Calendar.js';
+import Repurpose from './pages/Repurpose.js';
 import Review from './pages/Review.js';
 import BatchProgress from './pages/BatchProgress.js';
 
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/channels/new" element={<NewChannel />} />
           <Route path="/channels/:id" element={<ChannelEdit />} />
           <Route path="/channels/:id/calendar" element={<Calendar />} />
+          <Route path="/channels/:id/repurpose" element={<Repurpose />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

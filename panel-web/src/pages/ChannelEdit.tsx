@@ -97,11 +97,18 @@ export default function ChannelEdit() {
     <div>
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h2 style={{ marginTop: 0 }}>{channel.label}</h2>
-        <Link to={`/channels/${id}/calendar`}>
-          <button type="button" className="secondary">
-            Takvimi gor
-          </button>
-        </Link>
+        <div className="row" style={{ gap: 8 }}>
+          <Link to={`/channels/${id}/calendar`}>
+            <button type="button" className="secondary">
+              Takvimi gor
+            </button>
+          </Link>
+          <Link to={`/channels/${id}/repurpose`}>
+            <button type="button" className="secondary">
+              Shorts türet
+            </button>
+          </Link>
+        </div>
       </div>
       <p className="muted">
         {channel.id} · {channel.channelType === 'story' ? 'hikaye kanali' : 'standart kanal'} · {channel.refreshTokenEnvKey}

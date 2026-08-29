@@ -12,7 +12,7 @@ import { Logger } from '../core/logger.js';
 import { notifyEmail } from '../core/notify.js';
 import { WORKER, PIPELINE } from '../config/constants.js';
 import { getChannel } from '../config/channels.js';
-import { planShortsDerivatives } from '../publish/repurpose.js';
+import { queueShortsDerivatives } from '../publish/repurpose.js';
 import type { JobRow, StageResult } from './stages/types.js';
 
 export type { JobRow };
@@ -228,50 +228,21 @@ async function planPendingRepurposing(db: Database.Database): Promise<void> {
 
     const count = Math.min(channel.shortsDerivativeCount, PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS.length);
     const context = JSON.parse(row.metadata_context_json) as { subject: string; highlights: string[]; durationSec: number };
-    const longVideoUrl = `https://youtu.be/${row.video_id}`;
 
     Logger.info(`[repurpose] ${channel.label}: iş #${row.job_id} için ${count} Shorts kesiti planlanıyor`);
 
     try {
-      const plans = await planShortsDerivatives(context.subject, context.highlights, context.durationSec, count);
-      const parentPublishAt = new Date(row.publish_at);
-
-      const insertJob = db.prepare(
-        `INSERT INTO job (channel_id, template, source_ref, target_dur_sec, status, input_json, target_publish_at)
-         VALUES (?, 'ShortsDerivative', ?, ?, 'pending', ?, ?)`,
-      );
-      const insertDerivative = db.prepare(
-        `INSERT INTO shorts_derivative (parent_job_id, child_job_id, start_sec, end_sec, slot_index) VALUES (?, ?, ?, ?, ?)`,
-      );
-
-      const tx = db.transaction(() => {
-        plans.forEach((plan, index) => {
-          const offsetDays = PIPELINE.DERIVATIVE_PUBLISH_OFFSET_DAYS[index] ?? 1;
-          const targetPublishAt = new Date(parentPublishAt.getTime() + offsetDays * 24 * 60 * 60 * 1000);
-
-          const inputJson = JSON.stringify({
-            parentVideoPath: row.output_path,
-            startSec: plan.startSec,
-            endSec: plan.endSec,
-            hook: plan.hook,
-            derivativeTitle: plan.title,
-            longVideoUrl,
-          });
-
-          const jobResult = insertJob.run(
-            channel.id,
-            row.output_path,
-            Math.round(plan.endSec - plan.startSec),
-            inputJson,
-            targetPublishAt.toISOString(),
-          );
-
-          insertDerivative.run(row.job_id, Number(jobResult.lastInsertRowid), plan.startSec, plan.endSec, index);
-        });
+      await queueShortsDerivatives(db, {
+        parentJobId: row.job_id,
+        channelId: channel.id,
+        outputPath: row.output_path,
+        videoId: row.video_id,
+        publishAt: row.publish_at,
+        subject: context.subject,
+        highlights: context.highlights,
+        durationSec: context.durationSec,
+        count,
       });
-      tx();
-
-      Logger.success(`[repurpose] ${channel.label}: ${plans.length} Shorts işi kuyruğa eklendi (iş #${row.job_id})`);
     } catch (error) {
       Logger.warn(`[repurpose] ${channel.label}: iş #${row.job_id} için planlama başarısız, sonraki turda tekrar denenecek`, error);
     }

@@ -83,7 +83,25 @@ export const api = {
     }),
   removeStoryReference: (channelId: string, refId: number) =>
     request<{ ok: true }>(`/channels/${channelId}/story-reference/${refId}`, { method: 'DELETE' }),
+
+  listLongVideos: (channelId: string) => request<LongVideo[]>(`/channels/${channelId}/long-videos`),
+  repurposeVideo: (channelId: string, jobId: number, count: number, offsetDays?: number[]) =>
+    request<{ queued: number }>(`/channels/${channelId}/long-videos/${jobId}/repurpose`, {
+      method: 'POST',
+      body: JSON.stringify({ count, offsetDays }),
+    }),
 };
+
+export interface LongVideo {
+  jobId: number;
+  template: string;
+  title: string;
+  videoId: string;
+  videoUrl: string;
+  publishAt: string;
+  durationSec: number | null;
+  derivativeCount: number;
+}
 
 export function mediaUrl(renderId: number): string {
   return `/api/media/${renderId}`;
