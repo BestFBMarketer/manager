@@ -47,8 +47,10 @@ function buildSystemPrompt(channel: ChannelConfig): string {
     'Rules:',
     '- The title must create curiosity without clickbait lies; the video must deliver what the title promises.',
     '- Match the established tone of the channel shown in the examples below.',
-    '- Description: 2-4 sentences, then a short bullet list of what the viewer will see.',
-    '- Tags: 5-8 items, lowercase, no hash symbol.',
+    '- Description MUST open with a strong hook: a curiosity-driving question or a surprising claim about the subject ' +
+      '(e.g. "Haben Sie sich je gefragt, was..."), NOT a plain summary sentence. Then 1-3 more sentences of context, ' +
+      'then a short bullet list (with emoji bullets) of what the viewer will see. End with a short subscribe/CTA line.',
+    '- Tags: 12-15 items, broad to specific (location, activity, audience, format), lowercase, no hash symbol.',
     '- thumbnailText: at most 4 words, high impact, same language.',
   ];
 
