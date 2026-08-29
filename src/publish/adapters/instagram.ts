@@ -6,12 +6,11 @@
 // Last Modified: 2026-08-23
 // =====================================
 
-import { requireEnv } from '../../config/env.js';
 import { Logger } from '../../core/logger.js';
 import { withRetry } from '../../core/retry.js';
 import { TIMEOUTS } from '../../config/constants.js';
 import { publishFileTemporarily } from '../publicMediaHost.js';
-import type { CrossPostInput, CrossPostResult, PlatformAdapter, PublishTargetRow } from './types.js';
+import { resolveAccessToken, type CrossPostInput, type CrossPostResult, type PlatformAdapter, type PublishTargetRow } from './types.js';
 
 const GRAPH_API_VERSION = 'v19.0';
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
@@ -58,7 +57,7 @@ export const instagramAdapter: PlatformAdapter = {
   platform: 'instagram',
 
   isConfigured(target: PublishTargetRow): boolean {
-    return Boolean(target.credentials_env_key && target.external_channel_ref);
+    return Boolean((target.access_token || target.credentials_env_key) && target.external_channel_ref);
   },
 
   async publish(input: CrossPostInput): Promise<CrossPostResult> {
@@ -67,7 +66,7 @@ export const instagramAdapter: PlatformAdapter = {
       throw new Error('Instagram bağlantısı eksik - access token veya business account id yok');
     }
 
-    const accessToken = requireEnv(target.credentials_env_key!);
+    const accessToken = resolveAccessToken(target);
     const businessAccountId = target.external_channel_ref!;
 
     const hosted = await publishFileTemporarily(input.filePath);

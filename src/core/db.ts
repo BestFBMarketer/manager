@@ -224,6 +224,13 @@ function applyIncrementalMigrations(db: Database.Database): void {
       column: 'target_publish_at',
       ddl: 'ALTER TABLE job ADD COLUMN target_publish_at TEXT',
     },
+    // OAuth ile baglanan platformlar (Facebook/Instagram/TikTok) icin token DB'de
+    // tutulur - credentials_env_key (manuel .env pointer) hala destekleniyor ama
+    // OAuth akisi artik token'i dogrudan buraya yaziyor.
+    { table: 'publish_target', column: 'access_token', ddl: 'ALTER TABLE publish_target ADD COLUMN access_token TEXT' },
+    { table: 'publish_target', column: 'refresh_token', ddl: 'ALTER TABLE publish_target ADD COLUMN refresh_token TEXT' },
+    { table: 'publish_target', column: 'token_expires_at', ddl: 'ALTER TABLE publish_target ADD COLUMN token_expires_at TEXT' },
+    { table: 'publish_target', column: 'account_label', ddl: 'ALTER TABLE publish_target ADD COLUMN account_label TEXT' },
   ];
 
   for (const { table, column, ddl } of alterations) {

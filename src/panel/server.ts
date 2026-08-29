@@ -23,6 +23,7 @@ import { storyReferencesRouter } from './routes/storyReferences.js';
 import { batchRouter } from './routes/batch.js';
 import { publishTargetsRouter } from './routes/publishTargets.js';
 import { repurposeRouter } from './routes/repurpose.js';
+import { oauthRouter, oauthCallbackRouter } from './routes/oauth.js';
 import { SqliteSessionStore } from './sessionStore.js';
 import { PUBLIC_MEDIA_DIR } from '../publish/publicMediaHost.js';
 
@@ -45,7 +46,11 @@ function createApp(): express.Express {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        sameSite: 'strict',
+        // 'strict' Facebook OAuth geri donusunu (cross-site top-level GET) kirar -
+        // tarayici cookie'yi hic gondermiyor, requireAuth 401 donuyordu. 'lax' hala
+        // cross-site POST/form-submit CSRF'ine karsi korur, sadece top-level
+        // navigasyonlarda (tam da OAuth redirect'in ihtiyaci) cookie'yi gonderir.
+        sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       },
@@ -73,12 +78,16 @@ function createApp(): express.Express {
   app.use('/public-media', express.static(PUBLIC_MEDIA_DIR));
 
   app.use('/api', authRouter());
+  // Facebook'un yonlendirdigi callback - panel session'ina guvenmez, kendi
+  // state dogrulamasini yapar (bkz. panel/routes/oauth.ts basindaki not).
+  app.use('/api', oauthCallbackRouter());
   app.use('/api', requireAuth, channelsRouter());
   app.use('/api', requireAuth, reviewRouter());
   app.use('/api', requireAuth, storyReferencesRouter());
   app.use('/api', requireAuth, batchRouter());
   app.use('/api', requireAuth, publishTargetsRouter());
   app.use('/api', requireAuth, repurposeRouter());
+  app.use('/api', requireAuth, oauthRouter());
 
   if (existsSync(FRONTEND_DIST)) {
     app.use(express.static(FRONTEND_DIST));

@@ -74,6 +74,16 @@ export const api = {
       body: JSON.stringify(input),
     }),
 
+  /** Tam sayfa yonlendirmesi - fetch degil, Facebook'un kendi login dialogu acilir. */
+  facebookConnectUrl: (channelId: string) => `/api/oauth/facebook/start?channelId=${encodeURIComponent(channelId)}`,
+  getPendingFacebookConnection: (channelId: string) =>
+    request<{ pages: MetaPage[] }>(`/channels/${channelId}/oauth/facebook/pending`),
+  finalizeFacebookConnection: (channelId: string, platform: 'facebook' | 'instagram', externalId: string) =>
+    request<PublishTarget>(`/channels/${channelId}/oauth/facebook/finalize`, {
+      method: 'POST',
+      body: JSON.stringify({ platform, externalId }),
+    }),
+
   listStoryReferences: (channelId: string) =>
     request<StoryReference[]>(`/channels/${channelId}/story-reference`),
   addStoryReference: (channelId: string, sourceUrl: string, label?: string) =>
@@ -244,7 +254,15 @@ export interface PublishTarget {
   external_channel_ref: string | null;
   enabled: number;
   credentials_env_key: string | null;
+  access_token: string | null;
+  account_label: string | null;
   config_json: string;
+}
+
+export interface MetaPage {
+  id: string;
+  name: string;
+  instagramBusinessAccountId?: string;
 }
 
 export interface StoryReference {
