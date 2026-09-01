@@ -510,6 +510,25 @@ Toplu üretim zamanlandığında, render **yayın saatinden en az 12-24 saat ön
 onay ekranına düşmeli — reviewer'ın gerekirse müdahale/düzeltme yapacak vakti
 olsun, son ana bırakılmasın. Worker/scheduler tasarımına dahil edilecek kural.
 
+### Onay ekranında önizleme + düzeltme (2026-09-01, bugünün somut kanıtı)
+
+ep02'nin bugünkü yayın-öncesi turunda chat üzerinden aynen bunu yaptık: video
+izlendi, 3 gerçek sorun bulundu (intro'da takılma, ana seste parazit/cızırtı,
+outro'da rahatsız edici bir SFX klibi), her biri **tüm pipeline'ı baştan
+çalıştırmadan**, hedefli düzeltmelerle (~birkaç dakikada) giderildi. **Panelin
+onay ekranı da aynı yeteneği sunmalı** — sadece onayla/reddet değil:
+- Videoyu önizle, **özellikle hata/uyarı durumlarında** (örn. bir aşama
+  kısmen başarısız olduysa — bir SFX eşleşmedi, bir sahne OCR'da engellendi,
+  bir filtre adımı çöktü ve o adım atlanarak devam edildiyse) bunlar reviewer'a
+  açıkça gösterilsin, sessizce geçilmesin.
+- Reviewer belirli bir sorunu işaretleyip (örn. "bu zaman aralığında ses
+  kötü") **hedefli yeniden üretim** tetikleyebilmeli — ilgili tek aşamayı
+  (SFX/watermark/CTA/intro-outro/vb.) yeniden çalıştırıp geri kalanına
+  dokunmadan.
+- Bu, [[panel-otomasyon-yayin-onay-gereksinimi]] hafıza notuyla aynı ilke,
+  bugünkü gerçek deneyimle somutlaştı — panel tasarımına birebir referans
+  olarak kullanılabilir (bu oturumun kendisi bir "onay ekranı" simülasyonuydu).
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
