@@ -467,6 +467,16 @@ gerekiyor — YouTube dokümanter kanallarında standart pratik, dönüşüm iç
   logo watermark'ı destekliyordu (köşe, doğru yerleşim) — text watermark
   toggle'ı da eklendi (bkz script'in kendisi).
 
+**Opacity kalibrasyon bulgusu + panel gereksinimi (2026-09-01):** ep02'de
+watermark %15 opaklıkla test edildi, düz gri fonda görünüyordu ama kanalın
+gerçek koyu/dokulu "Dark Cinematic Realism" sahnelerinde pratikte kayboldu —
+kullanıcı fark etti, gerçek görüntüde görünmüyordu. **%70'e çıkarıldı**
+(script varsayılanı güncellendi). Bu, sabit bir varsayılan değerin güvenilir
+olmadığını kanıtlıyor — **panelde opacity ayarı canlı önizlemeli (gerçek
+sahne üzerinde, düz test fonu değil) olmalı, hatta yayın-öncesi onay
+ekranında da gösterilmeli** ki reviewer yayına almadan önce watermark'ın
+gerçekten görünür olduğunu doğrulayabilsin.
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
