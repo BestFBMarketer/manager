@@ -348,6 +348,13 @@ Müzik kütüphanesi/üretimi, gerçek zamanlı karaoke, SFX, görsel efekt sist
 scope — hepsi kanal-bazlı değil, paylaşılan altyapının bir parçası olarak çözülecek
 (bkz `AUDIT.md`'deki 2026-09-01 checklist, aynen geçerli, tekrar taranmayacak).
 
+**Yeni madde (2026-09-01):** Standart intro/outro de aynı kategoriye giriyor —
+mystisches-echo'nun buddha-boy-akte-01 yayınında unutuldu (kanalın zaten var
+olan intro/outro şablonu vardı, kod'a hiç bağlanmamıştı). Kanal konfigürasyonuna
+intro/outro asset referansı eklenmeli, her assemble/render adımı bunu otomatik
+kontrol etsin — pipeline'a manuel hatırlama ile değil, config'ten gelen zorunlu
+adım olarak eklenmeli. Detay: `mystisches-echo/Instructions.md`.
+
 ### Düzeltme (2026-09-01): historisches-kapital ayrı 6. stage değil, StoryNarrative varyantı
 
 Kullanıcı netleştirdi: historisches-kapital'in gerçek iş akışı — referans
