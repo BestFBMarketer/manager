@@ -421,6 +421,30 @@ StoryNarrative'in görsel-kaynaklama adımına AI-görsel alternatifi eklenince
 (bkz yukarıdaki düzeltme notu) bu boşluk hem historisches-kapital hem
 gelecekteki benzer kanallar için tek seferde kapanır.
 
+Modal+FLUX adaptasyonunda 2 ek gerçek bug bulunup düzeltildi: (1) `.map()`
+varsayılan davranışı tek sahne hata verince TÜM batch'i çökertiyordu -
+`return_exceptions=True` + ayrı başarısız-listesi ile düzeltildi. (2) Golden
+Rule 3 ("ekranda yazı yok") sadece prompt metnini kontrol ediyor, FLUX
+levha/pankart/takvim gibi nesnelere kendiliğinden yazı hallüsine edebiliyor
+- OCR tabanlı otomatik tespit eklendi (NSFW kontrolüyle aynı desen). İlk OCR
+denemesi (`image_to_string` + ham karakter sayımı) %16 yanlış-pozitif verdi
+(doku/gren desenlerini "yazı" sanıyordu) - `image_to_data` + güven skoru
+(≥75) + gerçek kelime uzunluğu (≥4 harf) filtresine geçilince düzeldi.
+
+### Watermark + periyodik etkileşim overlay'i (2026-09-01, yeni ihtiyaç)
+
+Kullanıcı ekledi: videoya (1) kalıcı kanal logosu watermark, (2) belirli
+aralıklarla kanal dilinde "abone ol / takip et" tarzı hype/CTA overlay'leri
+gerekiyor — YouTube dokümanter kanallarında standart pratik, dönüşüm için
+önemli. Bu da diğer standart altyapı parçaları (intro/outro, dil, müzik) gibi
+**kanal-config-driven** olmalı, hardcoded değil:
+- Panelde kanal ayarlarına **logo/watermark upload** seçeneği.
+- Panelde **overlay şablonu için prompt/metin girme** seçeneği (kanal dilinde,
+  örn. "Abonniere jetzt" / "Subscribe now" / "Abone ol").
+- Overlay sıklığı/zamanlaması da ayarlanabilir olmalı (örn. her N dakikada bir).
+- Aynı paylaşılan altyapı sözleşmesinin parçası — assembler bunu kanal
+  config'inden okuyup otomatik uygulasın, episode/kanal-özel kod gerekmesin.
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
