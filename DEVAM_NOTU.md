@@ -477,6 +477,15 @@ sahne üzerinde, düz test fonu değil) olmalı, hatta yayın-öncesi onay
 ekranında da gösterilmeli** ki reviewer yayına almadan önce watermark'ın
 gerçekten görünür olduğunu doğrulayabilsin.
 
+**Kapsam netleştirmesi (2026-09-01):** Abone ol/zil/yorum-yap ikon animasyonlu
+CTA overlay'i **Shorts hariç tüm kanallarda standart** olsun — tek video
+kanalları (historisches-kapital, mystisches-echo, türkei-urlaub uzun format
+vb.) için varsayılan açık, panel seviyesinde paylaşılan bir bileşen. Shorts
+zaten kısa (~60sn altı) olduğu için periyodik overlay mantığı oraya uygulanmaz.
+**Kanal dili ve logosu/adı otomatik algılanıp kullanılmalı** — CTA metni ve
+görsel elementler kanal config'inden (`language`, logo asset, kanal adı)
+otomatik türetilsin, her kanal için elle yeniden yazılmasın.
+
 ### Zamanlama payı kuralı (2026-09-01)
 
 Toplu üretim zamanlandığında, render **yayın saatinden en az 12-24 saat önce**
