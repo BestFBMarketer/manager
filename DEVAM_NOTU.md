@@ -287,3 +287,105 @@ görsel olarak doğrulandı, typecheck temiz:**
 
 Detaylı mimari, tüm CLI komutları ve "Isletim" (pm2/systemd/yedekleme/health check)
 bölümü: `README.md`. Sorun çıkarsa oturuma devam edip birlikte bakarız.
+
+## Standardizasyon + çok-kanal uçtan uca plan (2026-09-01)
+
+### Hedef
+
+Kanal-özel panel değil, **tek standart panel**: yeni bir kanal eklerken kod
+değişikliği gerekmez, sadece config/DB satırı. Bunu doğrulamak için gerçek
+kanalların (mystisches-echo zaten uçtan uca doğrulandı — bkz. o kanalın kendi
+Memory.md'si) her biri gerçek bir uçtan uca denemeden geçirilecek: hata/eksik
+çıktıkça anında bu dosyaya ve `AUDIT.md` checklist'ine işlenir, küçük olan hemen
+düzeltilir, büyük olan roadmap'te kalır. Son bir gözden geçirmeyle yayına alınır.
+
+### Kritik bulgu: 2 farklı "aile" var, panel sadece birini kapsıyor
+
+Araştırıldı (2026-09-01), varsayım değil:
+
+- **AI-görsel dokümanter ailesi** — `mystisches-echo` (bkz kendi klasörü, uçtan uca
+  doğrulandı) + **`historisches-kapital`** (kendi `Instructions.md`'sinde tanımlı
+  gerçek kanal: "Historisches Kapital", tarihi filozof/ekonomist vs modern finansal
+  kriz teması, "Dark Cinematic Realism" AI görsel stili, zaten 1 yayınlanmış bölüm
+  var — `episodes/ep01-al-ghazali/`). Bu aile **tamamen manuel/script tabanlı**,
+  panelde hiç yok. ACE-Step müzik, Groq hizalama, karaoke altyazı, rain-overlay gibi
+  parçalar mystisches-echo'da doğrulandı ve tekrar kullanılabilir durumda.
+- **Gerçek-footage ailesi** — panelin kendi `HotelTour*`/`FunnyRanking`/`StoryNarrative`
+  stage'leri. **`Türkei Urlaub`** gerçek, canlı, 124 aboneli kanal (doğrulandı:
+  youtube.com'dan 2 videosu kontrol edildi) — `travel` seed'i zaten DB şablonunda var.
+  Aynı kanal iki farklı derinlikte video üretiyor (örnek: "Die dunkle Wahrheit über
+  Side" = derin anlatı+tarih+gezi; "Land Of Legends Bei Tag & Nacht" = sade footage
+  showcase, anlatı yok) — yani **tek kanal, sabit tek template yetmiyor**, konuya göre
+  hangi yapı taşının (derin anlatı / POI-gezi bilgisi / saf footage) kullanılacağı
+  seçilebilmeli.
+- **Funrank (Komik Shorts)** — panelin `shorts`/`FunnyRanking` seed'i zaten DB
+  şablonunda var, ama discovery/curation hiç yazılmadı (bkz. yukarıdaki "Ne var ne
+  yok" bölümü) — bu kanalın gerçek/yeni statüsü ve bu turda discovery'nin gerçek
+  yazılıp yazılmayacağı henüz kullanıcıdan onay bekliyor.
+
+### Mimari sonuç: tek stage sözleşmesi + composable content
+
+1. Her stage (AI-görsel dahil, port edilince) ortak bir sözleşmeye uysun: girdi =
+   `ChannelConfig` + job, çıktı = video + metadata paketi (dil, tag, thumbnail,
+   açıklama). Paylaşılan altyapı (upload, review gate, scheduler, thumbnail, dil,
+   müzik, altyazı, SFX/efekt hook'ları) hep bu sözleşme üzerinden çalışsın, hiçbir
+   content-type'a özel kod bunlara doğrudan dokunmasın.
+2. **Kanıtlanmış ilk sızıntı, sözleşmenin ilk test senaryosu:** `src/publish/uploader.ts`
+   `channel.language`'ı görmüyor, YouTube videoyu yanlış dilde (İngilizce) yayınlıyor
+   (mystisches-echo'da elle yakalandı). Bu düzeltilirken sözleşme de kurulmuş olsun.
+3. Türkei Urlaub için: sabit `defaultTemplate` yerine, konu bazında hangi yapı
+   taşlarının (anlatı derinliği / POI-gezi bilgisi / saf footage) kullanılacağına
+   karar veren bir seçim katmanı gerekiyor (LLM'e "bu konu için ne kullan" kararı
+   verdirmek mi, yoksa yapılandırılmış bir enum/flag sistemi mi — henüz karar
+   verilmedi, mimariyi kodlarken netleştirilecek).
+4. AI-görsel ailesinin (mystisches-echo/historisches-kapital) panele 6. stage
+   olarak portu — sıfırdan değil, doğrulanmış scriptlerden (ACE-Step/Groq/karaoke/
+   rain-overlay) devşirilecek.
+
+### Roadmap (AUDIT.md P0→P3) bu sözleşmenin parçası olarak ele alınacak
+
+Müzik kütüphanesi/üretimi, gerçek zamanlı karaoke, SFX, görsel efekt sistemi, OAuth
+scope — hepsi kanal-bazlı değil, paylaşılan altyapının bir parçası olarak çözülecek
+(bkz `AUDIT.md`'deki 2026-09-01 checklist, aynen geçerli, tekrar taranmayacak).
+
+### Düzeltme (2026-09-01): historisches-kapital ayrı 6. stage değil, StoryNarrative varyantı
+
+Kullanıcı netleştirdi: historisches-kapital'in gerçek iş akışı — referans
+kanallardaki en çok izlenen (İngilizce) videolardan konu bulmak, sonra o konuyu
+**çeviri değil özgün** Almanca içerik olarak yeniden üretmek. `ep01-al-ghazali`
+tam böyle üretildi (manuel).
+
+Bu, panelin zaten var olan `topicSource: 'reference'` mekanizmasıyla (StoryNarrative'in
+"referans kanal izle → transkript/olgu özeti → yeni özgün senaryo üret" adımı, bkz
+`src/story/factBrief.ts`, `topicDiscovery.ts`) birebir örtüşüyor — tek fark **görsel
+kaynaklama**: StoryNarrative şu an Pexels stok kullanıyor, historisches-kapital
+AI-görsel (mystisches-echo tarzı, "Dark Cinematic Realism") kullanıyor.
+
+**Sonuç:** historisches-kapital için ayrı bir 6. stage yazmaya gerek yok —
+StoryNarrative'in `visualSourcing.ts` adımına AI-görsel üretimi **alternatif bir
+kaynaklama yöntemi** olarak eklenir (kanal config'inde "visual source: stock |
+ai_generated" gibi bir seçim), geri kalan zincir (script/topic-discovery/TTS/render/
+upload) StoryNarrative'le aynı kalır. Bu, "tek stage sözleşmesi" prensibiyle de
+tam örtüşüyor — content-type'a özel yeni bir zincir değil, mevcut zincirin bir
+adımının pluggable alternatifi.
+
+### Konu kuyruğu sırası (2026-09-01)
+
+Referans kanal(lar)ın videoları **en çok izlenenden başlayarak sırayla** işlenir —
+rastgele/LLM'in keyfi seçimi değil, gerçek `viewCount`'a göre azalan sıralı bir
+kuyruk. Her zamanlanmış yayın slotunda (`scheduleRule`) kuyruktan bir sonraki video
+alınır, özgün Almanca içerik olarak uyarlanır. Kuyruk tükenince (ya da referans
+kanalda yeni video çıkınca) yeniden senkronize edilir. `topicDiscovery.ts`'in bunu
+zaten nasıl sıraladığı (varsa) doğrulanmalı, yoksa `viewCount DESC` sıralaması
+eklenmeli.
+
+### Açık kararlar (kullanıcı onayı bekliyor)
+
+- Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
+  `sourceRef` ile kısmi test mi (render/upload zinciri doğrulanır, discovery ayrı
+  roadmap maddesi olarak kalır)?
+- AI-görsel görsel-kaynaklama varyantının StoryNarrative'e eklenmesi ne kadar
+  öncelikli — standardizasyonun ilk fazı mı, yoksa gerçek-footage ailesi (Türkei
+  Urlaub composable-content + Funrank) önce mi standardize edilir?
+- Türkei Urlaub'un composable-content seçim mekanizması: LLM karar versin mi, yoksa
+  yapılandırılmış (config'te "bu konu tipi = şu yapı taşları") bir sistem mi?
