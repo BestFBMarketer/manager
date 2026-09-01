@@ -477,6 +477,12 @@ sahne üzerinde, düz test fonu değil) olmalı, hatta yayın-öncesi onay
 ekranında da gösterilmeli** ki reviewer yayına almadan önce watermark'ın
 gerçekten görünür olduğunu doğrulayabilsin.
 
+### Zamanlama payı kuralı (2026-09-01)
+
+Toplu üretim zamanlandığında, render **yayın saatinden en az 12-24 saat önce**
+onay ekranına düşmeli — reviewer'ın gerekirse müdahale/düzeltme yapacak vakti
+olsun, son ana bırakılmasın. Worker/scheduler tasarımına dahil edilecek kural.
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
