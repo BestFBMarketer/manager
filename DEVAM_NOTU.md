@@ -431,6 +431,15 @@ denemesi (`image_to_string` + ham karakter sayımı) %16 yanlış-pozitif verdi
 (doku/gren desenlerini "yazı" sanıyordu) - `image_to_data` + güven skoru
 (≥75) + gerçek kelime uzunluğu (≥4 harf) filtresine geçilince düzeldi.
 
+**SONUÇ (2026-09-01):** `assemble_episode.py` (generic, mystisches-echo'nun
+gap-closing dersini miras alan) ile tam montaj yapıldı — `episode_final.mp4`,
+790.27s (narration 790.32s ile sadece 0.05s fark), 63 sahne, karaoke altyazı
+senkron, logo watermark köşede doğru. **historisches-kapital için uçtan uca
+zincir (script→prompt→görsel→TTS→hizalama→altyazı→watermark→montaj) bu turda
+tamamen çalışır durumda doğrulandı**, 6 gerçek bug bulunup düzeltildi yol
+boyunca. Kalan: intro/outro + periyodik CTA overlay (asset henüz yok, sadece
+spesifikasyon var, bkz `historisches-kapital/Instructions.md`).
+
 ### Watermark + periyodik etkileşim overlay'i (2026-09-01, yeni ihtiyaç)
 
 Kullanıcı ekledi: videoya (1) kalıcı kanal logosu watermark, (2) belirli
@@ -444,6 +453,19 @@ gerekiyor — YouTube dokümanter kanallarında standart pratik, dönüşüm iç
 - Overlay sıklığı/zamanlaması da ayarlanabilir olmalı (örn. her N dakikada bir).
 - Aynı paylaşılan altyapı sözleşmesinin parçası — assembler bunu kanal
   config'inden okuyup otomatik uygulasın, episode/kanal-özel kod gerekmesin.
+
+**Yerleşim kuralı (2026-09-01, netleştirildi):**
+- **Logo watermark:** SADECE köşe (üst veya alt, kullanıcı seçer) — asla ortada
+  devasa. Küçük köşe logosu hem şık hem "kırpılamaz" (kırpmaya çalışan içeriğin
+  kendisini de keser).
+- **Text watermark:** ayrı bir seçenek, bu ortada/büyük olabilir (klasik stok-
+  görsel tarzı çapraz tekrarlı metin — kırpılmaya karşı asıl koruma bu).
+- **İkisi birlikte kullanılabilmeli** — panelde logo watermark ve text
+  watermark için ayrı toggle/tick, ikisi de aynı anda açık olabilir.
+- Panelde her ikisi için ayrı yerleşim + transparency (opacity) ayarı olmalı.
+- `historisches-kapital/scripts/assemble_episode.py`'de ilk versiyon sadece
+  logo watermark'ı destekliyordu (köşe, doğru yerleşim) — text watermark
+  toggle'ı da eklendi (bkz script'in kendisi).
 
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
