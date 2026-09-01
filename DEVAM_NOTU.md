@@ -399,11 +399,17 @@ adımının pluggable alternatifi.
   (havuzdan seçilmiş, henüz üretilmemiş konular önceden görünür olsun).
   Ayrıca **yapılmış olanlar da not edilip görünsün** (hangi konu, hangi tarih,
   hangi kanal).
-- **Global tekrar-önleme (dedup):** aynı konu/aynı kaynak video — ister aynı
-  kanal ister **başka bir kanal** tarafından zaten işlenmiş olsun — bir daha
-  planlamaya alınmamalı. Yani dedup kanal bazlı değil, **tüm sistem çapında**
-  tek bir "işlenmiş konular" kaydı üzerinden çalışmalı (iki farklı kanal aynı
-  kaynak videoyu bağımsız bilmeden iki kez uyarlamasın).
+- **Global tekrar-önleme (dedup), inceltildi (2026-09-01):** aynı konu/aynı
+  kaynak video — ister aynı kanal ister **başka bir kanal** tarafından zaten
+  işlenmiş olsun — birebir tekrar planlamaya alınmamalı (örn. kanal A
+  Al-Ghazali'yi işlediyse kanal B aynı Al-Ghazali'yi tekrar almasın). Dedup
+  kanal bazlı değil, **tüm sistem çapında** tek bir "işlenmiş konular" kaydı
+  üzerinden çalışmalı.
+  **Ama katı blok değil:** eğer gerçekten farklı bir bakış açısı/genişletilmiş
+  konu varsa (aynı figür/olay ama yeni açı, yeni kaynak, derinleştirilmiş
+  içerik), bu tam tekrar sayılmaz — sistem bunu **"devam episodu" (bölüm 2)
+  olarak öner**, otomatik sessizce işlemesin, kullanıcıya/onay ekranına
+  öneri olarak düşsün.
 
 ### Süre-uyum kuralı (2026-09-01, esnek dial — katı kural değil)
 
