@@ -15,7 +15,19 @@ import type { ChannelConfig } from '../config/channels.js';
 export interface DiscoveredTopic {
   sourceRef: string;
   videoTitle: string;
+  videoDescription: string;
   viewCount: number;
+}
+
+/**
+ * Video basligi/aciklamasi verilen anahtar kelimelerden en az birini iceriyor mu -
+ * buyuk/kucuk harf duyarsiz, basit alt-dize eslesmesi (Rule 8: sabit esik/mantik
+ * burada, cagiran taraf bos liste = "filtrele" degil "filtresiz" anlamina gelir).
+ */
+function matchesAnyCategory(topic: Pick<DiscoveredTopic, 'videoTitle' | 'videoDescription'>, categories: string[]): boolean {
+  if (categories.length === 0) return true;
+  const haystack = `${topic.videoTitle} ${topic.videoDescription}`.toLowerCase();
+  return categories.some((c) => haystack.includes(c.trim().toLowerCase()));
 }
 
 interface StoryReferenceRow {
@@ -91,6 +103,7 @@ async function fetchChannelCatalog(apiKey: string, referenceUrl: string): Promis
         topics.push({
           sourceRef: `https://www.youtube.com/watch?v=${video.id}`,
           videoTitle: video.snippet.title,
+          videoDescription: video.snippet.description ?? '',
           viewCount: Number(video.statistics?.viewCount ?? 0),
         });
       }
@@ -125,7 +138,15 @@ export async function discoverNextTopics(channel: ChannelConfig, count: number):
   }
 
   const allTopics = (await Promise.all(references.map((ref) => fetchChannelCatalog(apiKey, ref.source_url)))).flat();
-  allTopics.sort((a, b) => b.viewCount - a.viewCount);
+
+  const categories = channel.settings.discoveryCategories;
+  const categoryMatched = allTopics.filter((t) => matchesAnyCategory(t, categories));
+  if (categories.length > 0) {
+    Logger.info(
+      `${channel.id}: kategori filtresi (${categories.join(', ')}) uygulandi - ${categoryMatched.length}/${allTopics.length} video eslesti`,
+    );
+  }
+  categoryMatched.sort((a, b) => b.viewCount - a.viewCount);
 
   const alreadyAdapted = new Set(
     (db.prepare('SELECT source_ref FROM job WHERE channel_id = ?').all(channel.id) as Array<{ source_ref: string }>).map(
@@ -133,9 +154,11 @@ export async function discoverNextTopics(channel: ChannelConfig, count: number):
     ),
   );
 
-  const fresh = allTopics.filter((t) => !alreadyAdapted.has(t.sourceRef));
+  const fresh = categoryMatched.filter((t) => !alreadyAdapted.has(t.sourceRef));
   const picked = fresh.slice(0, count);
 
-  Logger.success(`${channel.id}: ${picked.length}/${count} yeni konu seçildi (${allTopics.length} katalogda, ${fresh.length} uyarlanmamış)`);
+  Logger.success(
+    `${channel.id}: ${picked.length}/${count} yeni konu seçildi (${allTopics.length} katalogda, ${categoryMatched.length} kategoriye uygun, ${fresh.length} uyarlanmamış)`,
+  );
   return picked;
 }

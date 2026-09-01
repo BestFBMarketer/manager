@@ -25,17 +25,13 @@ export async function downloadVideo(url: string, outputPath: string): Promise<st
 
   Logger.info(`Video indiriliyor: ${url}`);
   try {
+    // Ozel format secici (bestvideo+bestaudio ext=mp4/m4a) YouTube'un guncel
+    // format listesiyle 403 Forbidden veriyordu (yt-dlp'nin varsayilan format
+    // secimi hala calisiyor, sorun secici degil, YouTube'un o an sundugu spesifik
+    // format kombinasyonuydu) - varsayilana birakip sadece cikti konteynerini sabitliyoruz.
     await run(
       'yt-dlp',
-      [
-        '-f',
-        'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        '--merge-output-format',
-        'mp4',
-        '-o',
-        outputPath,
-        url,
-      ],
+      ['--merge-output-format', 'mp4', '-o', outputPath, url],
       TIMEOUTS.DOWNLOAD_MS,
     );
     Logger.success(`Video indirildi: ${outputPath}`);

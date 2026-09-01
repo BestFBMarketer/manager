@@ -15,7 +15,8 @@ export type LlmTask =
   | 'shortsPlan'
   | 'factBrief'
   | 'narrativeScript'
-  | 'clipCommentary';
+  | 'clipCommentary'
+  | 'topicGen';
 
 export interface LlmRequest {
   task: LlmTask;

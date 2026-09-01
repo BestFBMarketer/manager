@@ -154,6 +154,9 @@ export interface ChannelSettings {
   crossPost: { facebook: boolean; instagram: boolean; tiktok: boolean };
   ttsProvider: 'voicebox' | 'piper' | null;
   voiceRef: string | null;
+  voiceLineExamples: string[];
+  discoveryCategories: string[];
+  tierListSourceMode: 'manual' | 'search_suggest';
 }
 
 export interface ChannelConfig {

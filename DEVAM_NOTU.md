@@ -144,5 +144,146 @@ zamanlanmış yayın (cron/pm2) burada kurulmuyor — o VPS aşamasının işi.
   dönebilir (crash etmez, sadece o alan eksik kalır) — `data/hotelManual.json` ile
   elle doldurabilirsin.
 
+## FunnyRanking (Komik Shorts) — genişletilmiş hedef (2026-08-31, henüz kodlanmadı)
+
+Kullanıcının istediği tam akış:
+1. **Kategori filtresi** — discovery sabit değil, esnek kategori/niş listesi olacak
+   (örnek: pool fails, DIY fails, dance fails vb., kullanıcı çoğaltabilir). Referans
+   kanal(lar)dan sadece seçilen kategoriye uyan klipler seçilecek.
+2. **Şort başına kısa Gemini planlaması** — her aday klip için Gemini ile mini bir
+   plan/senaryo/başlık üretilip panele otomatik düşecek (elle yapıştırma değil, uçtan
+   uca otomatik).
+3. **Otomatik üretim kuyruğu** — planlanan her short worker kuyruğuna otomatik girecek.
+4. **Günde 3 shorts otomatik yayın** — kullanıcı diğer kanallarla ilgilenirken bu
+   kanal kendi başına günlük ritimde yayınlamaya devam edecek.
+
+Bağımlılıklar / blokerler:
+- Şu an discovery/curation hiç yazılmamış (bkz. "Bilinen boşluklar" yukarıda) — bu
+  dört maddenin temeli, önce bu kurulmalı.
+- **YouTube kanal bağlama panelde yok** (sadece Facebook/Instagram/TikTok var,
+  `Connections.tsx`) — YouTube OAuth için kullanıcının Google Cloud'da OAuth consent
+  screen + client id/secret açması gerekiyor (bu adım kullanıcının kendi işlemi,
+  Claude yapamaz), sonra kod tarafı (Facebook'un OAuth akışı örnek alınarak) yazılabilir.
+  Yayın otomasyonu bu olmadan sonuçları YouTube'a gerçekten basamaz.
+- Ses önizleme ("dinle" butonu) kodu ve backend API'si (`/profiles/:id/samples`,
+  `/samples/:id`) bu oturumda gerçek Voicebox sunucusuna karşı doğrulandı, çalışıyor —
+  Voicebox sesleri (Mytischeecho/HKG2/HKG) ekran görüntüsünde de teyit edildi.
+  **Piper önizlemesi kırıktı, kök neden bulunup düzeltildi (2026-08-31): `piper`
+  binary'si PATH'te hiç yoktu** (sadece `.onnx` model dosyaları `data/tts-voices/`
+  altında duruyordu, `listPiperVoices()` bunları diskten okuyup listeliyordu ama
+  gerçek sentez binary'si eksikti). Çözüm: `pip install piper-tts` (yeni CLI'nin
+  `--output_file`/`--model` bayrakları `piper.ts`'teki çağrıyla birebir uyumlu,
+  `echo text | piper --model ... --output_file ...` ile gerçek WAV üretimi
+  doğrulandı). **Panel/worker süreçleri piper kurulmadan önce başlamış olabilir —
+  yeniden başlatılmaları gerekebilir ki güncel PATH'i görsünler.**
+
+Sıralama netleşmedi: önce discovery+kategori filtresi mi, önce YouTube OAuth
+(kullanıcının Google Cloud adımı) mı başlasın — sıradaki oturumda kullanıcıya sorup
+netleştir.
+
+**Güncelleme (2026-08-31) — kategori filtresi kodlandı, typecheck temiz (backend + panel-web):**
+- Netleşen gerçek akış: kullanıcı FunnyRanking kanalına elle 5(+) kaynak video linki
+  verecek (BatchProducer zaten destekliyor) + kanal ayarına istenen tema listesini
+  yazacak (örn. "pool fails", "DIY fails", "dance fails") — discovery "hangi videoyu
+  izleyelim" değil, video İÇİNDEKİ hangi anları seçelim sorusuna kategori-farkında
+  cevap vermeli. `topicDiscovery.ts`'teki (referans-kanal modu için) başlık/açıklama
+  anahtar-kelime filtresi de eklendi ama asıl düzeltme `rankingPlanner.ts` +
+  `funnyRanking.ts`'te: `channel.settings.discoveryCategories` artık `planRanking()`'e
+  geçiyor, LLM sistem promptuna "sadece bu temalara uyan adayları seç, uymayanı asla
+  seçme" kuralı ekleniyor.
+- Yeni alan: `ChannelSettings.discoveryCategories: string[]` — hem backend
+  `channelSettings.ts` hem frontend `api.ts` (iki ayrı tip tanımı var, ikisi de
+  güncellendi). Panelde "Genel ayarlar" kartına yeni bir textarea eklendi
+  (FunnyClip/FunnyRanking kanallarında görünür, satır satır kategori girilir).
+- Bilinen risk, kullanıcı kabul etti: `findCandidates` aday pencereleri
+  TRANSKRİPT/ALTYAZIDAN çıkarıyor — altyazısız/sessiz "fails" videolarında aday
+  bulunamaz, iş başarısız olur. Kullanıcı bunun için altyazılı kaynak video
+  seçeceğini söyledi, ek bir görsel/ses tabanlı algılama şimdilik yazılmadı.
+- Zamanlama ("günde 3 shorts") için yeni kod GEREKMİYOR — `ScheduleRuleEditor`
+  zaten çoklu saat slotu + günlük tekrar destekliyor, panelden 3 slot eklenip
+  her gün seçilmesi yeterli.
+- Hâlâ eksik/açık: YouTube OAuth panel UI'si (kullanıcının Google Cloud'da OAuth
+  consent screen + client id/secret açması gerekiyor, bu olmadan kod tarafı
+  yazılamaz/test edilemez).
+- **Yeni netleşen istek, henüz kodlanmadı — ayrı, daha büyük iş:** haftalık stok
+  planlamasında (örn. Shorts1..5) kaynak linkler o short'a özel değil, TÜM haftalık
+  parti için ORTAK BİR HAVUZ olmalı. Shorts2'nin istediği tema, sadece Shorts2'ye
+  verilen linklerde değil, havuzdaki TÜM linklerde (Shorts1/3/4/5'in linkleri dahil)
+  aranmalı. Şu anki mimari "1 iş = 1 kaynak video" varsayıyor (`funnyRanking.ts`
+  tüm adayları tek `downloadedPath`'ten çıkarıyor). Havuz mantığı için gerçek bir
+  refactor gerekir: havuzdaki tüm videolar (bir kere) indirilip her birinden aday
+  çıkarılmalı, adaylar kaynak video etiketiyle birleştirilmeli, `planRanking` havuzun
+  TAMAMINDAN o short'un temasına uyanları seçmeli, `cutAndFrame` seçilen her adayı
+  KENDİ kaynak videosundan kesmeli (şu an hepsi ayni `downloadedPath`'i varsayıyor).
+  Küçük bir tweak değil, sıradaki oturumun ana işi olmalı.
+  - Ek detay: indirilen havuz videolarının bir ömrü olmalı (HDD şişmesin). Havuz
+    sabit boyutlu olabilir (örn. 20 video), yeni link eklendikçe en eskisi silinir —
+    ama silmeden ÖNCE o videodan çıkarılabilecek her adayın gerçekten kullanıldığından
+    (ya da en azından bir kez taranıp değerlendirildiğinden) emin olunmalı, kuyrukta
+    henüz işlenmemiş/kullanılabilir aday varken video silinmemeli.
+
+**Referans kanal gözlemi (2026-08-31, @FunandRank, ~30 short incelendi):**
+- Kategori çeşitliliği geniş: pool/DIY/gym/sports/animal/baby/cooking fails +
+  "Who Did It Best" tarzı dans/trend karşılaştırma sıralamaları + "Battle of
+  Beauties" gibi rekabetçi format — sadece "fails" değil.
+  `discoveryCategories`'e örnek olarak eklenebilir: animal fails, baby fails,
+  husband fails, dans/trend "who did it best" rankings.
+  - Format sabit: "FUN & RANK" marka banner + üstte alt-tema yazısı (örn. "BEST
+    FAILS OF THE DAY") + numaralı geri sayım (#5→#1) + alt kalın altyazı.
+  - Başlık kalıpları: "(Wait for #1)", "(Try Not To Laugh)" gibi tık-tuzağı
+    ekleri — `rankingPlanner.ts`'in title/hook kuralına örnek olarak eklenebilir.
+  - Görüntülenme sayıları çoğunlukla düşük (10-100 arası "bin"), nadiren
+    patlıyor (1B-10B = 1000-10000) — her short'un viral olmayacağı baştan kabul
+    edilmeli, pipeline kalitesi tek başına garanti değil.
+  - **İstek, henüz yazılmadı:** köşede tekrarlayan "reaksiyon yüzü" meme overlay'i
+    (referans kanalda aynı yüz PNG'si defalarca farklı klipte kullanılıyor) —
+    `renderRemotion`/`FunnyRanking` composition'a veya thumbnail'e eklenebilir,
+    şimdilik polish/nice-to-have, öncelik değil.
+
+**Yayın stratejisi referansı (2026-08-31, kullanıcının eskiden elle/Gemini ile yaptığı
+günlük plan örneği) — ileride adaptif zamanlama için, şimdi kodlanmadı:**
+- Günde 3 slot: 12:30 / 17:30 / 22:30 (mevcut basit ScheduleRuleEditor ile bugün
+  bu saatlerle başlanabilir, ekstra kod gerekmez).
+- Stratejik sıralama fikri (ileride): 12:30 = geniş kitleye hitap eden "güvenli"
+  içerik (algoritmanın doğru kitleyi bulması için ilk 1-2 saatlik düşük veriye
+  takılmadan bekleniyor), 17:30 = 12:30 videosunun kitle-genişleme ivmesine
+  BAKILARAK en yüksek "duygu dozu"na sahip adaydan seçilir, 22:30 = günün
+  finali, gece kitlesi için en "savage"/tartışma-tetikleyici içerik.
+  **Bu, gerçek zamanlı YouTube Analytics entegrasyonu + reaktif karar mantığı
+  ister (17:30 seçimi 12:30'un canlı performansına bağlı) — bugünkü statik
+  yayın hedefinin çok ötesinde, ayrı ve büyük bir özellik. Şimdilik basit sabit
+  3-slot ile başla, bu adaptif katman ileride ayrı bir oturumda ele alınmalı.**
+
+**TierList/Crash Dummy içerik türü (2026-08-31) - iskelet kodlandı, çalıştığı
+görsel olarak doğrulandı, typecheck temiz:**
+- Ayrı kanal DEĞİL - "Komik Shorts"un ikinci içerik türü (FunnyRanking'in
+  yanında). Format: Crash Dummy karakteri gerçek marka reklamlarından kısa
+  anları (2-3sn) S/A/B/C/D tier listesine yerleştirip alaycı yorum yapıyor.
+- **Telif/marka riski kullanıcıya açıkça anlatıldı, kullanıcı bilerek devam
+  kararı verdi**: kısa klip + ağır yorum katmanı + Content ID'yi normal
+  işletme maliyeti kabul etme stratejisiyle ilerleniyor.
+- Yeni dosya: `remotion/compositions/TierList.tsx` (+ `Root.tsx`'e kayıt) -
+  `FunnyRanking.tsx` deseni takip edilerek yazıldı: üstte %38 karakter paneli
+  (statik görsel, hafif zoom), altta S/A/B/C/D tier tahtası (kod-çizimi renkli
+  şeritler, şu an placeholder - kullanıcının verdiği gerçek tahta PNG'si
+  henüz dosya yolu olarak gelmedi, gelince arkaplan resmi olarak değiştirilecek
+  ve slot koordinatları o görsele göre hizalanacak), aktif klip sağ üstte
+  küçük "spot" video, alt yazı `CaptionLine` ile senkron. Remotion Studio'da
+  görsel olarak dogrulandı (D-tier + B-tier dolarken doğru sırayla birikiyor,
+  altyazı senkron).
+- Karakter görseli: kullanıcı Freepik/Magnific'te ürettiği 4 adaydan birini
+  (`public/tierlist/dummy.png`) seçti - **hepsinde kask üzerinde kırmızı/beyaz
+  "Target" (ABD market zinciri) logosuna çok benzeyen bir amblem vardı, bu
+  fark edilip PIL ile düz beyaz yamayla temizlendi** (bkz. session log).
+  Göğsündeki sarı/siyah crash-test-dummy piktogramı (jenerik, markasız) kaldı,
+  kullanıcının önerisiyle bu semboller kullanılacak.
+- **Henüz yapılmadı:** gerçek tier-board arkaplan PNG'sinin dosya yolu (kullanıcı
+  Freepik'te üretti, henüz kaydedip yol vermedi), gerçek reklam klipleri
+  (worker stage tarafı - `funnyRanking.ts` deseninde yeni bir `tierList.ts`
+  worker stage'i + `rankingPlanner.ts` benzeri bir `tierPlanner.ts` LLM
+  planlayıcısı yazılmalı, henüz yazılmadı), gerçek TTS/ses (ElevenLabs
+  "Antoni"/"Callum" tarzı hızlı/enerjik ses önerildi - şu anki Piper/Voicebox
+  seslerinden farklı bir profil gerekebilir).
+
 Detaylı mimari, tüm CLI komutları ve "Isletim" (pm2/systemd/yedekleme/health check)
 bölümü: `README.md`. Sorun çıkarsa oturuma devam edip birlikte bakarız.

@@ -30,6 +30,11 @@ export const LLM_CHAINS: Record<LlmTask, string[]> = {
   // FunnyClip'in ignelenen yorum metni videonun tum komik degerini belirliyor -
   // viralHook gibi kalite-kritik, ucretsiz katmanla baslamiyor.
   clipCommentary: ['claude', 'openai', 'gemini'],
+
+  // Konu beyin firtinasi - fikir kalitesi factBrief/narrativeScript kadar
+  // kritik degil (kotu bir konu basligi elenip yeniden denenebilir), ucretsiz
+  // katmanla baslar.
+  topicGen: ['gemini', 'deepseek', 'claude'],
 };
 
 /** Ucretli saglayicilarin gunluk maliyet tavani (USD). Asilirsa sadece ucretsizler calisir. */

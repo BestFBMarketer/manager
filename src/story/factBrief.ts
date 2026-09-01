@@ -28,7 +28,7 @@ function isNumberEntry(value: unknown): value is FactBrief['numbers'][number] {
   return typeof v.label === 'string' && typeof v.value === 'string';
 }
 
-function isFactBrief(value: unknown): value is FactBrief {
+export function isFactBrief(value: unknown): value is FactBrief {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
 

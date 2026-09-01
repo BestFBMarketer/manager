@@ -72,6 +72,8 @@ export async function runFunnyRankingJob(
       scoredCandidates.map((c) => c.candidate),
       videoTitle,
       channel.language,
+      channel.settings.voiceLineExamples,
+      channel.settings.discoveryCategories,
     );
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('ranking_planned', jobId);
 
@@ -122,6 +124,10 @@ export async function runFunnyRankingJob(
     }
 
     if (items.length < 5) {
+      // Kategori filtresi (discoveryCategories) acikken bu beklenen bir durum olabilir:
+      // kaynak video istenen temaya (orn. "pool fails") yeterince uymuyorsa LLM'e az
+      // eslesen aday icin 5'i tamamlamasi soylenmedi (bkz. rankingPlanner.ts) - is
+      // yine de basarisiz sayilir, ama kok neden "kotu video" degil "bu video o temada degil" olabilir.
       throw new Error(`Sadece ${items.length}/5 sıra tamamlanabildi - ranking eksik kalır, iş başarısız sayılır`);
     }
 

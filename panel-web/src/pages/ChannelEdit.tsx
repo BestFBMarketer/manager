@@ -175,6 +175,49 @@ export default function ChannelEdit() {
           </div>
         )}
 
+        {(channel.defaultTemplate === 'FunnyClip' || channel.defaultTemplate === 'FunnyRanking') && (
+          <div className="field">
+            <label>Istenen kategori/tema (her satira bir tane - orn. pool fails, DIY fails, dance fails)</label>
+            <textarea
+              rows={3}
+              placeholder={'pool fails\nDIY fails\ndance fails'}
+              value={channel.settings.discoveryCategories.join('\n')}
+              onChange={(e) =>
+                setChannel({
+                  ...channel,
+                  settings: {
+                    ...channel.settings,
+                    discoveryCategories: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean),
+                  },
+                })
+              }
+              style={{ width: '100%' }}
+            />
+            <p className="muted" style={{ marginTop: 4 }}>
+              Bos birakilirsa filtre uygulanmaz (referans kanaldaki/kaynak videolardaki tum anlar aday sayilir).
+              Doluysa hem kaynak video kesfi hem de video icindeki an secimi bu temalara uymayanlari eler.
+            </p>
+
+            <label style={{ marginTop: 16, display: 'block' }}>TierList (Crash Dummy) kaynak modu</label>
+            <select
+              value={channel.settings.tierListSourceMode}
+              onChange={(e) =>
+                setChannel({
+                  ...channel,
+                  settings: { ...channel.settings, tierListSourceMode: e.target.value as 'manual' | 'search_suggest' },
+                })
+              }
+            >
+              <option value="manual">Elle link - marka reklami linkini kendim veririm (en guvenilir)</option>
+              <option value="search_suggest">Ara ve oner - isme gore YouTube'da arasin, aday sunsun, ben secerim</option>
+            </select>
+            <p className="muted" style={{ marginTop: 4 }}>
+              "Ara ve oner" modunda bile korlemesine secim yapilmaz - her zaman panelde onayin istenir,
+              yanlis/resmi olmayan bir reklam yuklemesi secilme riskine karsi.
+            </p>
+          </div>
+        )}
+
         {usesReferenceDiscovery && (
           <div className="field">
             <label>Konu kaynagi</label>

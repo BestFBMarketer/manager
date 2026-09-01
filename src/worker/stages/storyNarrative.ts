@@ -14,7 +14,8 @@ import { Logger } from '../../core/logger.js';
 import { run } from '../../core/exec.js';
 import { TIMEOUTS } from '../../config/constants.js';
 import { transcribeSource } from '../../story/transcribeSource.js';
-import { extractFactBrief } from '../../story/factBrief.js';
+import { extractFactBrief, type FactBrief } from '../../story/factBrief.js';
+import { inventFactBrief } from '../../story/premiseInventor.js';
 import { writeNarrativeScript, type NarrativeScene } from '../../story/scriptWriter.js';
 import { sourceVisualForScene } from '../../story/visualSourcing.js';
 import { synthesizeSpeech, resolveChannelVoice } from '../../tts/router.js';
@@ -30,6 +31,11 @@ import type { StoryScene } from '../../../remotion/compositions/StoryNarrative.j
 import type { JobRow, StageResult } from './types.js';
 
 const TITLE_DURATION_SEC = 3;
+
+interface StoryNarrativeInput {
+  /** 'invented' ise source_ref bir video URL'i degil, premiseInventor.ts'e verilecek konu metnidir (topic_source='ai_generated') */
+  mode?: 'reference' | 'invented';
+}
 
 const MOOD_ENERGY: Record<NarrativeScene['mood'], SegmentEnergy> = {
   tension: 'high',
@@ -92,21 +98,32 @@ export async function runStoryNarrativeJob(
 ): Promise<StageResult> {
   const jobId = job.id;
   const workDir = `data/work/${jobId}`;
-  const sourceUrl = job.source_ref;
+  // invented modda source_ref bir URL degil, premiseInventor.ts'e giden konu metnidir.
+  const sourceRef = job.source_ref;
+  const jobInput = JSON.parse(job.input_json || '{}') as StoryNarrativeInput;
+  const mode = jobInput.mode ?? 'reference';
 
-  Logger.info(`[job ${jobId}] StoryNarrative başlıyor: ${channel.label} → ${sourceUrl}`);
+  Logger.info(`[job ${jobId}] StoryNarrative başlıyor: ${channel.label} → ${sourceRef} (${mode})`);
   await mkdir(workDir, { recursive: true });
 
   try {
-    // 1. Transkript
-    Logger.debug(`[job ${jobId}] Transkript çekiliyor`);
-    const transcript = await transcribeSource(sourceUrl, channel.language);
-    db.prepare('UPDATE job SET stage=? WHERE id=?').run('transcribed', jobId);
+    // 1-2. Olgu özeti - referans videodan (transkript -> özet) veya konu
+    // basliginden dogrudan uydurma/ozetleme (premiseInventor). Her iki yolda
+    // da writeNarrativeScript SADECE brief'i gorur, kaynagin kendisini degil.
+    let brief: FactBrief;
+    if (mode === 'invented') {
+      Logger.debug(`[job ${jobId}] Konu özeti üretiliyor (referans video yok)`);
+      brief = await inventFactBrief(channel, sourceRef);
+      db.prepare('UPDATE job SET stage=? WHERE id=?').run('fact_brief_ready', jobId);
+    } else {
+      Logger.debug(`[job ${jobId}] Transkript çekiliyor`);
+      const transcript = await transcribeSource(sourceRef, channel.language);
+      db.prepare('UPDATE job SET stage=? WHERE id=?').run('transcribed', jobId);
 
-    // 2. Olgu özeti - orijinal ifade biçimi burada elenir
-    Logger.debug(`[job ${jobId}] Olgu özeti çıkarılıyor`);
-    const brief = await extractFactBrief(transcript, channel.language);
-    db.prepare('UPDATE job SET stage=? WHERE id=?').run('fact_brief_ready', jobId);
+      Logger.debug(`[job ${jobId}] Olgu özeti çıkarılıyor`);
+      brief = await extractFactBrief(transcript, channel.language);
+      db.prepare('UPDATE job SET stage=? WHERE id=?').run('fact_brief_ready', jobId);
+    }
 
     // 3. Yeni senaryo - SADECE brief'ten, transkripti hiç görmez (tip seviyesinde zorlanan kısıt)
     Logger.debug(`[job ${jobId}] Senaryo yazılıyor`);

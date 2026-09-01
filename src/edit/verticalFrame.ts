@@ -25,8 +25,8 @@ function watermarkSafeCropFilter(w: number, h: number): string {
 
   return [
     `scale=${zoomW}:${zoomH}:force_original_aspect_ratio=increase,crop=${w}:${h},split=3[core][topsrc][botsrc]`,
-    `[topsrc]crop=${w}:${topBand}:0:0,boxblur=24:3[topblur]`,
-    `[botsrc]crop=${w}:${bottomBand}:0:${bottomY},boxblur=24:3[botblur]`,
+    `[topsrc]crop=${w}:${topBand}:0:0,boxblur=23:3[topblur]`,
+    `[botsrc]crop=${w}:${bottomBand}:0:${bottomY},boxblur=23:3[botblur]`,
     `[core][topblur]overlay=0:0[stripped1]`,
     `[stripped1][botblur]overlay=0:${bottomY},fps=${VIDEO.FPS},format=${VIDEO.PIXEL_FORMAT}`,
   ].join(';');

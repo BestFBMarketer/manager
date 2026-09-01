@@ -277,3 +277,45 @@ tespit içindir — yeni kod yazılmadı.
   `origin/claude/youtube-shorts-automation-plan-779kjx` ile senkron (fast-forward sonrası fark yok).
 - **Doğrulama:** `git status` clean (AUDIT.md hariç), `git log` origin ile birebir eşleşiyor.
   Bu dosya commit edilip local push onayı istenecek (kullanıcı onayı gerektirir).
+
+## 2026-09-01 — Referans Pipeline Gap-Audit (kalıcı roadmap)
+
+> Kaynak: mystisches-echo/buddha-boy-akte-01 (script→AI görsel→TTS→ACE-Step müzik→Groq hizalama→
+> montaj→thumbnail→YouTube upload) uçtan uca doğrulanmış referans pipeline'a karşı panelin
+> kod taraması (README/AUDIT/DEVAM_NOTU + src/remotion/scripts grep). Tam rapor sohbette artifact
+> olarak yayınlandı. **Bu liste kalıcı — bir sonraki "panel durumu ne" sorusunda buradan devam
+> edilecek, sıfırdan tekrar taranmayacak** (bkz claude ~/.claude/CLAUDE.md "Audit = kalıcı roadmap" kuralı).
+
+**P0 — sessiz başarısızlık, müdahalesiz çalışmayı engelliyor:**
+- [ ] `src/publish/uploader.ts` `snippet.defaultLanguage`/`defaultAudioLanguage` set etmiyor,
+      `ChannelConfig.language` (src/config/channels.ts:40) uploader'a hiç ulaşmıyor — YouTube
+      videoyu İngilizce varsayıyor. Review ekranına (`Review.tsx`) da dil alanı eklenmeli.
+- [ ] `data/music/library.json` boş — videolar sessizce müziksiz yayınlanıyor (crash yok, fark
+      edilmiyor). Ya kütüphaneyi doldur ya da referanstaki ACE-Step/Modal üretim yolunu bağla.
+
+**P1:**
+- [ ] `remotion/components/CaptionLine.tsx` kelime zamanlamasını eşit bölüyor
+      (`durationInFrames / words.length`) — gerçek Groq kelime zaman damgası yok.
+- [ ] SFX hiç yok — Freesound key (historisches-kapital/.env) panelde kullanılmıyor.
+- [ ] Genel görsel efekt/sahne-etiketleme sistemi yok (referanstaki rain overlay tekil örnek).
+- [ ] `scripts/authYoutube.ts` OAuth scope'u dar (`youtube.upload+readonly`) — ileride
+      `videos.update` gerekirse referansta yaşanan 403'e çarpar, geniş `youtube` scope'una çıkar.
+
+**P2:**
+- [ ] FunnyRanking discovery/curation yazılmadı, "haftalık paylaşılan kaynak havuzu" DEVAM_NOTU.md'de
+      "sıradaki oturumun ana işi" diye zaten işaretli.
+- [ ] TierList iskelet halinde (klip kaynaklama, LLM tier-planner, arkaplan görseli, TTS profili yok).
+- [ ] YouTube bağlantısı için panel UI yok, kullanıcı hâlâ elle `authYoutube.ts` çalıştırıyor.
+- [ ] Instagram cross-post `PUBLIC_MEDIA_BASE_URL` deploy adımını bekliyor (kod hazır).
+
+**P3:**
+- [ ] TikTok chunked upload yok (64MB tek parça sınırı).
+- [ ] Facebook adaptörü stub (düşük öncelik, kullanıcı zaten Instagram+TikTok seçti).
+- [ ] Hiçbir şey VPS'e deploy edilmedi — tüm doğrulamalar Windows dev PC üzerinden.
+
+**Panelin referanstan daha iyi olduğu, dokunma:**
+- Sahne süresi gerçek ölçüme dayanıyor (`src/worker/stages/storyNarrative.ts:139-162`) — referansın
+  18.3sn gap-closing bug sınıfı burada yapısal olarak oluşamaz.
+- Gerçek DB tabanlı onay ekranı (`src/publish/reviewGate.ts`) — video/thumbnail önizleme, çift-onay koruması.
+- Çok-kanal sistemi zaten sağlam (`src/config/channels.ts`, `channelSettings.ts`) — kod değişikliği
+  gerekmeden yeni kanal eklenebiliyor.

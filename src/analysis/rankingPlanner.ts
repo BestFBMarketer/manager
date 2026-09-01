@@ -42,8 +42,12 @@ const LANGUAGE_NAMES: Record<ChannelConfig['language'], string> = {
   en: 'English',
 };
 
-function buildSystemPrompt(language: ChannelConfig['language']): string {
-  return [
+function buildSystemPrompt(
+  language: ChannelConfig['language'],
+  styleExamples: string[],
+  requestedCategories: string[] = [],
+): string {
+  const lines = [
     'You write scripts for a YouTube Shorts ranking channel.',
     `CRITICAL: Write ALL spoken lines and titles in ${LANGUAGE_NAMES[language]} (${language}).`,
     'Tone: humorous, teasing, sarcastic - but never insults, profanity, humiliation or personal attacks.',
@@ -59,7 +63,31 @@ function buildSystemPrompt(language: ChannelConfig['language']): string {
     '{"title": string, "hookLine": string, "items": [{"rank": number, "clipId": string,',
     '"startSec": number, "endSec": number, "voiceLine": string}], "outroLine": string,',
     '"description": string, "tags": string[]}',
-  ].join(' ');
+  ];
+
+  if (requestedCategories.length > 0) {
+    lines.push(
+      '',
+      `CRITICAL SELECTION RULE: the channel owner only wants clips matching one of these` +
+        ` requested themes: ${requestedCategories.join(', ')}.`,
+      'Only pick candidates whose content clearly matches one of these themes, even if other',
+      'candidates look more entertaining in isolation - a clip that does not match the requested',
+      'theme must never be picked, no matter how good it looks. If fewer than',
+      `${RANKING.ITEM_COUNT} candidates genuinely match, pick only the ones that do (do not pad`,
+      'with off-theme clips).',
+    );
+  }
+
+  if (styleExamples.length > 0) {
+    lines.push(
+      '',
+      'Match this exact comedic voice from previously published videos on this channel',
+      '(internet meme slang, "bro" register, absurd comparisons - do not copy lines, match the STYLE):',
+      ...styleExamples.map((example, i) => `Example ${i + 1}: ${example}`),
+    );
+  }
+
+  return lines.join(' ');
 }
 
 function isRankingPlan(value: unknown): value is RankingPlan {
@@ -120,12 +148,18 @@ export function enforceBudget(plan: RankingPlan): RankingPlan {
  * Aday kliplerden ranking kurgusu uretir.
  * @param candidates Ozetleri cikarilmis aday klipler
  * @param topic Kanalin bu videodaki temasi (orn. "en komik hayvan anlari")
+ * @param language Cikti dili
+ * @param styleExamples Kanalin gercek, daha once yayinlanmis videolarindan
+ *                       alinmis countdown metinleri (channel.settings.voiceLineExamples) -
+ *                       LLM'e few-shot stil ornegi olarak verilir
  * @returns Sure butcesine uydurulmus ranking plani
  */
 export async function planRanking(
   candidates: RankingCandidate[],
   topic: string,
   language: ChannelConfig['language'] = 'en',
+  styleExamples: string[] = [],
+  requestedCategories: string[] = [],
 ): Promise<RankingPlan> {
   if (candidates.length < RANKING.ITEM_COUNT) {
     throw new Error(
@@ -146,7 +180,7 @@ export async function planRanking(
   ].join('\n');
 
   const { data } = await callLlmJson<RankingPlan>(
-    { task: 'viralHook', system: buildSystemPrompt(language), user: userPrompt },
+    { task: 'viralHook', system: buildSystemPrompt(language, styleExamples, requestedCategories), user: userPrompt },
     isRankingPlan,
   );
 

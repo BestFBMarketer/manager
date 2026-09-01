@@ -12,6 +12,7 @@ import { getDb } from '../../core/db.js';
 import { Logger } from '../../core/logger.js';
 import { getChannel } from '../../config/channels.js';
 import { discoverNextTopics } from '../../story/topicDiscovery.js';
+import { generateStoryTopics } from '../../story/premiseInventor.js';
 
 /** Gercek Remotion kompozisyon id'leri (remotion/Root.tsx) - hatali sablon adiyla is acilmasin. */
 const VALID_TEMPLATES = new Set(['FunnyClip', 'FunnyRanking', 'HotelTourLandscape', 'HotelTourVertical', 'StoryNarrative']);
@@ -22,6 +23,12 @@ interface BatchItem {
   hotelCity?: string;
   /** discoverNextTopics'ten geliyorsa - transkriptsiz kaldığında (fasıl/parti içeriği) tek içerik ipucu */
   videoTitle?: string;
+  /**
+   * StoryNarrative icin: 'invented' ise sourceRef bir video URL'i degil,
+   * premiseInventor.ts'e giden konu metnidir (topic_source='ai_generated').
+   * Belirtilmezse 'reference' varsayilir (mevcut davranis, geriye donuk uyumlu).
+   */
+  mode?: 'reference' | 'invented';
 }
 
 export function batchRouter(): Router {
@@ -58,24 +65,40 @@ export function batchRouter(): Router {
     // referans kanal olmadan LLM'in kendi konu listesini urettigi ayri bir yol.
     if (!items) {
       if (channel.topicSource === 'ai_generated') {
-        res.status(501).json({
-          error: '"AI kendi konu listesini üretsin" modu henüz otomatik değil - items listesini elle verin',
-        });
-        return;
-      }
-      try {
-        const topics = await discoverNextTopics(channel, count);
-        if (topics.length < count) {
-          res.status(409).json({
-            error: `sadece ${topics.length}/${count} yeni konu bulundu (referans kanal kataloğu tükendi veya hepsi zaten uyarlanmış)`,
-          });
+        try {
+          const db = getDb();
+          const alreadyUsed = (
+            db.prepare('SELECT source_ref FROM job WHERE channel_id = ?').all(channel.id) as Array<{ source_ref: string }>
+          ).map((r) => r.source_ref);
+
+          const topics = await generateStoryTopics(channel, count, alreadyUsed);
+          if (topics.length < count) {
+            res.status(409).json({
+              error: `sadece ${topics.length}/${count} yeni kurgu/konu üretilebildi - tekrar deneyin`,
+            });
+            return;
+          }
+          items = topics.map((t) => ({ sourceRef: t.topic, videoTitle: t.videoTitle, mode: 'invented' as const }));
+        } catch (error) {
+          Logger.error('Otomatik konu üretimi başarısız', error);
+          res.status(400).json({ error: error instanceof Error ? error.message : 'konu üretimi başarısız' });
           return;
         }
-        items = topics.map((t) => ({ sourceRef: t.sourceRef, videoTitle: t.videoTitle }));
-      } catch (error) {
-        Logger.error('Otomatik konu keşfi başarısız', error);
-        res.status(400).json({ error: error instanceof Error ? error.message : 'konu keşfi başarısız' });
-        return;
+      } else {
+        try {
+          const topics = await discoverNextTopics(channel, count);
+          if (topics.length < count) {
+            res.status(409).json({
+              error: `sadece ${topics.length}/${count} yeni konu bulundu (referans kanal kataloğu tükendi veya hepsi zaten uyarlanmış)`,
+            });
+            return;
+          }
+          items = topics.map((t) => ({ sourceRef: t.sourceRef, videoTitle: t.videoTitle }));
+        } catch (error) {
+          Logger.error('Otomatik konu keşfi başarısız', error);
+          res.status(400).json({ error: error instanceof Error ? error.message : 'konu keşfi başarısız' });
+          return;
+        }
       }
     }
 
@@ -105,7 +128,12 @@ export function batchRouter(): Router {
       const jobIds: number[] = [];
       const insertAll = db.transaction((rows: BatchItem[]) => {
         for (const row of rows) {
-          const inputJson = JSON.stringify({ hotelName: row.hotelName, hotelCity: row.hotelCity, videoTitle: row.videoTitle });
+          const inputJson = JSON.stringify({
+            hotelName: row.hotelName,
+            hotelCity: row.hotelCity,
+            videoTitle: row.videoTitle,
+            mode: row.mode,
+          });
           const result = insertJob.run(
             channel.id,
             channel.defaultTemplate,

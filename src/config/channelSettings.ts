@@ -27,6 +27,28 @@ export interface ChannelSettings {
   ttsProvider: 'voicebox' | 'piper' | null;
   /** ttsProvider='voicebox' ise profil id'si; 'piper' ise .onnx dosya yolu. */
   voiceRef: string | null;
+  /**
+   * FunnyRanking icin gercek, daha once yayinlanmis videolardan alinmis
+   * ornek voice line dizileri (her string bir videonun tum countdown metni,
+   * "No.5 ... No.1 ..." sirasiyla) - LLM'e few-shot stil ornegi olarak verilir,
+   * boylece uretilen alay/mizah tonu kanalin kurulu sesinden sapmaz.
+   */
+  voiceLineExamples: string[];
+  /**
+   * FunnyRanking/FunnyClip icin nis/kategori anahtar kelimeleri (orn. "pool fails",
+   * "DIY fails", "dance fails"). Bos ise topicDiscovery filtrelemez (eski davranis).
+   * Doluysa, referans kanal kataloğundaki bir video sadece basligi/aciklamasi bu
+   * anahtar kelimelerden en az birini iceriyorsa aday sayilir.
+   */
+  discoveryCategories: string[];
+  /**
+   * TierList (Crash Dummy) icerik turu icin kaynak modu: 'manual' = kullanici
+   * her marka reklami icin dogrudan video linkini kendi girer (en guvenilir,
+   * yanlis/resmi olmayan yukleme riski yok). 'search_suggest' = worker
+   * YOUTUBE_API_KEY ile isme gore arar, birkac aday sunar, kullanici panelde
+   * tek tikla secer (kor otomatik secim YOK - hep bir onay adimi var).
+   */
+  tierListSourceMode: 'manual' | 'search_suggest';
 }
 
 export const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
@@ -34,6 +56,9 @@ export const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
   crossPost: { facebook: false, instagram: false, tiktok: false },
   ttsProvider: null,
   voiceRef: null,
+  voiceLineExamples: [],
+  discoveryCategories: [],
+  tierListSourceMode: 'manual',
 };
 
 /** Bilinmeyen/eksik alanlar sessizce varsayilana duser - eski satirlar da calisir kalir. */
@@ -63,6 +88,15 @@ export function parseChannelSettings(json: string): ChannelSettings {
     },
     ttsProvider: obj.ttsProvider === 'voicebox' || obj.ttsProvider === 'piper' ? obj.ttsProvider : null,
     voiceRef: typeof obj.voiceRef === 'string' ? obj.voiceRef : null,
+    voiceLineExamples:
+      Array.isArray(obj.voiceLineExamples) && obj.voiceLineExamples.every((v) => typeof v === 'string')
+        ? (obj.voiceLineExamples as string[])
+        : [],
+    discoveryCategories:
+      Array.isArray(obj.discoveryCategories) && obj.discoveryCategories.every((v) => typeof v === 'string')
+        ? (obj.discoveryCategories as string[])
+        : [],
+    tierListSourceMode: obj.tierListSourceMode === 'search_suggest' ? 'search_suggest' : 'manual',
   };
 }
 
