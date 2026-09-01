@@ -369,15 +369,22 @@ upload) StoryNarrative'le aynı kalır. Bu, "tek stage sözleşmesi" prensibiyle
 tam örtüşüyor — content-type'a özel yeni bir zincir değil, mevcut zincirin bir
 adımının pluggable alternatifi.
 
-### Konu kuyruğu sırası (2026-09-01)
+### Konu kuyruğu sırası (2026-09-01, güncellendi)
 
-Referans kanal(lar)ın videoları **en çok izlenenden başlayarak sırayla** işlenir —
-rastgele/LLM'in keyfi seçimi değil, gerçek `viewCount`'a göre azalan sıralı bir
-kuyruk. Her zamanlanmış yayın slotunda (`scheduleRule`) kuyruktan bir sonraki video
-alınır, özgün Almanca içerik olarak uyarlanır. Kuyruk tükenince (ya da referans
-kanalda yeni video çıkınca) yeniden senkronize edilir. `topicDiscovery.ts`'in bunu
-zaten nasıl sıraladığı (varsa) doğrulanmalı, yoksa `viewCount DESC` sıralaması
-eklenmeli.
+- **Birden fazla referans kanal olabilir** (tek kanal değil) — havuz hepsinin
+  videolarından oluşur.
+- Seçim **ağırlıklı-rastgele**: rastgele seçilir ama en çok izlenenler dahil
+  edilme/öncelik açısından ağırlıklı — yani katı `viewCount DESC` sıralı kuyruk
+  değil, yüksek izlenmeye sahip videoların havuza girme/seçilme olasılığı daha
+  yüksek olacak şekilde ağırlıklandırılmış rastgele seçim.
+- **Yayın sıklığı:** haftada 1-2 video.
+- **Önden planlama:** birkaç aylık bir takvim/kuyruk önceden oluşturulabilir
+  (canlı/anlık seçim zorunlu değil — örn. gelecek 2-3 ay için havuzdan ağırlıklı-
+  rastgele seçilmiş bir liste baştan üretilip zamanlanabilir).
+- Her zamanlanmış yayın slotunda (`scheduleRule`) kuyruktan bir sonraki video
+  alınır, özgün Almanca içerik olarak uyarlanır. `topicDiscovery.ts`'in bunu
+  şu an nasıl yaptığı doğrulanmalı, yoksa çoklu-referans-kanal + ağırlıklı-
+  rastgele + önden-çoklu-ay-planlama mantığı eklenmeli.
 
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
