@@ -402,6 +402,25 @@ ep02 Hume taslağı kısaltıldıktan sonra 1320 kelime ≈ 9:33 çıktı, kayna
 sadece %1.7 fark — %25 toleransı bile rahat karşılıyor, bu da yöntemin (gerçek anlatım
 hızına göre kelime→saniye tahmini) işe yaradığını doğruladı.
 
+### ep02 gerçek pipeline testi tamamlandı (2026-09-01) — bulgular
+
+Text→sahne manifest→görsel prompt→TTS→Groq zaman hizalama→karaoke altyazı
+zinciri baştan sona gerçek verilerle çalıştırıldı (historisches-kapital'da,
+panel dışı ama aynı prensip). Sonuç: zincir otomatik çalışıyor, yolda 2
+gerçek bug bulunup düzeltildi — **her iki Groq-çağıran script'te de (zaman
+hizalama + karaoke altyazı) rate-limit (429) retry/backoff eksikti**, free
+tier 20 req/dk sınırına 23 bölümlük bir işte kaçınılmaz çarpılıyor. Panel
+tarafında da Groq'a çoklu ardışık çağrı yapan her yer (varsa) bu riski
+taşıyor — kontrol edilmeli.
+
+Tek gerçek otomasyon boşluğu: **görsel üretim adımı**. historisches-kapital'in
+orijinal pipeline'ı burada manuel "Auto Meta" (Meta AI tarayıcı eklentisi)
+kullanıyor — mystisches-echo'nun tam otomatik Modal+FLUX yaklaşımı buraya
+henüz adapte edilmedi. Bu, "tek standart panel" hedefinin somut kanıtı:
+StoryNarrative'in görsel-kaynaklama adımına AI-görsel alternatifi eklenince
+(bkz yukarıdaki düzeltme notu) bu boşluk hem historisches-kapital hem
+gelecekteki benzer kanallar için tek seferde kapanır.
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
