@@ -386,6 +386,15 @@ adımının pluggable alternatifi.
   şu an nasıl yaptığı doğrulanmalı, yoksa çoklu-referans-kanal + ağırlıklı-
   rastgele + önden-çoklu-ay-planlama mantığı eklenmeli.
 
+### Süre-uyum kuralı (2026-09-01, esnek dial — katı kural değil)
+
+Uyarlanan bölümün süresi, kaynak videonun süresine göre bir **tolerans yüzdesi** ile
+sınırlı olsun — ama sabit %25 değil, panelde **seçmeli** (%25 / %50 / %75 gibi) bir
+ayar. Kanal veya iş bazında seçilebilir, katı/tek bir blok kural değil. Örnek doğrulama:
+ep02 Hume taslağı kısaltıldıktan sonra 1320 kelime ≈ 9:33 çıktı, kaynak (9:24) ile
+sadece %1.7 fark — %25 toleransı bile rahat karşılıyor, bu da yöntemin (gerçek anlatım
+hızına göre kelime→saniye tahmini) işe yaradığını doğruladı.
+
 ### Açık kararlar (kullanıcı onayı bekliyor)
 
 - Funrank/shorts: discovery/curation bu turda gerçek yazılsın mı, yoksa manuel
