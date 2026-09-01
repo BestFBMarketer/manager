@@ -393,6 +393,18 @@ adımının pluggable alternatifi.
   şu an nasıl yaptığı doğrulanmalı, yoksa çoklu-referans-kanal + ağırlıklı-
   rastgele + önden-çoklu-ay-planlama mantığı eklenmeli.
 
+**Panel görünürlüğü + global dedup (2026-09-01, yeni gereksinim):**
+- Referans-kanal tabanlı bir kanal (örn. historisches-kapital) için panelde
+  schedule planı ekranında **sıradaki video konuları otomatik listelenmeli**
+  (havuzdan seçilmiş, henüz üretilmemiş konular önceden görünür olsun).
+  Ayrıca **yapılmış olanlar da not edilip görünsün** (hangi konu, hangi tarih,
+  hangi kanal).
+- **Global tekrar-önleme (dedup):** aynı konu/aynı kaynak video — ister aynı
+  kanal ister **başka bir kanal** tarafından zaten işlenmiş olsun — bir daha
+  planlamaya alınmamalı. Yani dedup kanal bazlı değil, **tüm sistem çapında**
+  tek bir "işlenmiş konular" kaydı üzerinden çalışmalı (iki farklı kanal aynı
+  kaynak videoyu bağımsız bilmeden iki kez uyarlamasın).
+
 ### Süre-uyum kuralı (2026-09-01, esnek dial — katı kural değil)
 
 Uyarlanan bölümün süresi, kaynak videonun süresine göre bir **tolerans yüzdesi** ile
