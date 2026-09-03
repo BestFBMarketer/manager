@@ -632,3 +632,57 @@ onay ekranı da aynı yeteneği sunmalı** — sadece onayla/reddet değil:
   eklemeli** (dönen kanal adını kullanıcıya gösterip "doğru kanal bu mu?" diye
   teyit ettirsin) — yanlış kanala bağlanma sessizce oluyor, saatler sonra "video
   kaldırıldı" şeklinde ortaya çıkıyor.
+
+## Yeni özellik testi: otomatik tanıtım Shorts'ları (2026-09-03)
+
+Kanaldaki 3 mevcut videonun (Bridey Murphy, Ram Bahadur/Buddha Boy, Titu Singh)
+her biri için 1'er dikey (1080×1920) tanıtım Shorts'u üretilip yayınlandı —
+ilk deneme, sonuç olumlu. Script: `mystisches-echo/scripts/make_shorts_promo.py`
+(kanal-seviyesinde tekrar kullanılabilir, blur-arka-plan + net ön-plan + CTA
+banner + cliffhanger end-card deseni).
+
+**Tasarım ilkesi (kullanıcı talebi, vazgeçilmez): Shorts asla hikayeyi
+çözmemeli, mutlaka tam videoyu izlemeye teşvik edici bir "cliffhanger"da
+bitmeli.** Bu turda klip seçimi elle (manifest/transkript okunarak, cevapsız
+bir soru veya "bekle, gerçek daha karmaşık" cümlesinde biten an bulunarak)
+yapıldı — panel bunu otomatikleştirecekse, klip bitiş noktasını rastgele/sabit
+saniye yerine transkriptteki soru işareti/gerilim cümlesi gibi bir işarete
+göre seçmeli.
+
+**Zamanlama ilkesi (kullanıcı talebi, vazgeçilmez): bir video yayınlandıktan
+sonra 3 farklı Shorts otomatik zamanlanmalı — yayından 1 gün, 3 gün ve 5 gün
+sonra, her biri farklı bir klipten.** Bu turda hepsi aynı anda elle yayınlandı
+(test amaçlı) — panelde gerçek özellik olarak: video yayınlandığında (veya
+onaylandığında) otomatik olarak 3 ayrı Shorts render+upload job'ı, videonun
+`publishedAt`'ine göre +1g/+3g/+5g için zamanlanmalı, ve bu gecikme (1/3/5 gün,
+Shorts sayısı) panelden kanal/iş bazında **ayarlanabilir** olmalı (sabit
+kodlanmamalı).
+
+**Panelde bu özellik için yapılması gerekenler:**
+- **Klip seçimi otomasyonu:** `scene_manifest_timed.csv` + transkript üzerinden
+  "hook adayı" tespiti (ör. soru cümlesiyle biten sahne, ilk N saniye içindeki
+  gerilim cümlesi) — şu an elle seçildi, panel bunu bir sezgisel/LLM adımına
+  bağlamalı (free-tier'a uygun, mekanik bir "en iyi cliffhanger anını bul" görevi).
+  3 farklı zamanlanmış Shorts için 3 FARKLI klip seçilmeli (aynı klibin
+  tekrarı olmamalı).
+- **Zamanlama/schedule ayarı:** video yayınından +1g/+3g/+5g (varsayılan) —
+  panelde kanal ayarlarına "yayın sonrası Shorts zamanlaması" alanı: kaç adet
+  Shorts, hangi gün offsetlerinde (liste olarak düzenlenebilir, örn.
+  `[1, 3, 5]`), açık/kapalı toggle. Worker/scheduler video `publishedAt`
+  bilgisini job kuyruğuna offsetli olarak eklemeli.
+- **Süre sınırı belirsizliği — ÇÖZÜLDÜ, endişe yersizmiş.** Üretilen Shorts'lar
+  1:01/1:38/1:50 uzunluğunda (klasik 60sn sınırının üzerinde), kullanıcı YouTube
+  Studio'da doğruladı: **üçü de "Shorts videoları" sekmesinde sorunsuz görünüyor**
+  — YouTube'un 3dk'ya kadar dikey videoyu Shorts sayan güncel politikası burada
+  net çalışıyor. Panelin 60sn'ye zorla sıkıştırma gibi bir kısıtlaması GEREKMİYOR,
+  cliffhanger noktası doğal olarak nereye denk geliyorsa (3dk'ya kadar) sorun yok.
+- **"Videoya link" mekanizması:** API'de Shorts'u ana videoya bağlayan resmi bir
+  alan yok — açıklamanın ilk satırına `youtu.be/<id>` linki koymak (bu turda
+  yapılan) pratik çözüm. Panel bunu şablonlaştırmalı; ayrıca yayından sonra ilk
+  yorumu "Ganze Akte: <link>" olarak sabitlemek (comment pinning, ayrı bir API
+  çağrısı) ek bir görünürlük katmanı olarak eklenebilir.
+- **Kaynak videonun yerelde olmayabileceği durum:** Titu Singh videosu bu
+  kanalın kendi eski yüklemesiydi ama pipeline'ın hiç işlemediği bir dosyaydı -
+  `yt-dlp` ile kanalın kendi YouTube ID'sinden indirildi. Panel, "kaynak dosya
+  yerelde yoksa kendi kanalından indir" adımını (sadece kendi videoları için)
+  standart bir fallback olarak tanımlayabilir.
