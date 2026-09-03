@@ -670,6 +670,25 @@ kodlanmamalı).
   Shorts, hangi gün offsetlerinde (liste olarak düzenlenebilir, örn.
   `[1, 3, 5]`), açık/kapalı toggle. Worker/scheduler video `publishedAt`
   bilgisini job kuyruğuna offsetli olarak eklemeli.
+- **Community post (anket/gönderi) otomasyonu — API'de mümkün değil (2026-09-03).**
+  Kullanıcı önerdi: video yayınlandığında/sonrasında topluluğu canlı tutmak için
+  otomatik Community-tab gönderisi (anket/soru, videoyla ilgili). **YouTube Data
+  API v3'te Community post oluşturma endpoint'i yok** — bu, Shorts'u mevcut
+  videodan klipleme özelliği gibi sadece Studio UI/mobil uygulamada var, API'ye
+  hiç açılmamış. Tam otomasyon yapılamaz. **Yarı-otomasyon önerisi:** panel,
+  video/senaryo içeriğine göre bir anket sorusu + seçenekleri otomatik üretip
+  onay kuyruğunda/panelde göstersin (kopyala-yapıştır hazır), kullanıcı elle
+  Studio'ya girip yapıştırsın — elle yazma işini ortadan kaldırır, tam otomasyon
+  olmasa da zaman kazandırır. Kanalda zaten örnek "Test" gönderileri var (Side/
+  Land of Legends içerikli anketler, 2026-03-01) — bu şablon olarak kullanılabilir.
+- **Disk alanı riski (2026-09-03, kullanıcı gözlemi):** Shorts üretimi için kaynak
+  video indirme (`yt-dlp`, tekil videolar 1GB+) + render çıktıları (final mp4'ler,
+  ara dosyalar) disk'te ciddi yer kaplıyor — özellikle bu turdaki gibi harici
+  kanalların (Türkei Urlaub) mevcut YouTube videolarını yerelde işlerken. **Panel
+  önerisi: belli bir süre sonra (ör. iş tamamlanıp onaylandıktan N gün sonra)
+  büyük medya dosyaları otomatik bir Google Drive klasörüne taşınmalı, yerelde
+  sadece bir link/referans kalmalı** — disk temizliği + arşiv erişimi bir arada.
+  Henüz kodlanmadı, ileride ele alınacak.
 - **Süre sınırı belirsizliği — ÇÖZÜLDÜ, endişe yersizmiş.** Üretilen Shorts'lar
   1:01/1:38/1:50 uzunluğunda (klasik 60sn sınırının üzerinde), kullanıcı YouTube
   Studio'da doğruladı: **üçü de "Shorts videoları" sekmesinde sorunsuz görünüyor**
