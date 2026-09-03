@@ -681,6 +681,43 @@ kodlanmamalı).
   Studio'ya girip yapıştırsın — elle yazma işini ortadan kaldırır, tam otomasyon
   olmasa da zaman kazandırır. Kanalda zaten örnek "Test" gönderileri var (Side/
   Land of Legends içerikli anketler, 2026-03-01) — bu şablon olarak kullanılabilir.
+- **3. bir kanalda (Türkei Urlaub — gerçek footage, bizim pipeline'ımızın
+  ÜRETMEDİĞİ hazır videolar) test edildi, 5/5 shorts başarılı, +publishAt ile
+  gün içine yayılmış zamanlama ilk kez gerçekten kullanıldı** (önceki turlarda
+  hep anlık public'ti). Yeni dersler:
+  - **Transkript/manifest'i olmayan (bizim pipeline dışı) kaynak videolar için
+    Groq Whisper ile segment-seviyeli transkript çıkarmak işe yarıyor** — hook/
+    cliffhanger tespiti için yeterli, `timestamp_granularities[]=segment` (word
+    değil) bu iş için yeterli, daha ucuz/hızlı.
+  - **Whisper, uzun sessiz/sadece-müzikli bölümlerde halüsinasyon üretiyor**
+    (tekrar tekrar "Untertitelung des ZDF für funk" / "Bis zum nächsten Mal"
+    gibi TV-altyazı eğitim verisinden kalıntı cümleler basıyor). Panel bunu
+    otomatik ayıklamalı — ör. aynı cümlenin birden çok segment'te birebir
+    tekrarı = muhtemelen halüsinasyon, gerçek konuşma değil, filtrelenmeli.
+  - **Bazı videolarda hiç narrasyon yok** (sadece müzik+görsel showcase,
+    örn. Digiverse/Land of Legends/Sandland) — bu durumda cliffhanger-metin
+    stratejisi çalışmaz, panel bir fallback'e düşmeli: transkript boşsa/
+    anlamsızsa GÖRSEL örnekleme (birkaç zaman noktasından kare çıkarıp en
+    "çarpıcı" olanı seçme - şu an elle yapıldı) devreye girmeli.
+  - **Kaynak videonun kendi içinde başka bir platformun UI chrome'u (360°
+    video oynatıcı arayüzü, "Sessiz" butonu, VR rozeti) baked-in olabilir** —
+    bu bizim hatamız değil, orijinal içeriğin kendisi öyle, ama shorts için
+    klip seçerken bu tür segmentlerden kaçınmak gerekiyor (görsel örnekleme
+    adımında otomatik tespit edilebilir bir şey değil, elle fark edildi).
+  - **`yt-dlp` ile kendi kanalının videolarını indirmek** (Şort kaynağı için)
+    büyük dosyalara (tekil video 1GB+) yol açıyor — bkz aşağıdaki disk alanı
+    riski maddesi, aynı oturumda ortaya çıktı.
+- **Yeni öneri (2026-09-03): üretilen her Shorts için "Instagram Story'ye
+  gönder" / "Facebook Reels/Story'ye gönder" butonu veya oto-zamanlama.**
+  Community post'un aksine bunun gerçek bir API karşılığı var — panelde zaten
+  Instagram (Graph API) ve TikTok (Content Posting API v2) adapter'ları
+  yazılmış durumda (bkz "Ne var ne yok" bölümü yukarıda), sadece Facebook Reels/
+  Story'ye özel bir hedef eksik (mevcut Facebook adapter'ı stub). Aynı üretilen
+  dikey Shorts dosyası (1080×1920, ≤3dk) IG Reels/Story ve FB Reels/Story için
+  de kullanılabilir formatta zaten — ek render gerekmez, sadece dağıtım hedefi
+  eklenir. Panelde onay ekranına (bkz "Onay ekranında önizleme" bölümü) her
+  platform için ayrı toggle/zamanlama eklenmeli: "Şimdi", "Video ile aynı gün
+  gecikmeli", veya manuel tarih/saat.
 - **Disk alanı riski (2026-09-03, kullanıcı gözlemi):** Shorts üretimi için kaynak
   video indirme (`yt-dlp`, tekil videolar 1GB+) + render çıktıları (final mp4'ler,
   ara dosyalar) disk'te ciddi yer kaplıyor — özellikle bu turdaki gibi harici
