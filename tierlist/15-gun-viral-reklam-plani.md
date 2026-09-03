@@ -111,8 +111,18 @@ net ayrıldı, tekrar "kayıp" sanılmasın diye:
   S/A/B/C/D renkli etiketli pano) ama bu sadece chat'e yapıştırılan bir görsel
   — Claude'un bunu doğrudan dosyaya kaydedecek bir aracı yok, kullanıcının
   gerçek dosya yolunu/yeniden yüklemesini vermesi gerekiyor.
-- ❌ **Kanal banner'ı repo'da hiçbir yerde yok** (`find` ile doğrulandı) —
-  gerçekten hiç kaydedilmemiş, kullanıcının tekrar paylaşması gerekiyor.
+- ✅ **Kanal banner'ı artık kayıtlı (2026-09-03):** `public/tierlist/channel_banner.png`
+  — kanalın gerçek adı **"Fun & Rank"** (mor/altın neon, oyun kontrolcüsü
+  motifleri, S/A/B/C/D tier şeridi zaten banner'ın kendisinde var). TierList ve
+  Funrank/Komik Shorts AYNI bu kanalı paylaşıyor — bu artık kesinleşti (daha
+  önce ayrı kanallar sanılıyordu). Kanalın gerçek YouTube handle/URL'i HÂLÂ
+  verilmedi — banner var ama henüz canlı bir YouTube kanalına bağlı değil,
+  kullanıcı ya mevcut bir handle verecek ya da yeni oluşturacak.
+  **Not:** Kaynak dosya 5504×3072, 17MB — video composition'da kullanılmadan
+  önce küçültülmesi gerekebilir (Remotion'a doğrudan bu boyutta vermek
+  performansı düşürür). **Kural (daha önce de karar verilmiş, kullanıcı
+  2026-09-03'te doğruladı): görsel SADECE crop edilebilir (ör. 9:16 dikey
+  kırpma), renk/içerik/filtre değişikliği YOK** — banner olduğu gibi korunmalı.
 - ❌ **Gerçek worker stage (`tierList.ts` + `rankingPlanner.ts` benzeri bir LLM
   planlayıcı) hâlâ yazılmadı** — composition ve toggle'lar hazır ama uçtan uca
   otomatik üretim zinciri henüz yok.
