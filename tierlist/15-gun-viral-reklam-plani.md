@@ -106,11 +106,13 @@ net ayrıldı, tekrar "kayıp" sanılmasın diye:
   aynı) self-host edilebilir. **`TierList.tsx`'teki `DummyPanel` hâlâ statik
   `<Img>` kullanıyor (satır 56), `OffthreadVideo`'ya çevrilmedi — bu iş
   gerçekten YAPILMADI, unutulma değil, sıradaki adım bu.**
-- ❌ **Tier-board arka plan PNG'si hâlâ dosya olarak repo'da yok.** Kullanıcı
-  2026-09-03'te chat'e bir örnek şablon görseli yapıştırdı (yeşil ekran +
-  S/A/B/C/D renkli etiketli pano) ama bu sadece chat'e yapıştırılan bir görsel
-  — Claude'un bunu doğrudan dosyaya kaydedecek bir aracı yok, kullanıcının
-  gerçek dosya yolunu/yeniden yüklemesini vermesi gerekiyor.
+- ✅ **Tier-board şablonu artık kayıtlı (2026-09-03):**
+  `public/tierlist/tierboard_template.jpg` — yeşil ekran (Dummy chroma-key
+  alanı, üstte) + ahşap panolu S/A/B/C/D tier tahtası (altta, kırmızı/turuncu/
+  sarı/yeşil/mavi etiketler, her tier'de 3 boş slot) + sağda mor dolma kalem.
+  `TierList.tsx`'teki `DummyPanel`/`TierBoard` bileşenlerinin gerçek görsel
+  arka planı olarak bağlanabilir (şu an sadece düz renk background kullanıyor,
+  bu şablon henüz composition'a eklenmedi).
 - ✅ **Kanal banner'ı artık kayıtlı (2026-09-03):** `public/tierlist/channel_banner.png`
   — kanalın gerçek adı **"Fun & Rank"** (mor/altın neon, oyun kontrolcüsü
   motifleri, S/A/B/C/D tier şeridi zaten banner'ın kendisinde var). TierList ve
