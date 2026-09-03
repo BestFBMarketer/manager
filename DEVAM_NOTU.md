@@ -222,7 +222,16 @@ netleştir.
     (ya da en azından bir kez taranıp değerlendirildiğinden) emin olunmalı, kuyrukta
     henüz işlenmemiş/kullanılabilir aday varken video silinmemeli.
 
-**Referans kanal gözlemi (2026-08-31, @FunandRank, ~30 short incelendi):**
+**DÜZELTME (2026-09-03): @FunandRank "referans kanal" değil, KULLANICININ KENDİ
+kanalı.** Aşağıdaki 2026-08-31 gözlemi yanlışlıkla "başkasının kanalı, ilham
+için incelendi" sanılmıştı — aslında zaten canlı, kullanıcının kendi Fun&Rank
+kanalı (12 abone, 32 video, banner de kendi `public/tierlist/channel_banner.png`
+dosyasıyla birebir aynı). **TierList içerik türü de bu ZATEN VAR OLAN kanala
+yayınlanacak** — yeni kanal açmaya gerek yok, mevcut @FunandRank kullanılacak.
+Sıradaki adım: bu kanal için `authorize.py --channel-name funandrank` ile
+YouTube API token'ı oluşturulmalı (henüz yok).
+
+**Eski not (2026-08-31, o zaman "referans" sanılan gözlem — içerik hâlâ geçerli):**
 - Kategori çeşitliliği geniş: pool/DIY/gym/sports/animal/baby/cooking fails +
   "Who Did It Best" tarzı dans/trend karşılaştırma sıralamaları + "Battle of
   Beauties" gibi rekabetçi format — sadece "fails" değil.

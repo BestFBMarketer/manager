@@ -114,10 +114,12 @@ net ayrıldı, tekrar "kayıp" sanılmasın diye:
 - ✅ **Kanal banner'ı artık kayıtlı (2026-09-03):** `public/tierlist/channel_banner.png`
   — kanalın gerçek adı **"Fun & Rank"** (mor/altın neon, oyun kontrolcüsü
   motifleri, S/A/B/C/D tier şeridi zaten banner'ın kendisinde var). TierList ve
-  Funrank/Komik Shorts AYNI bu kanalı paylaşıyor — bu artık kesinleşti (daha
-  önce ayrı kanallar sanılıyordu). Kanalın gerçek YouTube handle/URL'i HÂLÂ
-  verilmedi — banner var ama henüz canlı bir YouTube kanalına bağlı değil,
-  kullanıcı ya mevcut bir handle verecek ya da yeni oluşturacak.
+  Funrank/Komik Shorts AYNI bu kanalı paylaşıyor. **Kanal handle DOĞRULANDI
+  (2026-09-03): @FunandRank** — zaten canlı, 12 abone, 32 video, banner de bu
+  görselle birebir aynı. Daha önce DEVAM_NOTU'da bu kanal yanlışlıkla
+  "başkasının referans kanalı" sanılmıştı (düzeltildi). Sıradaki adım:
+  `python authorize.py --channel-name funandrank` ile bu kanal için YouTube
+  API token'ı oluşturulmalı.
   **Not:** Kaynak dosya 5504×3072, 17MB — video composition'da kullanılmadan
   önce küçültülmesi gerekebilir (Remotion'a doğrudan bu boyutta vermek
   performansı düşürür). **Kural (daha önce de karar verilmiş, kullanıcı
