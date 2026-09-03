@@ -32,6 +32,7 @@ const FUNNY_CLIP_DEFAULTS: FunnyClipProps = {
 
 const RANKING_DEFAULTS: FunnyRankingProps = {
   hookLine: 'Bu 5 an gerçekten inanılmaz',
+  titleLabel: 'TOP 5 EN INANILMAZ ANLAR',
   items: [
     { rank: 5, videoSrc: '', voiceLine: 'Beşinci sırada klasik bir an', durationSec: 6 },
     { rank: 4, videoSrc: '', voiceLine: 'Dördüncü sırada işler çığırından çıkıyor', durationSec: 6 },

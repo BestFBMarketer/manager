@@ -1,5 +1,6 @@
 {
   "hookLine": "Ranking the most epic pool fails from 5 to 1!",
+  "titleLabel": "TOP 5 POOL FAILS OF THE WEEK",
   "hookAudioSrc": "tierlist/ranking/day1-pool/hook.wav",
   "items": [
     { "rank": 5, "videoSrc": "tierlist/ranking/day1-pool/item_01.mp4", "voiceLine": "Number 5: The classic belly flop. Ouch!", "durationSec": 3.8 },

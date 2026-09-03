@@ -1,14 +1,15 @@
 // =====================================
 // MODULE: FunnyRanking
-// Purpose: Geri sayimli Top-5 Shorts kompozisyonu (hook -> siralar -> kapanis)
+// Purpose: Geri sayimli Top-5 Shorts kompozisyonu - kanalin gercek yayinlanmis
+//          sablonuna gore (banner + sabit baslik cubugu + cerceveli klip +
+//          rozet + karaoke altyazi), hook -> siralar -> kapanis
 // Dependencies: remotion, components/*, theme
 // Author: BestMarketer Team
-// Last Modified: 2026-08-18
+// Last Modified: 2026-09-04
 // =====================================
 
-import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
-import { HookTitle } from '../components/HookTitle';
 import { RankBadge } from '../components/RankBadge';
 import { THEME, TEXT_SHADOW } from '../theme';
 
@@ -30,9 +31,14 @@ export type RankingItemProps = {
 
 export type FunnyRankingProps = {
   hookLine: string;
-  /** Hook repliginin TTS ses dosyasi - hook'ta arkada video olmadigi icin
-   * sesi tasiyacak baska katman yok, burada ayrica calinmali. */
+  /** Hook repliginin TTS ses dosyasi - hook'ta arkada gorunen klip zaten
+   * kendi seslendirmesiyle geliyor, hook sesi ayri katman olarak calinmali. */
   hookAudioSrc?: string;
+  /** Sabit ust baslik cubugunda goruntulenen kisa, tum video boyunca sabit
+   * kalan metin (orn "TOP 5 POOL FAILS OF THE WEEK") - kanalin gercek
+   * yayinlanmis videolarindaki sablonla eslesir (bkz 2026-09-04, 10k izlenmeli
+   * referans video incelemesi). */
+  titleLabel: string;
   items: RankingItemProps[];
   outroLine: string;
   /** Outro repliginin TTS ses dosyasi - ayni sebepten burada calinmali. */
@@ -42,9 +48,69 @@ export type FunnyRankingProps = {
   outroDurationSec: number;
 }
 
+/** Banner + sabit baslik cubugu - tum video boyunca degismeden durur (kanalin
+ * gercek sablonu, bkz referans video). */
+const TopChrome: React.FC<{ titleLabel: string }> = ({ titleLabel }) => (
+  <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: BANNER_H, overflow: 'hidden' }}>
+      <Img src={staticFile('tierlist/channel_banner.png')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </div>
+    <div
+      style={{
+        position: 'absolute',
+        top: BANNER_H,
+        left: 0,
+        right: 0,
+        height: TITLE_BAR_H,
+        backgroundColor: '#0a0a0a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: THEME.font.family,
+          fontSize: 40,
+          fontWeight: 900,
+          color: THEME.colors.ink,
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          padding: '0 24px',
+        }}
+      >
+        {titleLabel}
+      </div>
+    </div>
+  </>
+);
+
+/** Klip alani - arkada bulanik/buyutulmus ayni video (kenar bosluklarini
+ * doldurur), onde net video contain ile ortalanir. Kanalin gercek
+ * sablonundaki "cerceveli klip" gorunumu. */
+const FramedClip: React.FC<{ src: string; muted?: boolean }> = ({ src, muted }) => {
+  if (!src) return <AbsoluteFill style={{ backgroundColor: '#12141c' }} />;
+  const resolved = resolveSrc(src);
+  return (
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
+      <OffthreadVideo src={resolved} muted style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(0.55)', transform: 'scale(1.15)' }} />
+      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <OffthreadVideo src={resolved} muted={muted} style={{ width: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+const BANNER_H = 220;
+const TITLE_BAR_H = 76;
+const CLIP_TOP = BANNER_H + TITLE_BAR_H;
+const CAPTION_BAR_H = 260;
+
 export const FunnyRanking: React.FC<FunnyRankingProps> = ({
-  hookLine,
+  hookLine: _hookLine,
   hookAudioSrc,
+  titleLabel,
   items,
   outroLine,
   outroAudioSrc,
@@ -52,6 +118,7 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
   hookDurationSec,
   outroDurationSec,
 }) => {
+  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const hookFrames = Math.round(hookDurationSec * fps);
 
@@ -64,47 +131,64 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
     return entry;
   });
 
+  const activeEntry = placed.find((p) => frame >= p.from && frame < p.from + p.frames);
+  // Hook fazinda ilk itemin klibi sessiz onizleme olarak arkada oynar -
+  // kanalin gercek sablonunda ayri siyah "hook" ekrani yok, video hemen
+  // basliyor (bkz 2026-09-04 referans inceleme).
+  const currentVideo = activeEntry ? activeEntry.item.videoSrc : placed[0]?.item.videoSrc ?? '';
+  const isHookPhase = frame < hookFrames;
+
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
+      <div style={{ position: 'absolute', top: CLIP_TOP, left: 0, right: 0, bottom: CAPTION_BAR_H }}>
+        <FramedClip src={currentVideo} muted={isHookPhase} />
+      </div>
+
+      {/* Alt karaoke-altyazi cubugu - klibin bulanik/buyutulmus hali arka
+          plan olarak devam eder, kanalin gercek sablonuyla eslesir. */}
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, overflow: 'hidden' }}>
+        {currentVideo ? (
+          <OffthreadVideo
+            src={resolveSrc(currentVideo)}
+            muted
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(0.5)', transform: 'scale(1.3) translateY(-20%)' }}
+          />
+        ) : (
+          <AbsoluteFill style={{ backgroundColor: '#0c0d13' }} />
+        )}
+      </div>
+
+      <TopChrome titleLabel={titleLabel} />
+
       {placed.map(({ item, from, frames }) => (
         <Sequence key={item.rank} from={from} durationInFrames={frames}>
-          <AbsoluteFill>
-            {/* Klip eksikse render'in tamami cokmemeli - duz zemine dusulur.
-                Ses ayri bir muzik/altyazi katmani degil - item.videoSrc render
-                oncesinde zaten seslendirme ile miksajlanmis geliyor (bkz.
-                worker/stages/funnyRanking.ts), bu yuzden burada mute EDILMEZ. */}
-            {item.videoSrc ? (
-              <OffthreadVideo
-                src={resolveSrc(item.videoSrc)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <AbsoluteFill style={{ backgroundColor: '#12141c' }} />
-            )}
-          </AbsoluteFill>
           <RankBadge rank={item.rank} isFinal={item.rank === 1} />
-          <CaptionLine text={item.voiceLine} durationInFrames={frames} />
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, display: 'flex', alignItems: 'center' }}>
+            <CaptionLine text={item.voiceLine} durationInFrames={frames} />
+          </div>
         </Sequence>
       ))}
 
-      {/* Hook en uste cizilir ki ilk klibin uzerinde dursun */}
-      <Sequence durationInFrames={hookFrames}>
-        <HookTitle text={hookLine} />
-        {hookAudioSrc ? <Audio src={resolveSrc(hookAudioSrc)} /> : null}
-      </Sequence>
+      {hookAudioSrc ? (
+        <Sequence durationInFrames={hookFrames}>
+          <Audio src={resolveSrc(hookAudioSrc)} />
+        </Sequence>
+      ) : null}
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
         {outroAudioSrc ? <Audio src={resolveSrc(outroAudioSrc)} /> : null}
         {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa arkadaki
             son klip karesi sizip metnin ustune bindigi bozuk gorunum
             olusuyor (bkz 2026-09-03 kullanici geri bildirimi, TierList'in
-            ayni hatasi - bkz TierList.tsx). */}
+            ayni hatasi - bkz TierList.tsx). zIndex:100 sart, ust chrome
+            (TopChrome) ve rozet gibi elemanlarin ustunde kalmali. */}
         <AbsoluteFill
           style={{
             backgroundColor: '#0c0d13',
             justifyContent: 'center',
             alignItems: 'center',
             padding: THEME.layout.safePadding,
+            zIndex: 100,
           }}
         >
           <div
