@@ -8,7 +8,7 @@
 // Last Modified: 2026-09-04
 // =====================================
 
-import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
 import { RankBadge } from '../components/RankBadge';
 import { THEME, TEXT_SHADOW } from '../theme';
@@ -118,7 +118,6 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
   hookDurationSec,
   outroDurationSec,
 }) => {
-  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const hookFrames = Math.round(hookDurationSec * fps);
 
@@ -131,37 +130,52 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
     return entry;
   });
 
-  const activeEntry = placed.find((p) => frame >= p.from && frame < p.from + p.frames);
-  // Hook fazinda ilk itemin klibi sessiz onizleme olarak arkada oynar -
-  // kanalin gercek sablonunda ayri siyah "hook" ekrani yok, video hemen
-  // basliyor (bkz 2026-09-04 referans inceleme).
-  const currentVideo = activeEntry ? activeEntry.item.videoSrc : placed[0]?.item.videoSrc ?? '';
-  const isHookPhase = frame < hookFrames;
+  const firstVideo = placed[0]?.item.videoSrc ?? '';
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
-      <div style={{ position: 'absolute', top: CLIP_TOP, left: 0, right: 0, bottom: CAPTION_BAR_H }}>
-        <FramedClip src={currentVideo} muted={isHookPhase} />
-      </div>
-
-      {/* Alt karaoke-altyazi cubugu - klibin bulanik/buyutulmus hali arka
-          plan olarak devam eder, kanalin gercek sablonuyla eslesir. */}
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, overflow: 'hidden' }}>
-        {currentVideo ? (
-          <OffthreadVideo
-            src={resolveSrc(currentVideo)}
-            muted
-            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(0.5)', transform: 'scale(1.3) translateY(-20%)' }}
-          />
-        ) : (
-          <AbsoluteFill style={{ backgroundColor: '#0c0d13' }} />
-        )}
-      </div>
-
-      <TopChrome titleLabel={titleLabel} />
+      {/* Hook fazi - ilk itemin klibi sessiz onizleme olarak arkada oynar,
+          kanalin gercek sablonunda ayri siyah "hook" ekrani yok. Kendi
+          Sequence'i icinde olmasi SART - Sequence disinda OffthreadVideo
+          global frame'i klip-ici zaman sanip klibin suresini asinca donuk/
+          sessiz kaliyordu (bkz 2026-09-04 kullanici bulgusu: "ses yok donuk
+          ekran"). Her klip artik kendi Sequence'inde 0'dan baslar. */}
+      {hookFrames > 0 ? (
+        <Sequence durationInFrames={hookFrames}>
+          <div style={{ position: 'absolute', top: CLIP_TOP, left: 0, right: 0, bottom: CAPTION_BAR_H }}>
+            <FramedClip src={firstVideo} muted />
+          </div>
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, overflow: 'hidden' }}>
+            {firstVideo ? (
+              <OffthreadVideo
+                src={resolveSrc(firstVideo)}
+                muted
+                style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(0.5)', transform: 'scale(1.3) translateY(-20%)' }}
+              />
+            ) : (
+              <AbsoluteFill style={{ backgroundColor: '#0c0d13' }} />
+            )}
+          </div>
+          {hookAudioSrc ? <Audio src={resolveSrc(hookAudioSrc)} /> : null}
+        </Sequence>
+      ) : null}
 
       {placed.map(({ item, from, frames }) => (
         <Sequence key={item.rank} from={from} durationInFrames={frames}>
+          <div style={{ position: 'absolute', top: CLIP_TOP, left: 0, right: 0, bottom: CAPTION_BAR_H }}>
+            <FramedClip src={item.videoSrc} />
+          </div>
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, overflow: 'hidden' }}>
+            {item.videoSrc ? (
+              <OffthreadVideo
+                src={resolveSrc(item.videoSrc)}
+                muted
+                style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(0.5)', transform: 'scale(1.3) translateY(-20%)' }}
+              />
+            ) : (
+              <AbsoluteFill style={{ backgroundColor: '#0c0d13' }} />
+            )}
+          </div>
           <RankBadge rank={item.rank} isFinal={item.rank === 1} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: CAPTION_BAR_H, display: 'flex', alignItems: 'center' }}>
             <CaptionLine text={item.voiceLine} durationInFrames={frames} />
@@ -169,11 +183,7 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
         </Sequence>
       ))}
 
-      {hookAudioSrc ? (
-        <Sequence durationInFrames={hookFrames}>
-          <Audio src={resolveSrc(hookAudioSrc)} />
-        </Sequence>
-      ) : null}
+      <TopChrome titleLabel={titleLabel} />
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
         {outroAudioSrc ? <Audio src={resolveSrc(outroAudioSrc)} /> : null}

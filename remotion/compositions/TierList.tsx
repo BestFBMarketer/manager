@@ -96,7 +96,15 @@ function lerpRect(a: Rect, b: Rect, t: number): Rect {
  * reddettigi asil sebeplerden biriydi (bkz 2026-09-03 yeniden tasarim notu):
  * video ilk FULLSCREEN_SEC saniye tam ekran oynar, sonra TRANSITION_SEC
  * icinde kendi slotuna kucularak oturur ve orada kalir. */
-const AdSpot: React.FC<{ item: TierListItemProps; localFrame: number; fps: number; slotCol: number }> = ({ item, localFrame, fps, slotCol }) => {
+const AdSpot: React.FC<{ item: TierListItemProps; slotCol: number }> = ({ item, slotCol }) => {
+  // Sequence icinde render edildigi icin useCurrentFrame() zaten bu item'in
+  // KENDI lokal zamanini verir (0'dan baslar) - disaridan localFrame prop
+  // olarak GLOBAL frame gecirmek OffthreadVideo'nun klip suresini asip
+  // donuk/yanlis kareye kilitlenmesine yol aciyordu (bkz 2026-09-04
+  // FunnyRanking'de bulunan ayni hata - kok neden: OffthreadVideo Sequence
+  // disinda/yanlis Sequence'te global frame'i klip-ici zaman saniyor).
+  const localFrame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const fullscreenFrames = Math.round(2.4 * fps);
   const transitionFrames = Math.round(0.45 * fps);
   const target = slotRect(item, slotCol);
@@ -163,14 +171,6 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, hookVideoSrc, item
     return entry;
   });
 
-  const activeEntry = placed.find((p) => frame >= p.from && frame < p.from + p.frames);
-
-  const currentDummyVideo = frame < hookFrames
-    ? hookVideoSrc
-    : activeEntry
-      ? activeEntry.item.dummyVideoSrc
-      : outroVideoSrc;
-
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
       {/* Persistent arka plan - kullanicinin verdigi gercek tier-board sablonu
@@ -179,23 +179,27 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, hookVideoSrc, item
         <Img src={staticFile('tierlist/tierboard_clipboard.png')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
 
-      <DummyPanel videoSrc={currentDummyVideo} />
+      {/* Hook fazi - kendi Sequence'i icinde, DummyPanel'in videosu 0'dan
+          baslar (bkz asagidaki item Sequence'lerindeki ayni gerekce). */}
+      <Sequence durationInFrames={hookFrames}>
+        <DummyPanel videoSrc={hookVideoSrc} />
+        <HookTitle text={hookLine} />
+      </Sequence>
 
       {/* Acilmis reklamlar - kendi slotlarinda sabit thumbnail olarak kalir. */}
       {placed.map((p, i) => (frame >= p.from + p.frames ? <PinnedThumb key={i} item={p.item} slotCol={p.slotCol} /> : null))}
 
-      {/* Aktif reklam - tam ekran acilip slotuna kucularak oturur. */}
-      {activeEntry ? <AdSpot item={activeEntry.item} localFrame={frame - activeEntry.from} fps={fps} slotCol={activeEntry.slotCol} /> : null}
-
-      {placed.map(({ item, from, frames }, i) => (
+      {placed.map(({ item, from, frames, slotCol }, i) => (
         <Sequence key={i} from={from} durationInFrames={frames}>
+          {/* DummyPanel + AdSpot MUTLAKA bu Sequence icinde olmali - disarida
+              olsa OffthreadVideo global frame'i klip-ici zaman sanip klip
+              suresini asinca donuk kaliyordu (bkz 2026-09-04 FunnyRanking'de
+              bulunan ayni hata, kullanici bulgusu: "ses yok donuk ekran"). */}
+          <DummyPanel videoSrc={item.dummyVideoSrc} />
+          <AdSpot item={item} slotCol={slotCol} />
           <CaptionLine text={item.voiceLine} durationInFrames={frames} />
         </Sequence>
       ))}
-
-      <Sequence durationInFrames={hookFrames}>
-        <HookTitle text={hookLine} />
-      </Sequence>
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
         {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa TV paneli ve

@@ -757,3 +757,34 @@ kodlanmamalı).
   `yt-dlp` ile kanalın kendi YouTube ID'sinden indirildi. Panel, "kaynak dosya
   yerelde yoksa kendi kanalından indir" adımını (sadece kendi videoları için)
   standart bir fallback olarak tanımlayabilir.
+
+## Panelin kendi kendine hata düzeltme kabiliyeti (2026-09-04, kullanıcı talebi)
+
+Fun&Rank TierList/Ranking şablon yeniden tasarımı turunda (bkz proje hafızası
+`tierlist-yeniden-tasarim-2026-09-03.md`, `tierlist-sample-v6-reddedildi.md`)
+render→ekran-görüntüsü-geri-bildirimi→kod-düzeltme→yeniden-render döngüsü çok
+sayıda tur sürdü (chroma-key, z-index, Sequence-scoping/donuk-video bug'ı,
+watermark/bumper-kart kaçırma, klip-ses eşleşmesi gibi hatalar tek tek elle
+bulunup düzeltildi). Kullanıcı bunu görünce: **"kodu bu tarz değişiklikleri,
+hataları düzeltebilecek kabiliyette panel hazırlamamız lazım"** dedi - yani
+panelin kendisinin (Claude Code CLI/bu oturum dışında) bu tür render-QA-fix
+döngüsünü çalıştırabilecek bir yeteneğe sahip olması hedefleniyor.
+
+**Ne anlama geliyor (henüz netleşmedi, ileride konuşulacak):**
+- Panelde üretilen bir örnek render'ı otomatik/yarı-otomatik QA'dan geçirip
+  (kare çıkarma + görsel kontrol, ses/watermark/senkron kontrolü gibi) bulunan
+  sorunları kod tarafında (Remotion composition'ları, ffmpeg pipeline script'leri)
+  düzeltebilen bir mekanizma - muhtemelen bir LLM entegrasyonu (Claude API/Agent
+  SDK ile panelin kendi içinden kod düzenleme çağrısı) gerektirir.
+- Bu oturumda elle yapılan iş akışı (render → ffmpeg ile kare çıkar → görsel
+  incele → composition kodunu düzenle → tekrar render) bir referans şablon
+  olarak kullanılabilir - panel bunu bir "workflow" olarak kodlayabilir.
+- Henüz TASARLANMADI/KODLANMADI - bu sadece bir yön/istek notu. Bir sonraki
+  oturumda kapsam netleştirilmeli: tam otonom mu (panel kendi kendine düzeltip
+  yeniden dener), yoksa yarı-otonom mu (bulguları raporlar, kullanıcı/Claude
+  onaylar)? Hangi hata sınıfları hedefleniyor (sadece görsel/render hataları mı,
+  yoksa worker/pipeline mantık hataları da mı)?
+- İlgili: kullanıcı ayrıca kaynak klipler için **kendi "bumper card" tasarımımızı**
+  (FailArmy'nin video başı/arası marka kartı gibi) eklemeyi de iyi bir fikir
+  olarak not etti - bu da ayrı, daha kolay bir gelecek görevi (öncelik: önce
+  temiz sample render'lar tamamlansın).
