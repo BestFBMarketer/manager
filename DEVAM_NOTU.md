@@ -254,6 +254,12 @@ günlük plan örneği) — ileride adaptif zamanlama için, şimdi kodlanmadı:
   yayın hedefinin çok ötesinde, ayrı ve büyük bir özellik. Şimdilik basit sabit
   3-slot ile başla, bu adaptif katman ileride ayrı bir oturumda ele alınmalı.**
 
+**Güncel plan + doğrulanmış durum (2026-09-03):** 15 günlük içerik takvimi,
+Crash Dummy karakter detayları ve repo'dan tek tek doğrulanmış kod durumu
+(ne kodlandı, ne sadece konuşuldu) artık `shortsfactory/manager/tierlist/
+15-gun-viral-reklam-plani.md` içinde — yeni bir TierList günü üretilecekse
+önce o dosya okunmalı.
+
 **TierList/Crash Dummy içerik türü (2026-08-31) - iskelet kodlandı, çalıştığı
 görsel olarak doğrulandı, typecheck temiz:**
 - Ayrı kanal DEĞİL - "Komik Shorts"un ikinci içerik türü (FunnyRanking'in
