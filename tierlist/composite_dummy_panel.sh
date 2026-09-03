@@ -24,7 +24,7 @@ ffmpeg -y -loglevel error \
   -i "$IN" \
   -filter_complex "\
 [0:v]scale=1080:628[bg]; \
-[1:v]chromakey=0x057D0A:0.20:0.10,despill=type=green:mix=0.6:expand=0.1:brightness=0:green=-0.2,scale=-1:566[fg]; \
+[1:v]chromakey=0x057D0A:0.12:0.04,despill=type=green:mix=0.4:expand=0.0:brightness=0:green=-0.15,scale=-1:566[fg]; \
 [bg][fg]overlay=x=257:y=66:format=auto:shortest=1[outv]" \
   -map "[outv]" -map 1:a \
   -c:v libx264 -pix_fmt yuv420p -c:a aac \
