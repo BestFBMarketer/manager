@@ -200,13 +200,18 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, hookVideoSrc, item
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
         {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa TV paneli ve
             tier board arkadan sizip metnin ustune bindigi bozuk gorunum
-            olusuyor (bkz 2026-09-03 kullanici geri bildirimi: "kabul edilemez"). */}
+            olusuyor (bkz 2026-09-03 kullanici geri bildirimi: "kabul edilemez").
+            zIndex:100 sart - PinnedThumb(5)/AdSpot(20) explicit z-index'e
+            sahip, z-index:auto olsa DOM sirasi onemsiz bunlarin ALTINDA
+            kalirdi (bkz 2026-09-03 v8 QA bulgusu: eski reklam thumbnail'leri
+            outro'nun ustunde gorunuyordu). */}
         <AbsoluteFill
           style={{
             backgroundColor: '#0c0d13',
             justifyContent: 'center',
             alignItems: 'center',
             padding: THEME.layout.safePadding,
+            zIndex: 100,
           }}
         >
           <div
