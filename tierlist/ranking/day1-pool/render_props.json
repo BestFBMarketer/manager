@@ -3,7 +3,7 @@
   "titleLabel": "TOP 5 POOL FAILS OF THE WEEK",
   "hookAudioSrc": "tierlist/ranking/day1-pool/hook.wav",
   "items": [
-    { "rank": 5, "videoSrc": "tierlist/ranking/day1-pool/item_01.mp4", "voiceLine": "Number 5: The classic belly flop. Ouch!", "durationSec": 3.79 },
+    { "rank": 5, "videoSrc": "tierlist/ranking/day1-pool/item_01.mp4", "voiceLine": "Number 5: The classic belly flop. Ouch!", "durationSec": 4.5 },
     { "rank": 4, "videoSrc": "tierlist/ranking/day1-pool/item_02.mp4", "voiceLine": "Number 4: Slipping on the diving board.", "durationSec": 4.5 },
     { "rank": 3, "videoSrc": "tierlist/ranking/day1-pool/item_03.mp4", "voiceLine": "Number 3: The double bounce disaster.", "durationSec": 4.5 },
     { "rank": 2, "videoSrc": "tierlist/ranking/day1-pool/item_04.mp4", "voiceLine": "Number 2: Missing the pool entirely!", "durationSec": 4.2 },

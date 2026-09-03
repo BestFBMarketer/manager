@@ -788,3 +788,18 @@ döngüsünü çalıştırabilecek bir yeteneğe sahip olması hedefleniyor.
   (FailArmy'nin video başı/arası marka kartı gibi) eklemeyi de iyi bir fikir
   olarak not etti - bu da ayrı, daha kolay bir gelecek görevi (öncelik: önce
   temiz sample render'lar tamamlansın).
+
+**Somut ornek (2026-09-04 devam):** Ranking klip secimi turunda kullanici bunu
+tekrar vurguladi: "**pipeline otomasyonu da senin (Claude'un) dışarıdan
+müdahalene ihtiyaç kalmadan aynı hassasiyette çalışabilmeli**". Somut olay:
+"Number 4: Slipping on the diving board" script satirina uyan bir klip iki
+farkli kaynak videoda da bulunamadi (yogun kare tarama + elle inceleme
+yapildi, gercek bir eslesme cikmadi) - sonucta kullaniciya soruldu, o da
+UCUNCU bir kaynak video linki bulmaya gitti. Bu, otomasyonun su an HALA
+insan (kullanici + Claude) mudahalesine bagimli oldugunun somut kaniti:
+"script satiri X'e gercekten uyan bir klip var mi" sorusu bugun tamamen
+elle (once Gemini vision batch - guvenilmez cikti, sonra elle kare-kare
+inceleme) cozuluyor. Panelin bu hassasiyette CALISABILMESI icin muhtemelen:
+(a) script yazarken KLIP MEVCUDIYETINI onceden dogrulayan bir on-tarama
+adimi, veya (b) script'i mevcut klip icerigine gore ADAPTE eden bir akis
+(once klip bul, sonra o klibe uygun script yaz - siradaki ters), gerekebilir.
