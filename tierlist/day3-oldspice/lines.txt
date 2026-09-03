@@ -1,0 +1,3 @@
+hook|audio/hook.wav
+item_01|audio/item_01.wav
+outro|audio/outro.wav

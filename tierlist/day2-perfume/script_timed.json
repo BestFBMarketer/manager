@@ -1,0 +1,26 @@
+{
+  "hook": "Why do luxury brands think everyone needs to stare into nowhere to sell perfume? Today: fragrance ads, ranked.",
+  "outro": "Art, or nonsense? Drop it below, and hit subscribe!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Chanel No. 5",
+      "clip": "clip_chanel.mp4",
+      "line": "Brad Pitt stares at a wall having an existential crisis. What did we learn? Nothing! Straight to D-Tier, sorry Brad!",
+      "durationSec": 8.08,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Dior Sauvage",
+      "clip": "clip_dior.mp4",
+      "line": "A bison in the desert, Johnny Depp behind the wheel. No idea what the perfume smells like, but this is pure charisma. S-Tier, no debate!",
+      "durationSec": 9.68,
+      "audio": "audio/item_02.wav"
+    }
+  ],
+  "hookDurationSec": 7.04,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 3.6,
+  "outroAudio": "audio/outro.wav"
+}
