@@ -96,6 +96,10 @@ net ayrıldı, tekrar "kayıp" sanılmasın diye:
   frontend tipi + `ChannelEdit.tsx` UI'ı da eklendi. `'search_suggest'` seçilse
   bile panelde onay ister (kör otomatik seçim yok — worker'ın YouTube'da
   yanlış/resmi-olmayan video bulma riski bilerek engellendi).
+- ✅ **Ses profili hazır (2026-09-03):** ElevenLabs "Callum - Husky Trickster"
+  sesi klonlanıp VoiceBox'a "Callum" adıyla eklendi (`en`, `Qwen3-TTS 1.7B`,
+  `ZDF` preset, description: "official voice of F&R"). Test üretimi başarılı.
+  **Kanalın TEK sesi budur (TierList + diğer tüm Fun&Rank shorts'ları).**
 - ❌ **Lip-sync/hareket — SADECE ARAŞTIRILDI, KODLANMADI.** Kullanıcı "CapCut
   Pro'da elle yaptığımızda dudak hareketleri bile voiceover'a tam uyumluydu"
   dedi, bunun otomatik eşdeğeri için (o oturumda Gemini web'de) **SadTalker**
