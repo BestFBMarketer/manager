@@ -803,3 +803,37 @@ inceleme) cozuluyor. Panelin bu hassasiyette CALISABILMESI icin muhtemelen:
 (a) script yazarken KLIP MEVCUDIYETINI onceden dogrulayan bir on-tarama
 adimi, veya (b) script'i mevcut klip icerigine gore ADAPTE eden bir akis
 (once klip bul, sonra o klibe uygun script yaz - siradaki ters), gerekebilir.
+
+**Netlestirme (2026-09-04, kullanici duzeltmesi):** "sonraki gunler icin ben
+[Claude] tekrarlarim" demek YANLIS cerceve - kullanici acikca "bunu sen
+degil PIPELINE yapacak, bu yuzden eklenecek tools var kodlamak lazim" dedi.
+Yani hedef Claude'un her gun elle tekrarlamasi DEGIL, panelin kendi basina
+calistirabilecegi bir ARAC/TOOL kodlamak. Bu oturumda ortaya cikan somut
+tool gereksinimleri (Day1-Pool klip secim surecinden turetildi):
+
+1. **Yogun kare-tarama + etiketli contact-sheet uretici** (mekanik, kolay
+   kodlanir): bir video dosyasini N saniyede bir orneklemek, zaman damgasi
+   yakilmis grid halinde birlestirmek. Script olarak zaten var (bu oturumda
+   elle yazildi, `full_scan`/`sheet_*` mantigi) - panele fonksiyon olarak
+   tasinabilir.
+2. **Klip-script eslesme dogrulama adimi**: Gemini vision'a TOPLU (50+ kare)
+   batch göndermek GUVENILMEZ - dosya adindaki zaman damgasini yanlis okuyup
+   uyduruyor (bu oturumda 2 kez dogrulandi). Dogru yontem: KUCUK batch'ler
+   (5-10 kare, tek bir aday penceresi) + acik "bu spesifik zaman araligi X
+   olayini gosteriyor mu, evet/hayir + guven puani" sorusu. Buyuk taramadan
+   SONRA kucuk-batch dogrulama iki asamali akis olarak kodlanmali.
+3. **Coklu kaynak fallback mantigi**: birincil kaynak videoda script satirina
+   uyan klip yoksa, otomatik ikincil/ucuncul kaynaklara (ayni temada baska
+   derleme videolari - onceden bir havuz/liste tutulabilir) dusen bir arama
+   dongusu. Bu oturumda kullanici manuel olarak 3 farkli link verdi - panelin
+   kendi basina "bu konuda X tane alternatif kaynak dene" yapabilmesi hedef.
+4. **Watermark/bumper-kart tespiti**: kaynak videolarda tekrarlayan marka
+   kartlari (ör. "FAILARMY 2.0" splash) veya kose watermark'lari otomatik
+   tespit edip o karelerdeki zaman araliklarini aday listesinden ELEMENIN
+   bir yolu olmali (bu oturumda rank5 ilk secimi yanlislikla bir bumper
+   karta denk gelmisti, elle fark edildi).
+
+Ozetle: Ranking klip secim sureci ARTIK BILINEN/TEKRARLANABILIR bir akis
+(yukaridaki 4 adim), ama HENUZ KODLANMADI - bir sonraki gelistirme
+oncelik'i bu olmali (TierList/Ranking mass production'dan ONCE ya da ONA
+PARALEL ele alinabilir).
