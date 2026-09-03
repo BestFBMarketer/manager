@@ -1,6 +1,6 @@
 {
   "hook": "Sports brands love calling every single ad inspiring. Let's see who actually earned that word.",
-  "outro": "Two ads, zero apologies. Which one hit harder? Drop it below, and hit subscribe!",
+  "outro": "Four ads, zero apologies. Which one hit hardest? Drop it below, and hit subscribe!",
   "items": [
     {
       "tier": "S",
@@ -17,10 +17,26 @@
       "line": "Kaepernick risks his career for one line. Believe in something, even if it means sacrificing everything. Nike did not play it safe. S-Tier, and they knew exactly what they were doing!",
       "durationSec": 10.48,
       "audio": "audio/item_02.wav"
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Adidas: Is All In",
+      "clip": "clip_adidas.mp4",
+      "line": "Adidas crams football, basketball, running AND skating into one ad and calls it a strategy. That's not focus, that's picking every option on the menu because you couldn't decide! Forgettable the second it ends. C-Tier, no offense... okay, some offense.",
+      "durationSec": 15.44,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Puma: Forever Faster",
+      "clip": "clip_puma.mp4",
+      "line": "Puma's 'Forever Faster' is just gorgeous slow-motion footage of people moving... slowly. The name and the ad are literally fighting each other! Beautiful cinematography, zero punch. B-Tier, all style, barely any story.",
+      "durationSec": 14.64,
+      "audio": "audio/item_04.wav"
     }
   ],
   "hookDurationSec": 5.52,
   "hookAudio": "audio/hook.wav",
-  "outroDurationSec": 6.0,
+  "outroDurationSec": 5.2,
   "outroAudio": "audio/outro.wav"
 }
