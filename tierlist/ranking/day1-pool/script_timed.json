@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most epic pool fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: The classic belly flop. Ouch!",
+      "durationSec": 3.44,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: Slipping on the diving board.",
+      "durationSec": 3.36,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: The double bounce disaster.",
+      "durationSec": 3.44,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Missing the pool entirely!",
+      "durationSec": 3.44,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: The majestic swan dive straight into concrete!",
+      "durationSec": 4.4,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Which one made you laugh? Subscribe for more!",
+  "hookDurationSec": 3.04,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 2.8,
+  "outroAudio": "audio/outro.wav"
+}

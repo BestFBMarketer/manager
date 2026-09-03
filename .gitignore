@@ -12,3 +12,9 @@ panel-web/dist/
 # indirilebilir), repo'ya girmesin. Ciktilar (audio/talking/clip_*.mp4) kalir.
 tierlist/*/clips/
 tierlist/__pycache__/
+# ProRes4444 alpha denemeleri (130-270MB/klip) - Remotion'da guvenilmez cikti,
+# ffmpeg-side compositing'e (composite_dummy_panel.sh) gecildi, artik uretilmiyor.
+tierlist/*/talking_alpha/
+tierlist/*/talking_webm/
+tierlist/test_alpha_prores.mov
+tierlist/test_alpha_fix.webm

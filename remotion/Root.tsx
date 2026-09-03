@@ -6,7 +6,7 @@
 // Last Modified: 2026-08-18
 // =====================================
 
-import { Composition, Still, staticFile } from 'remotion';
+import { Composition, Still } from 'remotion';
 import { fontFaceCss } from './theme';
 import { FunnyClip, funnyClipDurationInFrames, type FunnyClipProps } from './compositions/FunnyClip';
 import { FunnyRanking, rankingDurationInFrames, type FunnyRankingProps } from './compositions/FunnyRanking';
@@ -47,14 +47,15 @@ const RANKING_DEFAULTS: FunnyRankingProps = {
 
 const TIER_LIST_DEFAULTS: TierListProps = {
   hookLine: 'Bugün en çılgın reklamları sıralıyoruz',
+  hookVideoSrc: '',
   items: [
-    { tier: 'D', brandLabel: 'Marka A', clipSrc: '', voiceLine: 'Buna bütçe mi onayladınız cidden?', durationSec: 3 },
-    { tier: 'B', brandLabel: 'Marka B', clipSrc: '', voiceLine: 'Fena değil ama unutulur', durationSec: 3 },
-    { tier: 'S', brandLabel: 'Marka C', clipSrc: '', voiceLine: 'İşte vizyon bu!', durationSec: 3 },
+    { tier: 'D', brandLabel: 'Marka A', clipSrc: '', dummyVideoSrc: '', voiceLine: 'Buna bütçe mi onayladınız cidden?', durationSec: 3 },
+    { tier: 'B', brandLabel: 'Marka B', clipSrc: '', dummyVideoSrc: '', voiceLine: 'Fena değil ama unutulur', durationSec: 3 },
+    { tier: 'S', brandLabel: 'Marka C', clipSrc: '', dummyVideoSrc: '', voiceLine: 'İşte vizyon bu!', durationSec: 3 },
   ],
   outroLine: 'Yarın yeni reklamlar',
+  outroVideoSrc: '',
   channelHandle: '@bestmarketer',
-  dummyImageSrc: staticFile('tierlist/dummy.png'),
   hookDurationSec: 2,
   outroDurationSec: 2,
 };

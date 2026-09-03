@@ -4,188 +4,188 @@
 //          yerlestirdigi Shorts kompozisyonu (hook -> siralar -> kapanis)
 // Dependencies: remotion, components/*, theme
 // Author: BestMarketer Team
-// Last Modified: 2026-08-31
+// Last Modified: 2026-09-03
 // =====================================
 
-import { AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
 import { HookTitle } from '../components/HookTitle';
 import { THEME, TEXT_SHADOW } from '../theme';
 
-export type Tier = 'S' | 'A' | 'B' | 'C' | 'D';
+/** Prop olarak gelen video/gorsel yollari ya http(s) URL'i ya da public/ klasorune
+ * gore relatif bir yoldur - ikincisi staticFile() ile Remotion'un kendi
+ * dev-server'indan servis edilmeli, aksi halde 404 olusuyor. */
+function resolveSrc(src: string): string {
+  if (!src) return src;
+  if (/^https?:\/\//.test(src)) return src;
+  return staticFile(src);
+}
 
-const TIER_COLORS: Record<Tier, string> = {
-  S: '#FF6B6B',
-  A: '#FFA94D',
-  B: '#FFD43B',
-  C: '#69DB7C',
-  D: '#4DABF7',
-};
+export type Tier = 'S' | 'A' | 'B' | 'C' | 'D';
 
 const TIER_ORDER: Tier[] = ['S', 'A', 'B', 'C', 'D'];
 
 export type TierListItemProps = {
   tier: Tier;
   brandLabel: string;
-  /** Kisa reklam ani (2-4sn) - kesilmis klibin yolu (staticFile veya mutlak URL) */
+  /** Kisa reklam ani - kesilmis klibin yolu (staticFile veya mutlak URL) */
   clipSrc: string;
+  /** Bu repligin lip-sync'li Dummy videosu (SadTalker + banner-composite, bkz composite_dummy_panel.sh) */
+  dummyVideoSrc: string;
   voiceLine: string;
   durationSec: number;
 };
 
 export type TierListProps = {
   hookLine: string;
+  /** Hook repliginin lip-sync'li Dummy videosu */
+  hookVideoSrc: string;
   items: TierListItemProps[];
   outroLine: string;
+  /** Outro repliginin lip-sync'li Dummy videosu */
+  outroVideoSrc: string;
   channelHandle: string;
-  /** Karakterin statik gorseli - yesil ekran/arka plan zaten gorselde islenmis olmali */
-  dummyImageSrc: string;
   hookDurationSec: number;
   outroDurationSec: number;
 };
 
-/** Karakter alani - hafif zoom/pan ile statik gorseli canlandirir. */
-const DummyPanel: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.06], { extrapolateRight: 'clamp' });
+/** DummyPanel'in kapladigi yukseklik yuzdesi - tierboard_template.jpg'nin TV
+ * kismi 1024px'in ilk 335px'i (%32.71). Bu kesin oran; degistirilirse
+ * composite_dummy_panel.sh'deki 1080:628 scale de guncellenmeli. */
+const DUMMY_PANEL_HEIGHT_PCT = 335 / 1024;
 
+/** tier-board sablonundaki 15 slot kutusunun (5 satir x 3 sutun) 1080x1920
+ * kanvasindaki MERKEZ koordinatlari - public/tierlist/tierboard_template.jpg
+ * uzerinde olculdu (bkz 2026-09-03 yeniden tasarim notu). */
+const SLOT_ROW_Y: Record<Tier, number> = { S: 894, A: 1091, B: 1291, C: 1493, D: 1727 };
+const SLOT_COL_X = [393, 604, 831];
+const SLOT_W = 175;
+const SLOT_H = 140;
+
+/** Karakter alani - TV-cerceve arkaplani (banner ile doldurulmus) ffmpeg ile
+ * ONCEDEN icine gomulmus, duz (alpha'siz) video. Chroma-key/overlay ffmpeg
+ * tarafinda yapiliyor (bkz tierlist/composite_dummy_panel.sh) - Remotion'un
+ * OffthreadVideo transparent+ProRes4444 alpha compositing'i bu ortamda
+ * guvenilmez ciktigi icin (bkz 2026-09-03 render bulgusu) bu yola gecildi. */
+const DummyPanel: React.FC<{ videoSrc: string }> = ({ videoSrc }) => {
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '38%', overflow: 'hidden', backgroundColor: '#1a1c26' }}>
-      {imageSrc ? (
-        <Img
-          src={imageSrc}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})` }}
-        />
-      ) : null}
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: `${DUMMY_PANEL_HEIGHT_PCT * 100}%`, overflow: 'hidden', backgroundColor: '#12141c' }}>
+      {videoSrc ? <OffthreadVideo src={resolveSrc(videoSrc)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
     </div>
   );
 };
 
-/** Su ana kadar acilmis sirlarin biriktigi tier panosu - yeni giren slot yaylanarak buyur. */
-const TierBoard: React.FC<{ items: TierListItemProps[]; revealedCount: number; fps: number; frame: number; lastRevealFrame: number }> = ({
-  items,
-  revealedCount,
-  fps,
-  frame,
-  lastRevealFrame,
-}) => {
-  const byTier: Record<Tier, TierListItemProps[]> = { S: [], A: [], B: [], C: [], D: [] };
-  items.slice(0, revealedCount).forEach((item) => byTier[item.tier].push(item));
+type PlacedItem = { item: TierListItemProps; from: number; frames: number; slotCol: number };
+
+/** Tam-ekrandan-slota-kuculme animasyonu icin dikdortgen. */
+type Rect = { x: number; y: number; w: number; h: number };
+const FULLSCREEN_RECT: Rect = { x: 0, y: 0, w: 1080, h: 1920 };
+
+function slotRect(item: TierListItemProps, slotCol: number): Rect {
+  const cx = SLOT_COL_X[slotCol] ?? SLOT_COL_X[2] ?? 831;
+  const cy = SLOT_ROW_Y[item.tier];
+  return { x: cx - SLOT_W / 2, y: cy - SLOT_H / 2, w: SLOT_W, h: SLOT_H };
+}
+
+function lerpRect(a: Rect, b: Rect, t: number): Rect {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, w: a.w + (b.w - a.w) * t, h: a.h + (b.h - a.h) * t };
+}
+
+/** Bir reklam klibinin tam ekran acilip sonra kendi tier-slotuna kuculerek
+ * yerlesmesi. "sadece kucuk kose kutusu" onceki tasarimda kullanicinin
+ * reddettigi asil sebeplerden biriydi (bkz 2026-09-03 yeniden tasarim notu):
+ * video ilk FULLSCREEN_SEC saniye tam ekran oynar, sonra TRANSITION_SEC
+ * icinde kendi slotuna kucularak oturur ve orada kalir. */
+const AdSpot: React.FC<{ item: TierListItemProps; localFrame: number; fps: number; slotCol: number }> = ({ item, localFrame, fps, slotCol }) => {
+  const fullscreenFrames = Math.round(2.4 * fps);
+  const transitionFrames = Math.round(0.45 * fps);
+  const target = slotRect(item, slotCol);
+
+  let rect: Rect;
+  if (localFrame < fullscreenFrames) {
+    rect = FULLSCREEN_RECT;
+  } else if (localFrame < fullscreenFrames + transitionFrames) {
+    const t = interpolate(localFrame, [fullscreenFrames, fullscreenFrames + transitionFrames], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    const eased = t * t * (3 - 2 * t); // smoothstep
+    rect = lerpRect(FULLSCREEN_RECT, target, eased);
+  } else {
+    rect = target;
+  }
+
+  const isFullscreen = rect.w === FULLSCREEN_RECT.w;
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: '38%',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: '#0c0d13',
-        padding: '24px 28px',
-        gap: 10,
+        left: rect.x,
+        top: rect.y,
+        width: rect.w,
+        height: rect.h,
+        borderRadius: isFullscreen ? 0 : 12,
+        overflow: 'hidden',
+        boxShadow: isFullscreen ? 'none' : '0 4px 14px rgba(0,0,0,0.5)',
+        zIndex: 20,
       }}
     >
-      {TIER_ORDER.map((tier) => (
-        <div key={tier} style={{ display: 'flex', alignItems: 'stretch', flex: 1, gap: 12 }}>
-          <div
-            style={{
-              width: 76,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: TIER_COLORS[tier],
-              borderRadius: 12,
-              fontFamily: THEME.font.family,
-              fontWeight: 900,
-              fontSize: 44,
-              color: '#14151c',
-            }}
-          >
-            {tier}
-          </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '0 12px' }}>
-            {byTier[tier].map((item, i) => {
-              const globalIndex = items.indexOf(item);
-              const isNewest = globalIndex === revealedCount - 1;
-              const entry = isNewest
-                ? spring({ frame: frame - lastRevealFrame, fps, config: { damping: 11, stiffness: 160, mass: 0.5 } })
-                : 1;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    transform: `scale(${interpolate(entry, [0, 1], [0.3, 1])})`,
-                    width: 88,
-                    height: 88,
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    backgroundColor: '#222436',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: THEME.font.family,
-                    fontWeight: 800,
-                    fontSize: 15,
-                    color: THEME.colors.ink,
-                    textAlign: 'center',
-                    flexShrink: 0,
-                    border: `2px solid ${TIER_COLORS[tier]}`,
-                  }}
-                >
-                  {item.brandLabel}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+      <OffthreadVideo src={resolveSrc(item.clipSrc)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
   );
 };
 
-export const TierList: React.FC<TierListProps> = ({ hookLine, items, outroLine, channelHandle, dummyImageSrc, hookDurationSec, outroDurationSec }) => {
+/** Zaten acilmis (aktif fazi biten) bir reklamin kendi slotunda sabit kalan
+ * sessiz thumbnail'i. */
+const PinnedThumb: React.FC<{ item: TierListItemProps; slotCol: number }> = ({ item, slotCol }) => {
+  const rect = slotRect(item, slotCol);
+  return (
+    <div style={{ position: 'absolute', left: rect.x, top: rect.y, width: rect.w, height: rect.h, borderRadius: 12, overflow: 'hidden', zIndex: 5 }}>
+      <OffthreadVideo src={resolveSrc(item.clipSrc)} muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </div>
+  );
+};
+
+export const TierList: React.FC<TierListProps> = ({ hookLine, hookVideoSrc, items, outroLine, outroVideoSrc, channelHandle, hookDurationSec, outroDurationSec }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const hookFrames = Math.round(hookDurationSec * fps);
 
   let cursor = hookFrames;
-  const placed = items.map((item) => {
+  const tierCounts: Record<Tier, number> = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  const placed: PlacedItem[] = items.map((item) => {
     const frames = Math.round(item.durationSec * fps);
-    const entry = { item, from: cursor, frames };
+    // Ayni tier'de en fazla 3 slot var (sablonda 3 sutun) - siradaki 4. item
+    // olursa son sutuna denk gelir (mass production'da tier basina 3'u
+    // gecmemeye dikkat edilmeli, bkz 2026-09-03 yeniden tasarim notu).
+    const slotCol = Math.min(tierCounts[item.tier], 2);
+    tierCounts[item.tier] += 1;
+    const entry: PlacedItem = { item, from: cursor, frames, slotCol };
     cursor += frames;
     return entry;
   });
 
-  const revealedCount = placed.filter((p) => frame >= p.from).length;
-  const lastRevealFrame = revealedCount > 0 ? placed[revealedCount - 1]!.from : 0;
   const activeEntry = placed.find((p) => frame >= p.from && frame < p.from + p.frames);
+
+  const currentDummyVideo = frame < hookFrames
+    ? hookVideoSrc
+    : activeEntry
+      ? activeEntry.item.dummyVideoSrc
+      : outroVideoSrc;
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000' }}>
-      <DummyPanel imageSrc={dummyImageSrc} />
-      <TierBoard items={items} revealedCount={revealedCount} fps={fps} frame={frame} lastRevealFrame={lastRevealFrame} />
+      {/* Persistent arka plan - kullanicinin verdigi gercek tier-board sablonu
+          (clipboard kismi), custom-coded UI DEGIL (bkz 2026-09-03 red gerekcesi). */}
+      <div style={{ position: 'absolute', top: `${DUMMY_PANEL_HEIGHT_PCT * 100}%`, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
+        <Img src={staticFile('tierlist/tierboard_clipboard.png')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
 
-      {/* Aktif klip - karakter panelinin ustunde kucuk bir "spot" olarak oynar */}
-      {activeEntry?.item.clipSrc ? (
-        <div
-          style={{
-            position: 'absolute',
-            top: '4%',
-            right: '6%',
-            width: '38%',
-            aspectRatio: '9 / 16',
-            borderRadius: 16,
-            overflow: 'hidden',
-            border: `4px solid ${TIER_COLORS[activeEntry.item.tier]}`,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
-          }}
-        >
-          <OffthreadVideo src={activeEntry.item.clipSrc} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      ) : null}
+      <DummyPanel videoSrc={currentDummyVideo} />
+
+      {/* Acilmis reklamlar - kendi slotlarinda sabit thumbnail olarak kalir. */}
+      {placed.map((p, i) => (frame >= p.from + p.frames ? <PinnedThumb key={i} item={p.item} slotCol={p.slotCol} /> : null))}
+
+      {/* Aktif reklam - tam ekran acilip slotuna kucularak oturur. */}
+      {activeEntry ? <AdSpot item={activeEntry.item} localFrame={frame - activeEntry.from} fps={fps} slotCol={activeEntry.slotCol} /> : null}
 
       {placed.map(({ item, from, frames }, i) => (
         <Sequence key={i} from={from} durationInFrames={frames}>
@@ -198,9 +198,12 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, items, outroLine, 
       </Sequence>
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
+        {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa TV paneli ve
+            tier board arkadan sizip metnin ustune bindigi bozuk gorunum
+            olusuyor (bkz 2026-09-03 kullanici geri bildirimi: "kabul edilemez"). */}
         <AbsoluteFill
           style={{
-            backgroundColor: THEME.colors.scrim,
+            backgroundColor: '#0c0d13',
             justifyContent: 'center',
             alignItems: 'center',
             padding: THEME.layout.safePadding,
@@ -209,7 +212,7 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, items, outroLine, 
           <div
             style={{
               fontFamily: THEME.font.family,
-              fontSize: THEME.font.hookSize,
+              fontSize: THEME.font.poiTitleSize + 8,
               fontWeight: 900,
               color: THEME.colors.ink,
               textAlign: 'center',

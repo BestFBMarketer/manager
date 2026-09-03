@@ -1,0 +1,16 @@
+{
+  "hookLine": "Ranking the most epic pool fails from 5 to 1!",
+  "hookAudioSrc": "tierlist/day1-pool/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/day1-pool/item_01.mp4", "voiceLine": "Number 5: The classic belly flop. Ouch!", "durationSec": 3.8 },
+    { "rank": 4, "videoSrc": "tierlist/day1-pool/item_02.mp4", "voiceLine": "Number 4: Slipping on the diving board.", "durationSec": 3.74 },
+    { "rank": 3, "videoSrc": "tierlist/day1-pool/item_03.mp4", "voiceLine": "Number 3: The double bounce disaster.", "durationSec": 3.8 },
+    { "rank": 2, "videoSrc": "tierlist/day1-pool/item_04.mp4", "voiceLine": "Number 2: Missing the pool entirely!", "durationSec": 3.8 },
+    { "rank": 1, "videoSrc": "tierlist/day1-pool/item_05.mp4", "voiceLine": "Number 1: The majestic swan dive straight into concrete!", "durationSec": 4.75 }
+  ],
+  "outroLine": "Which one made you laugh? Subscribe for more!",
+  "outroAudioSrc": "tierlist/day1-pool/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.4,
+  "outroDurationSec": 3.2
+}

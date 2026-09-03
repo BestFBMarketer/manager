@@ -6,11 +6,19 @@
 // Last Modified: 2026-08-18
 // =====================================
 
-import { AbsoluteFill, OffthreadVideo, Sequence, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
 import { HookTitle } from '../components/HookTitle';
 import { RankBadge } from '../components/RankBadge';
 import { THEME, TEXT_SHADOW } from '../theme';
+
+/** Prop olarak gelen yol http(s) URL'i ya da public/ klasorune gore relatif bir
+ * yol olabilir - ikincisi staticFile() ile servis edilmeli. */
+function resolveSrc(src: string): string {
+  if (!src) return src;
+  if (/^https?:\/\//.test(src)) return src;
+  return staticFile(src);
+}
 
 export type RankingItemProps = {
   rank: number;
@@ -22,8 +30,13 @@ export type RankingItemProps = {
 
 export type FunnyRankingProps = {
   hookLine: string;
+  /** Hook repliginin TTS ses dosyasi - hook'ta arkada video olmadigi icin
+   * sesi tasiyacak baska katman yok, burada ayrica calinmali. */
+  hookAudioSrc?: string;
   items: RankingItemProps[];
   outroLine: string;
+  /** Outro repliginin TTS ses dosyasi - ayni sebepten burada calinmali. */
+  outroAudioSrc?: string;
   channelHandle: string;
   hookDurationSec: number;
   outroDurationSec: number;
@@ -31,8 +44,10 @@ export type FunnyRankingProps = {
 
 export const FunnyRanking: React.FC<FunnyRankingProps> = ({
   hookLine,
+  hookAudioSrc,
   items,
   outroLine,
+  outroAudioSrc,
   channelHandle,
   hookDurationSec,
   outroDurationSec,
@@ -60,7 +75,7 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
                 worker/stages/funnyRanking.ts), bu yuzden burada mute EDILMEZ. */}
             {item.videoSrc ? (
               <OffthreadVideo
-                src={item.videoSrc}
+                src={resolveSrc(item.videoSrc)}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
@@ -75,12 +90,18 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
       {/* Hook en uste cizilir ki ilk klibin uzerinde dursun */}
       <Sequence durationInFrames={hookFrames}>
         <HookTitle text={hookLine} />
+        {hookAudioSrc ? <Audio src={resolveSrc(hookAudioSrc)} /> : null}
       </Sequence>
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
+        {outroAudioSrc ? <Audio src={resolveSrc(outroAudioSrc)} /> : null}
+        {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa arkadaki
+            son klip karesi sizip metnin ustune bindigi bozuk gorunum
+            olusuyor (bkz 2026-09-03 kullanici geri bildirimi, TierList'in
+            ayni hatasi - bkz TierList.tsx). */}
         <AbsoluteFill
           style={{
-            backgroundColor: THEME.colors.scrim,
+            backgroundColor: '#0c0d13',
             justifyContent: 'center',
             alignItems: 'center',
             padding: THEME.layout.safePadding,
@@ -89,7 +110,7 @@ export const FunnyRanking: React.FC<FunnyRankingProps> = ({
           <div
             style={{
               fontFamily: THEME.font.family,
-              fontSize: THEME.font.hookSize,
+              fontSize: THEME.font.poiTitleSize + 8,
               fontWeight: 900,
               color: THEME.colors.ink,
               textAlign: 'center',

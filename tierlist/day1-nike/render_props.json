@@ -1,0 +1,27 @@
+{
+  "hookLine": "Sports brands love calling every single ad inspiring. Let's see who actually earned that word.",
+  "hookVideoSrc": "tierlist/day1-nike/hook.mp4",
+  "items": [
+    {
+      "tier": "S",
+      "brandLabel": "Nike: Write the Future",
+      "clipSrc": "tierlist/day1-nike/clip_wtf.mp4",
+      "dummyVideoSrc": "tierlist/day1-nike/item_01.mp4",
+      "voiceLine": "Inarritu directs a global chain reaction. Ronaldinho literally turns into a demon on the pitch. This isn't an ad, it's a short film. S-Tier, no contest!",
+      "durationSec": 10.32
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Nike: Dream Crazy",
+      "clipSrc": "tierlist/day1-nike/clip_dreamcrazy.mp4",
+      "dummyVideoSrc": "tierlist/day1-nike/item_02.mp4",
+      "voiceLine": "Kaepernick risks his career for one line. Believe in something, even if it means sacrificing everything. Nike did not play it safe. S-Tier, and they knew exactly what they were doing!",
+      "durationSec": 10.48
+    }
+  ],
+  "outroLine": "Two ads, zero apologies. Which one hit harder? Drop it below, and hit subscribe!",
+  "outroVideoSrc": "tierlist/day1-nike/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 5.52,
+  "outroDurationSec": 6.0
+}

@@ -1,0 +1,18 @@
+{
+  "hook": "Can a deodorant ad break the internet? Let's rank them!",
+  "outro": "Old Spice or Gillette? Drop your comment below and hit subscribe!",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Gillette",
+      "clip": "clip_gillette.mp4",
+      "line": "Gillette's toxic masculinity ad? Way too much drama for shaving cream. C-Tier."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Old Spice",
+      "clip": "clip_oldspice.mp4",
+      "line": "But the Old Spice I'm on a horse guy? Fast, hilarious, and completely legendary. Absolute S-Tier without a doubt!"
+    }
+  ]
+}
