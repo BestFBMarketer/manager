@@ -539,3 +539,96 @@ onay ekranı da aynı yeteneği sunmalı** — sadece onayla/reddet değil:
   Urlaub composable-content + Funrank) önce mi standardize edilir?
 - Türkei Urlaub'un composable-content seçim mekanizması: LLM karar versin mi, yoksa
   yapılandırılmış (config'te "bu konu tipi = şu yapı taşları") bir sistem mi?
+
+### ep01 (Al-Ghazali) legacy-asset kurtarma turu — panel için yeni dersler (2026-09-02)
+
+- **Önce yerel diski tara, web'e gitme:** Meta AI web arşivinden (browser üzerinden
+  network-request takibiyle) tek tek düşük-çözünürlüklü görsel indirmeye saatlerce
+  uğraşıldı, sonra kullanıcının kendi diskinde (`E:\algazaliHK\images` + alt klasör
+  `klips`) aynı üretimlerin **94 JPG + 485 MP4** halinde zaten indirilmiş kopyaları
+  olduğu ortaya çıktı. Panel/pipeline bir "legacy asset" veya "mevcut varlık" adımını
+  render öncesi **ilk kontrol** olarak yapmalı — kullanıcının proje klasöründe hazır
+  medya var mı diye bakmadan sıfırdan üretime/indirmeye geçmemeli.
+- **Dosya adı sırası = anlatı sırası değil, varsayılamaz.** Kullanıcı bu görselleri
+  rastgele numarayla kaydetmiş (`1.jpg` "sahne 1" demek değil). Panelin görsel-sahne
+  eşleştirmesi dosya adı/klasör sırasına güvenmemeli — içerik bazlı (vision-LLM ile
+  kısa açıklama çıkarıp transcript'in ilgili bölümüyle eşleştirme) bir adım şart,
+  ve bu hacimli-ama-mekanik iş ücretsiz vision modeline (Gemini) verilmeli, Claude'a
+  değil.
+- **ffmpeg `zoompan` bu Windows makinesinde patolojik derecede yavaş/kararsız** —
+  832×464 kaynaktan 1920×1080 hedefe zoom uygulanan 10 saniyelik bir klip 15+ dakika
+  sürüp bitmedi (CPU aktif ama sonuç anormal büyük dosya, muhtemelen sonsuz-benzeri
+  döngü). Kaldırılıp sabit crop+fade ile değiştirilince aynı klip saniyeler içinde
+  normal boyutta bitti. **Panel/pipeline'da Ken-Burns/zoom-pan efekti risk olarak
+  işaretlenmeli** — en azından bu sınıf donanımda varsayılan olmamalı, ya da
+  kullanılmadan önce gerçek (kısa değil, çoklu-dakika) bir klip üzerinde ayrı test
+  edilmeli.
+- **`drawtext` crash'inin gerçek kök nedeni bulundu:** önceki oturumda (ep02) CTA
+  overlay üç kez çökmüştü, sebep hep "periyodik `mod()` ifadesi" sanılmıştı. Bu
+  oturumda `mod()`'u sabit `between()` pencerelerine çevirmeye rağmen YİNE çöktü —
+  asıl sebep Windows font yolundaki (`C:/Windows/Fonts/...`) escape edilmemiş `:`
+  karakteriydi (ffmpeg filtergraph'ta `:` seçenek-ayracı). Path'i `\:` ile escape
+  edince (ya da fontu proje klasörüne kopyalayıp relatif yol kullanınca) CTA sorunsuz
+  çalıştı. **Panel'in font-yolu her zaman ya escape edilmiş ya da relatif olmalı** —
+  bu sınıf hata (yanlış teşhis → yanlış düzeltme → sorun gizlice kalıcı olma) panelde
+  otomatik bir "önce izole test et" adımıyla önlenebilir.
+- Yukarıdakiyle aynı ilke: **her yeni filtre/efekt önce kısa test klipte DEĞİL,
+  gerçek uzunlukta bir klipte de doğrulanmalı** — `film-grain` (`noise=` filtresi)
+  de bu turda gerçek (~18 dakikalık) render'da çöktü, halbuki daha önce kısa
+  testlerde sorunsuzdu (tıpkı önceki CTA crash'inin öyküsü gibi). Panelin render
+  pipeline'ı her efekti aktif ettiğinde, en azından bir kere tam-uzunluk bir dry-run
+  ile doğrulanmasını zorunlu kılmalı.
+
+## mystisches-echo: Bridey Murphy (Akte-03) turu — yeni dersler (2026-09-03)
+
+- **ACE-Step müzik üretimi süreyle orantısız VRAM kullanıyor, sabit bir üst sınır
+  şart.** ep01'de en uzun act 316.99s ile sorunsuz çalışmıştı; bu turda 455s/444s'lik
+  iki act A100-40GB'de "Tried to allocate 36.45 GiB" ile OOM verdi. Her act'i ~240s
+  altında tutunca (7 act'e bölünce) sorunsuz çalıştı. **Panel'de ACE-Step çağrısı
+  öncesi bir süre-üst-sınırı (≈240-300s) kontrolü/otomatik-bölme adımı olmalı.**
+- **Resumable script'ler dosya ADINA göre "zaten var" diyor, İÇERİĞE göre değil —
+  tehlikeli sessiz bozulma.** Süre gruplarını 5 act'ten 7 act'e değiştirdiğimde,
+  arka planda hâlâ çalışan eski döngü ESKİ (yanlış) süre/prompt ile ürettiği
+  act02-05.wav dosyalarını YENİ isim şemasıyla aynı ada yazdı (`act04.wav` gibi) —
+  script sadece dosya adının var olup olmadığına bakıyor, hangi parametreyle
+  üretildiğine değil. ffprobe ile gerçek süreleri kontrol edince fark edildi,
+  4 dosya silinip doğru parametrelerle yeniden üretildi. **Panelde resumable/skip
+  mantığı content-hash veya parametre-imzası da tutmalı, salt dosya adı yetmez.**
+- **Modal `.map()` uzun gRPC stream'i bu makinede erken "Connection lost" ile
+  kesiliyor** (100 sahnelik FLUX görsel üretiminde art arda 2 kez, her seferinde
+  yaklaşık aynı noktada). Kalıcı network sorunu değil, ama tek büyük `.map()` çağrısı
+  güvenilir değil. Çözüm: işi küçük batch'lere bölüp (`--batch-size 10`), her batch
+  ayrı `modal run` çağrısı olacak şekilde bash döngüsünde tekrar tekrar çalıştırmak
+  (script zaten var-olan dosyaları atlıyor, resumable). **Panelde tek seferlik büyük
+  Modal `.map()` yerine batch+retry-loop deseni varsayılan olmalı.**
+- **Kanalın standart intro/outro'su ilk kez bu bölümde tam spek'e uygun üretildi**
+  (`mystisches-echo/assets/branding/` — 5 kalıcı marka görseli: dossier kartı,
+  yanan-göz logo, ağaç-kökü outro çerçevesi (FLUX kendiliğinden kukuletalı figürü de
+  merkeze yerleştirdi, ayrı overlay gerekmedi), avatar amblemi; `scripts/
+  make_intro_outro.py` — kanal-seviyesinde tekrar kullanılabilir, sadece
+  `--case-title`/`--next-image`/`--next-title`/ses kaynağı episode'a özel).
+  **Instructions.md'deki "Pflicht ab Episode 2" artık gerçek kod ile karşılanıyor —
+  sonraki bölümler bu script'i çağırmalı, yeniden unutulmamalı.**
+- **Kullanıcı geri bildirimi (yayından hemen sonra): anlatım "koşar adım", duygu/
+  gerilim için boşluk/ritim yok.** Kök neden muhtemelen transcript'i süre hedefine
+  ulaştırmak için genişletirken sadece bilgi eklenmesi, duraklama/nefes-alma beat'i
+  eklenmemesi — VoiceBox TTS de noktalama dışında ek duraklama uygulamıyor. Detay ve
+  sonraki-bölüm kontrol listesi: proje hafızası
+  `mystisches-echo-anlatim-ritmi-eksik.md`. **Panelin transcript-genişletme adımı
+  "hedef süreye ulaştı mı" yanında "yeterli duraklama beat'i var mı" diye de
+  kontrol etmeli.**
+- **YouTube Data API upload'ı mystisches-echo'da sessizce otomatik kaldırılmıştı —
+  kök neden bulundu ve çözüldü (2026-09-03).** `upload.py` ile public yüklenen
+  video (22:24) API'den "başarılı" göründü ama kısa süre sonra "çok uzun olduğu
+  için kaldırıldı" mesajıyla otomatik silindi, custom thumbnail set de 403 verdi.
+  `channels.list(mine=True)` ile teşhis edildi: `token_mystisches-echo.json`
+  **yanlış kanala** bağlıydı (eski kişisel "Nermin Y. Altindal" kanalı, 2013),
+  gerçek "Das Mystische Echo der Seele" kanalına değil — muhtemelen `authorize.py`
+  ilk çalıştırıldığında tarayıcıda yanlış Google hesabı/kanalı aktifti. Kullanıcı
+  `authorize.py --channel-name mystisches-echo`'yu doğru hesapla yeniden
+  çalıştırınca düzeldi (`title="Das Mystische Echo der Seele"`,
+  `longUploadsStatus="allowed"` doğrulandı). **Panel dersi: `authorize.py` sonrası
+  panel/pipeline otomatik bir `channels.list(mine=True)` doğrulama adımı
+  eklemeli** (dönen kanal adını kullanıcıya gösterip "doğru kanal bu mu?" diye
+  teyit ettirsin) — yanlış kanala bağlanma sessizce oluyor, saatler sonra "video
+  kaldırıldı" şeklinde ortaya çıkıyor.
