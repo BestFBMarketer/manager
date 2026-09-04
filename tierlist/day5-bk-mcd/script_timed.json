@@ -1,0 +1,42 @@
+{
+  "hook": "Fast food brands love a bold ad. Let's rank the craziest ones from Burger King and McDonald's.",
+  "outro": "Whopper or Big Mac? Drop your pick below and subscribe!",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "McDonald's",
+      "clip": "clip_mcd.mp4",
+      "line": "McDonald's sent Ronald the clown on an actual parade, with crowds cheering like he's royalty. Dated, cheesy, and deeply unsettling in hindsight. C-Tier, please retire the clown.",
+      "durationSec": 12.0,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Burger King",
+      "clip": "clip_bk.mp4",
+      "line": "But Burger King's 'Moldy Whopper' ad shows their burger rotting on camera to prove there's no artificial preservatives. Bold, disgusting, and somehow it actually worked. S-Tier, they turned mold into marketing genius.",
+      "durationSec": 13.68,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Wendy's",
+      "clip": "clip_wendys.mp4",
+      "line": "Wendy's 1984 'Where's the Beef' ad had grandmas roasting a competitor's tiny patty on a giant bun. Iconic slogan, painfully dated production. B-Tier, the line outlived the commercial by decades.",
+      "durationSec": 13.04,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "tier": "A",
+      "brandLabel": "KFC",
+      "clip": "clip_kfc.mp4",
+      "line": "And when KFC ran out of chicken across the UK, they rearranged their own logo to spell F C K on the bucket and apologized. Reached over 200 million people. A-Tier, turning a total disaster into their best ad ever.",
+      "durationSec": 14.48,
+      "audio": "audio/item_04.wav"
+    }
+  ],
+  "hookDurationSec": 6.16,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 3.68,
+  "outroAudio": "audio/outro.wav"
+}

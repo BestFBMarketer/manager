@@ -1,0 +1,43 @@
+{
+  "hookLine": "Fast food brands love a bold ad. Let's rank the craziest ones from Burger King and McDonald's.",
+  "hookVideoSrc": "tierlist/day5-bk-mcd/hook.mp4",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "McDonald's",
+      "clipSrc": "tierlist/day5-bk-mcd/clip_mcd.mp4",
+      "dummyVideoSrc": "tierlist/day5-bk-mcd/item_01.mp4",
+      "voiceLine": "McDonald's sent Ronald the clown on an actual parade, with crowds cheering like he's royalty. Dated, cheesy, and deeply unsettling in hindsight. C-Tier, please retire the clown.",
+      "durationSec": 12.0
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Burger King",
+      "clipSrc": "tierlist/day5-bk-mcd/clip_bk.mp4",
+      "dummyVideoSrc": "tierlist/day5-bk-mcd/item_02.mp4",
+      "voiceLine": "But Burger King's 'Moldy Whopper' ad shows their burger rotting on camera to prove there's no artificial preservatives. Bold, disgusting, and somehow it actually worked. S-Tier, they turned mold into marketing genius.",
+      "durationSec": 13.68
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Wendy's",
+      "clipSrc": "tierlist/day5-bk-mcd/clip_wendys.mp4",
+      "dummyVideoSrc": "tierlist/day5-bk-mcd/item_03.mp4",
+      "voiceLine": "Wendy's 1984 'Where's the Beef' ad had grandmas roasting a competitor's tiny patty on a giant bun. Iconic slogan, painfully dated production. B-Tier, the line outlived the commercial by decades.",
+      "durationSec": 13.04
+    },
+    {
+      "tier": "A",
+      "brandLabel": "KFC",
+      "clipSrc": "tierlist/day5-bk-mcd/clip_kfc.mp4",
+      "dummyVideoSrc": "tierlist/day5-bk-mcd/item_04.mp4",
+      "voiceLine": "And when KFC ran out of chicken across the UK, they rearranged their own logo to spell F C K on the bucket and apologized. Reached over 200 million people. A-Tier, turning a total disaster into their best ad ever.",
+      "durationSec": 14.48
+    }
+  ],
+  "outroLine": "Whopper or Big Mac? Drop your pick below and subscribe!",
+  "outroVideoSrc": "tierlist/day5-bk-mcd/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 6.16,
+  "outroDurationSec": 3.68
+}
