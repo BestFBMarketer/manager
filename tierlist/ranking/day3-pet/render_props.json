@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the funniest pet fails from 5 to 1!",
+  "titleLabel": "TOP 5 FUNNIEST PET FAILS",
+  "hookAudioSrc": "tierlist/ranking/day3-pet/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day3-pet/item_01.mp4", "voiceLine": "Number 5: The cat missing an easy jump.", "durationSec": 3.52 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day3-pet/item_02.mp4", "voiceLine": "Number 4: The dog getting scared of its own fart.", "durationSec": 3.52 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day3-pet/item_03.mp4", "voiceLine": "Number 3: Stealing pizza and running straight into a glass door.", "durationSec": 4.24 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day3-pet/item_04.mp4", "voiceLine": "Number 2: Getting stuck in a tiny sweater.", "durationSec": 3.44 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day3-pet/item_05.mp4", "voiceLine": "Number 1: The golden retriever jumping straight into mud!", "durationSec": 4.16 }
+  ],
+  "outroLine": "Subscribe for more!",
+  "outroAudioSrc": "tierlist/ranking/day3-pet/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.92,
+  "outroDurationSec": 1.52
+}
