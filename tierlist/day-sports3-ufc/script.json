@@ -1,0 +1,10 @@
+{
+  "hook": "Let's rank the craziest UFC moments ever! From embarrassing losses to pure box office gold.",
+  "items": [
+    { "tier": "D", "brandLabel": "Ben Askren", "line": "Ben Askren got knocked out in just five seconds, the fastest finish in UFC history. Undefeated hype, gone in a blink. D-Tier, an all-time embarrassing moment." },
+    { "tier": "C", "brandLabel": "Jon Jones", "line": "Jon Jones has this bizarre spider-crawl walk he does mid-fight, low to the ground, staring down opponents. Weird, unsettling, and somehow still effective. C-Tier, we're not sure how to feel about it." },
+    { "tier": "A", "brandLabel": "Jorge Masvidal", "line": "Jorge Masvidal's flying knee that finished Askren in five seconds was so fast the cameras barely caught it. Brutal, efficient, legendary. A-Tier, no question." },
+    { "tier": "S", "brandLabel": "Conor McGregor", "line": "And then there's Conor McGregor's billionaire strut after a knockout, suit, cigar, pure confidence oozing off him. Absolute box office. S-Tier, he knows exactly what he's doing." }
+  ],
+  "outro": "Who is the baddest fighter? Subscribe and tell me!"
+}

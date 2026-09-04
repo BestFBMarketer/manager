@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank the craziest UFC moments ever! From embarrassing losses to pure box office gold.",
+  "hookVideoSrc": "tierlist/day-sports3-ufc/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Ben Askren",
+      "clipSrc": "tierlist/day-sports3-ufc/clip_askren.mp4",
+      "dummyVideoSrc": "tierlist/day-sports3-ufc/item_01.mp4",
+      "voiceLine": "Ben Askren got knocked out in just five seconds, the fastest finish in UFC history. Undefeated hype, gone in a blink. D-Tier, an all-time embarrassing moment.",
+      "durationSec": 10.32
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Jon Jones",
+      "clipSrc": "tierlist/day-sports3-ufc/clip_jones.mp4",
+      "dummyVideoSrc": "tierlist/day-sports3-ufc/item_02.mp4",
+      "voiceLine": "Jon Jones has this bizarre spider-crawl walk he does mid-fight, low to the ground, staring down opponents. Weird, unsettling, and somehow still effective. C-Tier, we're not sure how to feel about it.",
+      "durationSec": 13.68
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Jorge Masvidal",
+      "clipSrc": "tierlist/day-sports3-ufc/clip_masvidal.mp4",
+      "dummyVideoSrc": "tierlist/day-sports3-ufc/item_03.mp4",
+      "voiceLine": "Jorge Masvidal's flying knee that finished Askren in five seconds was so fast the cameras barely caught it. Brutal, efficient, legendary. A-Tier, no question.",
+      "durationSec": 10.32
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Conor McGregor",
+      "clipSrc": "tierlist/day-sports3-ufc/clip_mcgregor.mp4",
+      "dummyVideoSrc": "tierlist/day-sports3-ufc/item_04.mp4",
+      "voiceLine": "And then there's Conor McGregor's billionaire strut after a knockout, suit, cigar, pure confidence oozing off him. Absolute box office. S-Tier, he knows exactly what he's doing.",
+      "durationSec": 11.44
+    }
+  ],
+  "outroLine": "Who is the baddest fighter? Subscribe and tell me!",
+  "outroVideoSrc": "tierlist/day-sports3-ufc/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 6.48,
+  "outroDurationSec": 3.04
+}
