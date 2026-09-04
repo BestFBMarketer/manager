@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most disastrous wedding fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Fishing the wedding ring out of the sink drain with tweezers.",
+      "durationSec": 4.56,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: The best man taking an unexpected dive straight into the pond mid-ceremony.",
+      "durationSec": 6.0,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: The entire wedding cake sliding off the table in one go.",
+      "durationSec": 4.8,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: The bride getting dropped mid-lift on the dance floor.",
+      "durationSec": 3.76,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Throwing the bride straight into the pool, wedding dress and all!",
+      "durationSec": 4.88,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Congrats to the happy couple, subscribe!",
+  "hookDurationSec": 4.08,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 2.24,
+  "outroAudio": "audio/outro.wav"
+}

@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most disastrous wedding fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: Fishing the wedding ring out of the sink drain with tweezers." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: The best man taking an unexpected dive straight into the pond mid-ceremony." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The entire wedding cake sliding off the table in one go." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: The bride getting dropped mid-lift on the dance floor." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: Throwing the bride straight into the pool, wedding dress and all!" }
+  ],
+  "outro": "Congrats to the happy couple, subscribe!"
+}
