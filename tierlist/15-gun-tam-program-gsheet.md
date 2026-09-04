@@ -14,6 +14,67 @@ S/A/B/C/D reklam kiyaslamasi). Her satirda hazir Ingilizce script (~25-30sn) + g
 kurgu notu + TTS ton/hiz talimati var - LLM planlama gerekmiyor, dogrudan uretime
 sokulabilir.
 
+## GUNCELLEME (2026-09-04): 60 videoya genisletildi - gunde 2 Ranking + 2 TierList
+
+Kullanici plani genisletti: **her gun 2 Ranking + 2 TierList olacak** (eskiden
+1 TierList + 2 Ranking = gunde 3, 15 gunde 45 video) - yeni toplam **15 gun x
+4 video = 60 video**. Ek TierList konusu icin yeni bir Google Sheet geldi:
+**Sports Tier List** - https://docs.google.com/spreadsheets/d/1vjORUUX3NKV3i_-aCfp72-DPIcBIceRjZdrmZ1_Z-ns/edit?usp=sharing
+(ham CSV: `sports-tierlist-15-gun.csv`, tam 15 gunluk, her gune 1 konu). Bu
+TierList marka-reklam kiyaslamasi DEGIL, unlu spor anlarini (Olimpiyat,
+WWE, UFC, NFL, F1, tenis, vb) S/A/B/C/D'ye sıralıyor - Dummy bu anlarla dalga
+geciyor. **Her satirda TAM script zaten yazili** (marka-TierList'in aksine,
+burada Dummy repligi yazmaya gerek yok, sadece o spor anina uygun GERCEK
+VIDEO KLIBI bulup kesmek gerekiyor - ayni ilke: watermark'siz, kaynagin
+kendi watermark'i haric [[watermark-kural]]).
+
+**Sports TierList 15 gunluk konu listesi** (`sports-tierlist-15-gun.csv`):
+
+| Gun | Konu | Tier dagilimi (D-C-B/A-S) |
+|---|---|---|
+| 1 | Olympic Sprinters | Gatlin(D) Lyles(C) Farah(A) Bolt(S) |
+| 2 | WWE Entrances | Shockmaster(D) Cena(C) Triple H(A) Undertaker(S) |
+| 3 | UFC Knockouts | Askren(D) Jones(C) Masvidal(A) McGregor(S) |
+| 4 | Volleyball Kills | Teammate Hit(D) Setter Fail(C) N'Gapeth(A) Nishida(S) |
+| 5 | Soccer Red Cards | Neymar(D) Pepe(C) Suarez(B) Zidane(S) |
+| 6 | NBA Dunk Contest | Robinson(C) Griffin(B) Gordon(A) Carter(S) |
+| 7 | Boxing Walkouts | Wilder(D) Mayweather(C) Fury(A) Ali(S) |
+| 8 | Olympic Memes | Raygun(D) Isinbayeva(B) Pommel Guy(A) Biles(S) |
+| 9 | NFL Celebrations | Gronk(C) Johnson(B) Owens(A) Moss(S) |
+| 10 | F1 Angry Radios | Stroll(D) Alonso(B) Verstappen(A) Raikkonen(S) |
+| 11 | Soccer Goalies | Karius(D) Neuer(B) Martinez(A) Higuita(S) |
+| 12 | Tennis Tantrums | Djokovic(D) Williams(B) Federer(A) McEnroe(S) |
+| 13 | UFC Mic Drops | Ortiz(D) Lewis(B) Sonnen(A) McGregor(S) |
+| 14 | Extreme Sports | Brown(D) Huston(B) Pastrana(A) Hawk(S) |
+| 15 | WWE Finishers | Scotty 2 Hotty(D) Mysterio(B) Orton(A) Austin(S) |
+
+### Yayin saatleri - USA/GB primetime'a gore guncellendi
+
+Kullanici yayin saatini "USA veya GB primetime'a gore sen ayarla" dedi. Eski
+saatler (12:30/17:30/22:30, muhtemelen TR saatiydi) yerine **4 slot, UTC
+bazli, US+GB aksamustu/prime saatlerini karsilayacak sekilde** secildi:
+
+| Slot | UTC | US Eastern | UK (BST) | Format |
+|---|---|---|---|---|
+| 1 | 13:00 | 09:00 | 14:00 | 5 to 1 Ranking #1 |
+| 2 | 17:00 | 13:00 | 18:00 | Tier List (marka reklam) |
+| 3 | 20:00 | 16:00 | 21:00 | Tier List (spor) |
+| 4 | 00:00 (+1 gun) | 20:00 | 01:00 | 5 to 1 Ranking #2 |
+
+Gerekce: Slot 2+3 UK aksam primetime'ini (18:00-21:00 BST) dogrudan
+kapsiyor; Slot 4 (00:00 UTC = 20:00 ET) US aksam primetime'ini kapsiyor;
+Slot 1 ise US sabah/ogle + UK ogleden sonra icin bir "ilk dalga" yayini.
+Bu kesin/degismez bir kural degil - kanal analytics'i (izleyici saat
+dagilimi) zamanla netlestikce ince ayar yapilabilir.
+
+### Guncel gunluk yayin plani (4 slot)
+
+Her gun: **13:00 Ranking A -> 17:00 TierList Marka -> 20:00 TierList Spor ->
+00:00(+1) Ranking B**. Marka-TierList konulari yukaridaki orijinal "Tam
+program" tablosundan (asagida), spor-TierList konulari yukaridaki tablodan
+gelir. Ranking A/B konulari da orijinal tablodaki 2 "5 to 1 Ranking" satirindan
+(gunde zaten 2 tane var, degisiklik yok).
+
 ## Uretim durumu (2026-09-03)
 
 - **Gun 1 - 17:30 (resmi: Nike vs Adidas)**: Bunun yerine daha once uretilmis "Nike solo"

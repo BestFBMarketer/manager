@@ -837,3 +837,30 @@ Ozetle: Ranking klip secim sureci ARTIK BILINEN/TEKRARLANABILIR bir akis
 (yukaridaki 4 adim), ama HENUZ KODLANMADI - bir sonraki gelistirme
 oncelik'i bu olmali (TierList/Ranking mass production'dan ONCE ya da ONA
 PARALEL ele alinabilir).
+
+**Panel feature-request (2026-09-04):** "panel ve pipeline ufak ekleme -
+sadece Shorts kanalları için 15/30 günlük planları CSV upload ile
+yükleme imkanı panelde olmalı" - kullanicinin bu oturumda Google Sheets'ten
+CSV export edip elle okutmasi (`15gun_plan_gsheet.csv`,
+`sports-tierlist-15-gun.csv` gibi) yerine, panelin dogrudan bir CSV/sheet
+linki alip plani parse edebilmesi. Henuz kodlanmadi, kucuk/kolay bir ekleme
+olarak degerlendirilebilir.
+
+**GECE VARDIYASI TALIMATI (2026-09-04, kullanici uyumadan once):** "kalan
+58 videoyu da uretime al, sabah onay/upload asamasina geceriz, TUM
+videolarda bu oturum boyunca gosterilen hassasiyeti goster, sifir hata
+olsunlar." **DURUM DEGERLENDIRMESI (onemli, dursat okunmali):** bu oturumda
+SADECE 2 ornek video (1 Ranking + 1 TierList) icin bile onlarca render/
+QA/duzeltme turu gerekti (chroma-key, z-index, Sequence-scoping donuk-video
+bug'i, watermark/bumper-kart kacirma x2, klip-icerik uyumsuzlugu x3,
+outro ses kaybi, altyazi z-index...) - HER seferinde kullanicinin GOZUYLE
+bulunan hatalar. Su an "58 videoyu ayni hassasiyetle, sifir hatayla, TAMAMEN
+gozetimsiz" bitirmek GERCEKCI DEGIL - bu tam olarak yukaridaki "Panel
+otomasyon" bolumunde tarif edilen, HENUZ KODLANMAMIS olan otomatik-QA
+aracina ihtiyac duyulan senaryo. Bu notun yazildigi noktada karar: kullanici
+uykudayken elimden geldigince Batch 1 (Gun 1-4, 16 video) uzerinde AYNI
+titizlikle (tam video tarama + elle kare-kare dogrulama + her render
+sonrasi QA) ilerlemeye devam edildi, ama 58 videonun TAMAMININ bu oturumda
+bitecegi iddia edilmedi/edilmemeli - sabah kullaniciya GERCEK ilerleme
+durumu (kac video bitti, kac video kaldi, hangi gunlerde hangi asamada)
+acikca raporlanmali, "58/58 bitti" gibi olmayan bir sey soylenmemeli.
