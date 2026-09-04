@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most painful golf fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Whiffing completely and swinging right through empty air.",
+      "durationSec": 4.56,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: Driving the golf cart straight through a pond at full speed.",
+      "durationSec": 4.32,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: Getting stuck in the sand trap for swing after swing.",
+      "durationSec": 4.32,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Hurling the club into the trees after one bad shot.",
+      "durationSec": 4.32,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Shanking the ball directly into the crowd, twice in a row!",
+      "durationSec": 4.16,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Fore! Subscribe for more!",
+  "hookDurationSec": 3.76,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 2.0,
+  "outroAudio": "audio/outro.wav"
+}

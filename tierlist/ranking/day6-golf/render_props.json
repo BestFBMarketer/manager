@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most painful golf fails from 5 to 1!",
+  "titleLabel": "TOP 5 GOLF FAILS",
+  "hookAudioSrc": "tierlist/ranking/day6-golf/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day6-golf/item_01.mp4", "voiceLine": "Number 5: Whiffing completely and swinging right through empty air.", "durationSec": 4.56 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day6-golf/item_02.mp4", "voiceLine": "Number 4: Driving the golf cart straight through a pond at full speed.", "durationSec": 4.32 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day6-golf/item_03.mp4", "voiceLine": "Number 3: Getting stuck in the sand trap for swing after swing.", "durationSec": 4.32 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day6-golf/item_04.mp4", "voiceLine": "Number 2: Hurling the club into the trees after one bad shot.", "durationSec": 4.32 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day6-golf/item_05.mp4", "voiceLine": "Number 1: Shanking the ball directly into the crowd, twice in a row!", "durationSec": 4.16 }
+  ],
+  "outroLine": "Fore! Subscribe for more!",
+  "outroAudioSrc": "tierlist/ranking/day6-golf/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.76,
+  "outroDurationSec": 2.00
+}
