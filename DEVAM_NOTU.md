@@ -1085,3 +1085,100 @@ kullanici onayiyla uygulanacak (kod yazilmadan once plan/oneri sunulmali).
   secimi) degistirilmesi gerektigine dair oneri uretme.
 - Bu, Gun5-9 yuklemesi + izleme donemi bittikten sonra ele alinacak
   (once mevcut 9 gunun sonuclarini gormek daha degerli veri saglar).
+
+## Bimble TV 3D pipeline - Asama 0, Mesh2Motion rigleme tamamlandi (2026-09-05)
+
+Onceki bulunan standing-pose mesh (`tierlist/bimble_mesh_standing.glb`,
+Hunyuan3D-2'den, dokusuz) gercek Chrome tarayicisi otomasyonuyla
+(`app.mesh2motion.org/create`) elle/otomatik riglendi - kullanicinin
+onayladigi "gercek Chrome'u CLI gibi kullan" yontemi:
+
+- Skeleton template: Human, Hand Options: Single Hand Bone (Bimble'in
+  parmaksiz guduk eli var, "All Fingers" gereksiz karmasiklik + cozulmemis
+  parmak cluster'i yaratiyordu).
+- Kol zinciri (shoulder-elbow-hand) TEK surukleme ile duzeldi: "Mesh
+  volume" pozisyonlama modu, zincirin son eklemini (hand_l) doğru
+  konuma surukleyince aradaki eklemleri mesh yuzeyine otomatik oturttu.
+  Ayna (Mirror Left/Right) acikken sadece "_l" tarafi duzenlemek yetti.
+- Bacak zinciri ayni yontemle (ball_l -> foot_l) duzeltildi.
+- **Onemli bulgu:** Ilk animasyon testinde ("Angry", "Idle A") kafa
+  mesh'i vahsice bozuluyordu (govde/kol kemiklerinin agirligi bulut-kafaya
+  sizmis, tavsan-kulagi gibi garip deformasyon). Kok neden: "Use Head
+  Weight Correction" kutucugu isaretlenmemisti. Isaretleyip kesme
+  duzlemini (Height slider) boyun hizasina (1.40 -> 1.16) indirince kafa
+  deformasyonu buyuk olcude duzeldi (kucuk bir dikis/catlak izi kaldi,
+  govde hareketiyle orantili - kabul edilebilir, kullanicinin onceligi
+  zaten yuz/dudak degil govde hareketi).
+- Secilen 3 temel klip (plan onerisiyle uyumlu: idle+wave+walk): **Idle A**,
+  **Greeting** (wave yerine kutuphanede bu isimle vardi), **Walk**.
+- **Indirme sorunu + cozumu:** Chrome (Default profil, indirme klasoru
+  `E:\Downloads`) "nereye kaydedilecegini sor" ayari acik oldugu icin
+  indirme native Save-As dialogunda takili kaldi (tarayici otomasyonu
+  DOM disi native dialoga erisemiyor). Dosya aslinda tam indirilmisti
+  (`.tmp` uzantili, gecerli `glTF` magic byte'lariyla dogrulandi), rename
+  yerine dogrudan kopyalandi: **`tierlist/bimble_mesh_rigged.glb`**
+  (15.6MB, riglenmis+3 animasyonlu). Ileride tekrar Mesh2Motion indirmesi
+  gerekirse: Chrome ayarlarindan "Ask where to save" kapatilirsa bu adim
+  otomatiklesir.
+
+**Sirada:** Remotion + Three.js test composition'i (`@remotion/three`,
+`@react-three/fiber`, `@react-three/drei` paketleri eklenip
+`bimble_mesh_rigged.glb`'yi `useGLTF`/`useAnimations` ile yukleyip kisa
+bir test render alma) - plan dosyasi Asama 0 adim 3
+(`C:\Users\MONSTER\.claude\plans\ancient-skipping-hamming.md`). Sonrasi:
+kullaniciya kisa render gonderilip onay alinacak, onaylanirsa Asama 1
+(anne/baba/arkadas/evcil hayvan icin ayni pipeline).
+
+## Bimble TV 3D - Remotion+Three.js entegrasyonu calisti, ilk render alindi (2026-09-05)
+
+Plan Asama 0 adim 3 tamamlandi:
+- `npm install @remotion/three @react-three/fiber @react-three/drei three
+  @types/three` (E: gercek instance) - Remotion 4.0.512 / React 19 ile
+  uyumlu, sorunsuz kuruldu.
+- `public/bimble/models/bimble_rigged.glb` (15.6MB, idle+greeting+walk).
+- Yeni composition: `remotion/compositions/BimbleTV3D.tsx` - `ThreeCanvas`
+  + `useGLTF`/`useAnimations`, mixer `frame/fps` ile senkron (gercek saat
+  degil, Remotion'in frame-deterministik render'ina uygun). `Root.tsx`'e
+  `BimbleTV3D` composition olarak kaydedildi (bu sadece test - sahne/
+  story-beat entegrasyonu Asama 2'de).
+- `npm run typecheck` temiz gecti.
+- Iki test render alindi ve kullaniciya gonderildi: `out/bimble_3d_test_idle.mp4`
+  (Idle A, 4sn) ve `out/bimble_3d_test_walk.mp4` (Walk, 4sn) - ikisi de
+  hatasiz render edildi (120 kare, ~0.9-1.2MB).
+
+**Sirada:** Kullanicidan kalite onayi bekleniyor. Onaylanirsa Asama 1
+(anne/baba/arkadas/evcil hayvan icin ayni FLUX-referans -> Hunyuan3D-2 ->
+Mesh2Motion-rig pipeline'i tekrarlanacak, evcil hayvan icin 4-ayakli/
+kanatli iskelet secilecek).
+
+## GUN 5-9 YUKLENDI (2026-09-05, kullanici onayi sonrasi)
+
+Kullanici Gun5-9 (20 video) renderlerini inceledi: "gun 5-7 daha iyi
+olabilir ama simdilik iyi upload mumkun" - onay verildi. 20 video YouTube'a
+`historisches-kapital/youtube_upload/token_funandrank.json` ile TEK TEK
+`private`+`publishAt` (zamanlanmis otomatik-public) olarak yuklendi.
+
+**Zamanlama - 6 saat sabit aralik** (onceki 4-slot/UTC plani yerine, cunku
+2 TierList ayni gun 2-3 saat arayla yayinlanirsa birbirinin algoritma test
+penceresini kanibalize ediyordu - kullanici bulgusu):
+- Gun5: 09-08 06:00/12:00/18:00 + 09-09 00:00 UTC
+- Gun6: 09-09 06:00/12:00/18:00 + 09-10 00:00 UTC
+- Gun7: 09-10 06:00/12:00/18:00 + 09-11 00:00 UTC
+- Gun8: 09-11 06:00/12:00/18:00 + 09-12 00:00 UTC
+- Gun9: 09-12 06:00/12:00/18:00 + 09-13 00:00 UTC
+
+Her gunun sirasi: RankingA, TierListBrand, TierListSport, RankingB (Gun1-4
+ile ayni desen). Video ID'ler + tum metadata: `tierlist/upload_results_day5-9.json`,
+manifest: `tierlist/upload_manifest_day5-9.json` (commit sonrasi). Baslik/
+aciklama zaten punchier stilde yazildi ([[youtube-metadata-etiket-cazibe-kurali]])
++ [[etkilesim-yorum-begeni-100k-esigi]] bulgusuna gore her description'da
+tartisma yaratan bir soru var ("Whopper or Big Mac - which one actually
+wins?" gibi), tek "comment below" yeterli degil denip biraz keskinlestirildi.
+
+**Sirada:** Kullanicinin talimati geregi ("9 gun upload edip bekleyelim
+sonuclari") - Gun10+ YENI URETIM DURDURULDU, sonuclar izlenip analiz
+edilecek. Ayrica bkz yukarida "Retention/engagement analizi + panel-capi
+viral-analiz araci (2026-09-05, backlog)" bolumu - kullanicinin gonderdigi
+detayli arastirma (VPH radar, CTR/thumbnail test araci, hook jeneratoru,
+retention/pacing analizi, tartisma-tetikleyici bot, peak-saat yayinci,
+shadowban kontrolcusu) hala onay bekliyor, kod yazilmadi.
