@@ -13,6 +13,18 @@
       "brandLabel": "Old Spice",
       "clip": "clip_oldspice.mp4",
       "line": "But the Old Spice 'I'm on a horse' guy? Fast, absurd, hilarious, and somehow he's already on a boat too. Completely legendary. Absolute S-Tier, without a doubt!"
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Axe",
+      "clip": "clip_axe.mp4",
+      "line": "Axe took teenage boys and turned deodorant into a full mythology, waking up buried in supermodels because you sprayed your armpits. Absurd, unforgettable, and every guy born before 2005 can still hum the jingle. A-Tier, pure marketing chaos."
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Dove Men+Care",
+      "clip": "clip_dove.mp4",
+      "line": "Dove Men Plus Care flipped the script completely, no seduction, no chaos, just real dads being vulnerable about becoming better men. Sincere and well-intentioned, but let's be honest, nobody's replaying it for fun. B-Tier, respectable but forgettable."
     }
   ]
 }

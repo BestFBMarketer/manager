@@ -17,6 +17,22 @@
       "dummyVideoSrc": "tierlist/day4-oldspice-gillette/item_02.mp4",
       "voiceLine": "But the Old Spice 'I'm on a horse' guy? Fast, absurd, hilarious, and somehow he's already on a boat too. Completely legendary. Absolute S-Tier, without a doubt!",
       "durationSec": 9.84
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Axe",
+      "clipSrc": "tierlist/day4-oldspice-gillette/clip_axe.mp4",
+      "dummyVideoSrc": "tierlist/day4-oldspice-gillette/item_03.mp4",
+      "voiceLine": "Axe took teenage boys and turned deodorant into a full mythology, waking up buried in supermodels because you sprayed your armpits. Absurd, unforgettable, and every guy born before 2005 can still hum the jingle. A-Tier, pure marketing chaos.",
+      "durationSec": 15.36
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Dove Men+Care",
+      "clipSrc": "tierlist/day4-oldspice-gillette/clip_dove.mp4",
+      "dummyVideoSrc": "tierlist/day4-oldspice-gillette/item_04.mp4",
+      "voiceLine": "Dove Men Plus Care flipped the script completely, no seduction, no chaos, just real dads being vulnerable about becoming better men. Sincere and well-intentioned, but let's be honest, nobody's replaying it for fun. B-Tier, respectable but forgettable.",
+      "durationSec": 17.6
     }
   ],
   "outroLine": "Old Spice or Gillette? Drop your comment below and subscribe!",
