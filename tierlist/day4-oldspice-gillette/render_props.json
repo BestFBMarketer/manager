@@ -1,0 +1,27 @@
+{
+  "hookLine": "Can a deodorant ad break the internet? Let's rank the craziest ones.",
+  "hookVideoSrc": "tierlist/day4-oldspice-gillette/hook.mp4",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Gillette",
+      "clipSrc": "tierlist/day4-oldspice-gillette/clip_gillette.mp4",
+      "dummyVideoSrc": "tierlist/day4-oldspice-gillette/item_01.mp4",
+      "voiceLine": "Gillette's 'The Best Men Can Be' ad tackled toxic masculinity head on, and honestly, that's a lot of heavy drama for a shaving cream commercial. Important message, wrong product to sell it with. C-Tier.",
+      "durationSec": 12.16
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Old Spice",
+      "clipSrc": "tierlist/day4-oldspice-gillette/clip_oldspice.mp4",
+      "dummyVideoSrc": "tierlist/day4-oldspice-gillette/item_02.mp4",
+      "voiceLine": "But the Old Spice 'I'm on a horse' guy? Fast, absurd, hilarious, and somehow he's already on a boat too. Completely legendary. Absolute S-Tier, without a doubt!",
+      "durationSec": 9.84
+    }
+  ],
+  "outroLine": "Old Spice or Gillette? Drop your comment below and subscribe!",
+  "outroVideoSrc": "tierlist/day4-oldspice-gillette/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 4.88,
+  "outroDurationSec": 4.32
+}
