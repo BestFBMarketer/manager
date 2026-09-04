@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most disastrous fishing fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: A stray hook nearly whacking a buddy right on the boat mid-cast." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: Losing balance and tumbling straight out of the kayak into the water." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: A massive fish yanking the angler clean overboard." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: The rod bending to its absolute breaking point fighting a monster fish." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: Accidentally reeling in a seagull instead of a fish!" }
+  ],
+  "outro": "Tight lines, subscribe!"
+}

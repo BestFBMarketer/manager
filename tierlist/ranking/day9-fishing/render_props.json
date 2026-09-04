@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most disastrous fishing fails from 5 to 1!",
+  "titleLabel": "TOP 5 FISHING FAILS",
+  "hookAudioSrc": "tierlist/ranking/day9-fishing/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day9-fishing/item_01.mp4", "voiceLine": "Number 5: A stray hook nearly whacking a buddy right on the boat mid-cast.", "durationSec": 4.80 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day9-fishing/item_02.mp4", "voiceLine": "Number 4: Losing balance and tumbling straight out of the kayak into the water.", "durationSec": 4.40 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day9-fishing/item_03.mp4", "voiceLine": "Number 3: A massive fish yanking the angler clean overboard.", "durationSec": 4.80 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day9-fishing/item_04.mp4", "voiceLine": "Number 2: The rod bending to its absolute breaking point fighting a monster fish.", "durationSec": 4.88 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day9-fishing/item_05.mp4", "voiceLine": "Number 1: Accidentally reeling in a seagull instead of a fish!", "durationSec": 4.08 }
+  ],
+  "outroLine": "Tight lines, subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day9-fishing/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.52,
+  "outroDurationSec": 1.52
+}
