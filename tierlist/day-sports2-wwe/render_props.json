@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank the craziest WWE entrances of all time! From total disasters to pure goosebumps.",
+  "hookVideoSrc": "tierlist/day-sports2-wwe/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "The Shockmaster",
+      "clipSrc": "tierlist/day-sports2-wwe/clip_shockmaster.mp4",
+      "dummyVideoSrc": "tierlist/day-sports2-wwe/item_01.mp4",
+      "voiceLine": "The Shockmaster was supposed to burst through a wall looking terrifying, and instead he tripped, fell flat on his face, and his helmet nearly popped off on live TV. Hilarious disaster. D-Tier, an all-time blooper.",
+      "durationSec": 13.68
+    },
+    {
+      "tier": "C",
+      "brandLabel": "John Cena",
+      "clipSrc": "tierlist/day-sports2-wwe/clip_cena.mp4",
+      "dummyVideoSrc": "tierlist/day-sports2-wwe/item_02.mp4",
+      "voiceLine": "John Cena's old rap entrance had him rolling up in a jersey and freestyling to the ring. Nostalgic? Sure. But also incredibly cheesy in hindsight. C-Tier, we still hum the beat though.",
+      "durationSec": 11.76
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Triple H",
+      "clipSrc": "tierlist/day-sports2-wwe/clip_hhh.mp4",
+      "dummyVideoSrc": "tierlist/day-sports2-wwe/item_03.mp4",
+      "voiceLine": "Triple H spitting water into the air before every single entrance became one of the most badass rituals in wrestling. Simple, intimidating, iconic. A-Tier, no notes.",
+      "durationSec": 10.32
+    },
+    {
+      "tier": "S",
+      "brandLabel": "The Undertaker",
+      "clipSrc": "tierlist/day-sports2-wwe/clip_undertaker.mp4",
+      "dummyVideoSrc": "tierlist/day-sports2-wwe/item_04.mp4",
+      "voiceLine": "And then there's The Undertaker, slowly walking out while the entire arena goes completely dark and the gong hits. Pure goosebumps every single time. S-Tier legend, no debate.",
+      "durationSec": 11.36
+    }
+  ],
+  "outroLine": "Which entrance gave you chills? Comment below and subscribe!",
+  "outroVideoSrc": "tierlist/day-sports2-wwe/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 6.48,
+  "outroDurationSec": 3.92
+}

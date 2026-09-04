@@ -1,0 +1,10 @@
+{
+  "hook": "Let's rank the craziest WWE entrances of all time! From total disasters to pure goosebumps.",
+  "items": [
+    { "tier": "D", "brandLabel": "The Shockmaster", "line": "The Shockmaster was supposed to burst through a wall looking terrifying, and instead he tripped, fell flat on his face, and his helmet nearly popped off on live TV. Hilarious disaster. D-Tier, an all-time blooper." },
+    { "tier": "C", "brandLabel": "John Cena", "line": "John Cena's old rap entrance had him rolling up in a jersey and freestyling to the ring. Nostalgic? Sure. But also incredibly cheesy in hindsight. C-Tier, we still hum the beat though." },
+    { "tier": "A", "brandLabel": "Triple H", "line": "Triple H spitting water into the air before every single entrance became one of the most badass rituals in wrestling. Simple, intimidating, iconic. A-Tier, no notes." },
+    { "tier": "S", "brandLabel": "The Undertaker", "line": "And then there's The Undertaker, slowly walking out while the entire arena goes completely dark and the gong hits. Pure goosebumps every single time. S-Tier legend, no debate." }
+  ],
+  "outro": "Which entrance gave you chills? Comment below and subscribe!"
+}
