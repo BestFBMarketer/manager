@@ -925,3 +925,70 @@ incelenmeli.
   yapildi.
 - Arka planda calisan `&` ile paralel yt-dlp cagrilari cwd'yi kaybediyor
   (subshell sorunu) - TEK TEK, sirali calistirmak daha guvenilir.
+
+## REWORK TURU (2026-09-04, kullanici sabah incelemesi sonrasi) - TAMAMLANDI
+
+Kullanici uyanip Batch 1'in 16 videosunu tek tek inceledi, hemen hemen HER
+videoda "klip anlatilanla eslesmiyor" tipi somut geri bildirim verdi (bkz
+yukarida "Somut ornek (2026-09-04 devam)" - bu artik teyit edildi, tek
+seferlik bir kaygi degil, SISTEMATIK bir sorundu). Asagidaki 8 madde tek
+tek duzeltildi, HER birinde: (1) script satirina literal uyan yeni kaynak
+video arandi (yt-dlp), (2) yogun kare-tarama ile TAM o anin/tepkinin
+gectigi saniye bulundu (sadece "tema uygun" degil, "olay/tepki GORUNUYOR"
+standardi), (3) yeniden render edildi, (4) render icindeki gercek
+caption+klip eslesmesi kare alinarak dogrulandi, (5) kullaniciya
+SendUserFile ile gonderildi, (6) commit edildi. Hepsi TEK TEK onaylanmadi
+(kullanici henuz yanit vermedi) ama teknik olarak TAMAMLANDI ve gonderildi:
+
+- [x] **Day2 Couples** (`ranking/day2-couples`) - kiss cam/lake/ring 3 klip
+  yeniden bulundu (kiss cam icin ikinci kaynak, ring icin farkli "Inside
+  Edition" proposal-fail videosu - orijinal kaynak SADECE basarili teklifi
+  gosteriyordu, gercek "ring suya dustu" panik anini degil). v3 render,
+  commit `8cb5086`.
+- [x] **Day2 Kids #1 "zombie mode"** (`ranking/day2-kids`) - eski klip
+  alakasiz bir kiz konusmasi idi, yeni kaynak: yuzu/eli krema/kek dolu
+  bebek klibi (chocolate yerine frosting ama gorsel olarak ayni "kirli yuz
+  yakalanma" komedisi). v3 render, commit `e74da3f`.
+- [x] **Day3 Water Splash** (`ranking/day3-watersplash`) - #3 waterslide
+  ve #1 cannonball ikisi de yanlisti (jet-ski ve inflatable su parki),
+  gercek "launch off giant waterslide" ve "cannonball splash on crowd"
+  klipleri bulundu. v2 render, commit `92c9b63`.
+- [x] **Day3 Pet Fails** (`ranking/day3-pet`) - #4 kedi idi (kopek
+  degil), #2 sweater'da kopek yoktu, #1 mud'da kopek yoktu - ucu de
+  yeniden bulundu (fart-scared terrier, sleeve'de sikismis yavru kopek,
+  camurda golden retriever). v2 render, commit `069a581`.
+- [x] **Day4 Cake Fails** (`ranking/day4-cake`) - 5 klibin 5'i de
+  alakasizdi, hepsi sifirdan bulundu (yanlis isim yazan kek, anne kek
+  dusuruyor, kopek kek yiyor, pecete/masa ortusu ates aliyor, yuz keke
+  gomuluyor). v2 render, commit `9bcfcda`.
+- [x] **Day4 Gym Fails** (`ranking/day4-gym`) - sadece #3 (dambil)
+  dogruydu, #5/#4/#2/#1 yeniden bulundu (treadmill'de geriye kosu, direnc
+  bandi, pantolon yirtilmasi - net gorunuyor, pull-up bar kirilip dusme).
+  #5/#4 kaynaklari dusuk isikli/bulanik ama gercek olay. v2 render, commit
+  `3a75fb6`.
+- [x] **Day4 Old Spice/Gillette TierList 2→4 tier** (`day4-oldspice-gillette`)
+  - Axe (A-tier, "Angels Fall" reklami) ve Dove Men+Care (B-tier, babalar
+  reklami) eklendi - Day1-Nike/Day2-Perfume ile ayni desen (TTS+SadTalker+
+  composite+render). v2 render, commit `f74add8`.
+- [x] **Day4 Volleyball TierList NBA klip** (`day-sports4-volleyball`) -
+  A-tier "N'Gapeth" klibi aslinda futsal/salon futbolu klibiydi (NBA
+  degil, kullanicinin ilk izleniminden farkli ama ayni sekilde YANLIS
+  spor), gercek N'Gapeth (Fransa formasi, FRA-JPN mac) klibiyle
+  degistirildi. v2 render, commit `6a4076f`.
+
+**Ogrenilen (tekrar teyit edildi):** kaynak videonun BASLIGI script
+satirina uysa bile icerigi TUTMAYABILIR (orn. "proposal ring falls in
+water" basligindaki video sadece basarili teklifi gosterebiliyor, gercek
+dusme anini degil) - her zaman ONCE kare-kare tara, SONRA guven. Bazi
+klipler (dusuk cozunurluklu/karanlik ev videolari) mukemmel degil ama
+GERCEK olayi gosteriyor - bu, tema-disi/alakasiz klip kullanmaktan
+kesinlikle daha iyi, kullaniciya bu sinirlama acikca belirtildi.
+
+**Sirada (henuz yapilmadi):**
+1. Yukaridaki 8 duzeltmenin kullanici onayini bekle.
+2. Gun 5-15 (44 video) - HENUZ BASLANMADI, bu reworkte ogrenilen "once
+   kaynagin basligi degil ICERIGI dogrula" disiplinini bastan uygulayarak
+   uretilmeli (fix-sonrasi degil, ilk seferden).
+3. Panel/worker entegrasyonu, otomatik-QA araclari (yukarida "Panel
+   feature-request" ve "Panel otomasyon" bolumlerinde tarif edildi) -
+   HENUZ KODLANMADI.
