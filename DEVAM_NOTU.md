@@ -879,7 +879,13 @@ acikca raporlanmali, "58/58 bitti" gibi olmayan bir sey soylenmemeli.
 - [x] slot3 TierList spor (WWE Entrances) - `tierlist/day-sports2-wwe/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
 - [x] slot4 Ranking (Couple Fails) - `tierlist/ranking/day2-couples/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
 
-**Gun3-15: HENUZ BASLANMADI (52 video kaldi)**
+**Gun3 TAMAMLANDI (4/4):**
+- [x] slot1 Ranking (Epic Water Splash) - `tierlist/ranking/day3-watersplash/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot2 TierList marka (Old Spice/Volvo Van Damme) - `tierlist/day3-oldspice/sample_render.mp4` - render+QA tamam, onay BEKLIYOR (sadece 2 item, 32.9sn - 45sn hedefinin altinda, kullaniciya belirtilmeli)
+- [x] slot3 TierList spor (UFC Knockouts) - `tierlist/day-sports3-ufc/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot4 Ranking (Funny Pet Fails) - `tierlist/ranking/day3-pet/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+
+**Gun4-15: HENUZ BASLANMADI (48 video kaldi) - toplam 12/60 tamamlandi**
 
 Not: "onay BEKLIYOR" isaretli 6 video render edildi ve QA'dan gecti (ffmpeg
 volumedetect ile audio kontrolu + kare-kare gorsel kontrol + watermark
