@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the funniest kids moments from 5 to 1!",
+  "titleLabel": "TOP 5 FUNNIEST KIDS MOMENTS",
+  "hookAudioSrc": "tierlist/ranking/day2-kids/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day2-kids/item_01.mp4", "voiceLine": "Number 5: Falling asleep mid-meal, watermelon still in hand.", "durationSec": 5.04 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day2-kids/item_02.mp4", "voiceLine": "Number 4: Sticking your tongue out at the camera like a total menace.", "durationSec": 4.56 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day2-kids/item_03.mp4", "voiceLine": "Number 3: Drawing all over yourself and blaming absolutely nobody.", "durationSec": 5.28 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day2-kids/item_04.mp4", "voiceLine": "Number 2: Refusing to smile for a single family photo.", "durationSec": 4.72 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day2-kids/item_05.mp4", "voiceLine": "Number 1: Finding the hidden chocolate stash and going full zombie mode!", "durationSec": 5.68 }
+  ],
+  "outroLine": "Subscribe for more laughs!",
+  "outroAudioSrc": "tierlist/ranking/day2-kids/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.44,
+  "outroDurationSec": 2.08
+}

@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the funniest kids moments from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Falling asleep mid-meal, watermelon still in hand.",
+      "durationSec": 4.64,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: Sticking your tongue out at the camera like a total menace.",
+      "durationSec": 4.16,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: Drawing all over yourself and blaming absolutely nobody.",
+      "durationSec": 4.88,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Refusing to smile for a single family photo.",
+      "durationSec": 4.32,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Finding the hidden chocolate stash and going full zombie mode!",
+      "durationSec": 5.28,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Subscribe for more laughs!",
+  "hookDurationSec": 3.04,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 1.68,
+  "outroAudio": "audio/outro.wav"
+}
