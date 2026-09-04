@@ -1,0 +1,43 @@
+{
+  "hookLine": "Luxury fashion loves a bold statement. Let's rank the craziest moments from Balenciaga and Gucci.",
+  "hookVideoSrc": "tierlist/day9-balenciaga-gucci/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Balenciaga",
+      "clipSrc": "tierlist/day9-balenciaga-gucci/clip_controversy.mp4",
+      "dummyVideoSrc": "tierlist/day9-balenciaga-gucci/item_01.mp4",
+      "voiceLine": "Balenciaga ran an ad campaign so disturbing it got pulled within days and dragged the whole brand into a real scandal. Not edgy, just a mistake. D-Tier, an all-time PR disaster.",
+      "durationSec": 11.04
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Balenciaga",
+      "clipSrc": "tierlist/day9-balenciaga-gucci/clip_mud.mp4",
+      "dummyVideoSrc": "tierlist/day9-balenciaga-gucci/item_02.mp4",
+      "voiceLine": "Then Balenciaga sold rubber boots caked in fake mud for over a thousand dollars, and somehow people bought them. Confusing, expensive, technically genius marketing. C-Tier, mud never looked so pointless.",
+      "durationSec": 14.48
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Gucci",
+      "clipSrc": "tierlist/day9-balenciaga-gucci/clip_twins.mp4",
+      "dummyVideoSrc": "tierlist/day9-balenciaga-gucci/item_03.mp4",
+      "voiceLine": "Gucci's ad campaigns keep leaning into weird, hallucinatory visuals that somehow still sell handbags. Bizarre, artistic, unmistakably Gucci. A-Tier, fashion as pure spectacle.",
+      "durationSec": 11.92
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Gucci",
+      "clipSrc": "tierlist/day9-balenciaga-gucci/clip_guilty.mp4",
+      "dummyVideoSrc": "tierlist/day9-balenciaga-gucci/item_04.mp4",
+      "voiceLine": "But Gucci Guilty has run the same seductive, star-studded perfume ad formula for over a decade and it still works every single time. Consistent, glamorous, timeless. S-Tier, they never had to change a thing.",
+      "durationSec": 14.16
+    }
+  ],
+  "outroLine": "Balenciaga or Gucci? Drop your pick and subscribe!",
+  "outroVideoSrc": "tierlist/day9-balenciaga-gucci/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 6.56,
+  "outroDurationSec": 3.76
+}
