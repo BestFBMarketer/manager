@@ -1,0 +1,10 @@
+{
+  "hook": "Let's rank the greatest Olympic sprinters ever! From banned legends to certified GOATs.",
+  "items": [
+    { "tier": "D", "brandLabel": "Justin Gatlin", "line": "Justin Gatlin got banned from the sport TWICE for doping and still tried to make a comeback like nothing happened. That's not resilience, that's shameless! D-Tier, no sympathy here." },
+    { "tier": "C", "brandLabel": "Noah Lyles", "line": "Noah Lyles poses for the camera like he's in an anime opening before the race even starts. Charisma? Sure. But all that flash and he still doesn't always deliver? C-Tier, tone it down a little." },
+    { "tier": "A", "brandLabel": "Mo Farah", "line": "Mo Farah's long-distance dominance was absolutely relentless, and the Mobot celebration became iconic for a reason. Consistent, disciplined, a genuine legend. A-Tier, easily." },
+    { "tier": "S", "brandLabel": "Usain Bolt", "line": "And then there's Usain Bolt, casually smiling and looking sideways at his competition while destroying the world record. The man made running look like a joke. The ultimate GOAT. S-Tier, no debate!" }
+  ],
+  "outro": "Who is the fastest alive? Comment below and subscribe!"
+}

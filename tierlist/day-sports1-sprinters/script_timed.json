@@ -1,0 +1,38 @@
+{
+  "hook": "Let's rank the greatest Olympic sprinters ever! From banned legends to certified GOATs.",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Justin Gatlin",
+      "line": "Justin Gatlin got banned from the sport TWICE for doping and still tried to make a comeback like nothing happened. That's not resilience, that's shameless! D-Tier, no sympathy here.",
+      "durationSec": 11.12,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Noah Lyles",
+      "line": "Noah Lyles poses for the camera like he's in an anime opening before the race even starts. Charisma? Sure. But all that flash and he still doesn't always deliver? C-Tier, tone it down a little.",
+      "durationSec": 13.36,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Mo Farah",
+      "line": "Mo Farah's long-distance dominance was absolutely relentless, and the Mobot celebration became iconic for a reason. Consistent, disciplined, a genuine legend. A-Tier, easily.",
+      "durationSec": 13.04,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Usain Bolt",
+      "line": "And then there's Usain Bolt, casually smiling and looking sideways at his competition while destroying the world record. The man made running look like a joke. The ultimate GOAT. S-Tier, no debate!",
+      "durationSec": 11.6,
+      "audio": "audio/item_04.wav"
+    }
+  ],
+  "outro": "Who is the fastest alive? Comment below and subscribe!",
+  "hookDurationSec": 5.44,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 3.2,
+  "outroAudio": "audio/outro.wav"
+}

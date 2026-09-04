@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank the greatest Olympic sprinters ever! From banned legends to certified GOATs.",
+  "hookVideoSrc": "tierlist/day-sports1-sprinters/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Justin Gatlin",
+      "clipSrc": "tierlist/day-sports1-sprinters/clip_gatlin.mp4",
+      "dummyVideoSrc": "tierlist/day-sports1-sprinters/item_01.mp4",
+      "voiceLine": "Justin Gatlin got banned from the sport TWICE for doping and still tried to make a comeback like nothing happened. That's not resilience, that's shameless! D-Tier, no sympathy here.",
+      "durationSec": 11.12
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Noah Lyles",
+      "clipSrc": "tierlist/day-sports1-sprinters/clip_lyles.mp4",
+      "dummyVideoSrc": "tierlist/day-sports1-sprinters/item_02.mp4",
+      "voiceLine": "Noah Lyles poses for the camera like he's in an anime opening before the race even starts. Charisma? Sure. But all that flash and he still doesn't always deliver? C-Tier, tone it down a little.",
+      "durationSec": 13.36
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Mo Farah",
+      "clipSrc": "tierlist/day-sports1-sprinters/clip_farah.mp4",
+      "dummyVideoSrc": "tierlist/day-sports1-sprinters/item_03.mp4",
+      "voiceLine": "Mo Farah's long-distance dominance was absolutely relentless, and the Mobot celebration became iconic for a reason. Consistent, disciplined, a genuine legend. A-Tier, easily.",
+      "durationSec": 13.04
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Usain Bolt",
+      "clipSrc": "tierlist/day-sports1-sprinters/clip_bolt.mp4",
+      "dummyVideoSrc": "tierlist/day-sports1-sprinters/item_04.mp4",
+      "voiceLine": "And then there's Usain Bolt, casually smiling and looking sideways at his competition while destroying the world record. The man made running look like a joke. The ultimate GOAT. S-Tier, no debate!",
+      "durationSec": 11.6
+    }
+  ],
+  "outroLine": "Who is the fastest alive? Comment below and subscribe!",
+  "outroVideoSrc": "tierlist/day-sports1-sprinters/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 5.44,
+  "outroDurationSec": 3.2
+}
