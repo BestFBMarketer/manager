@@ -8,7 +8,7 @@
 // Last Modified: 2026-09-04
 // =====================================
 
-import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
 import { RankBadge } from '../components/RankBadge';
 import { THEME, TEXT_SHADOW } from '../theme';
@@ -48,42 +48,43 @@ export type FunnyRankingProps = {
   outroDurationSec: number;
 }
 
-/** Banner + sabit baslik cubugu - tum video boyunca degismeden durur (kanalin
- * gercek sablonu, bkz referans video). */
+/** Ince sabit baslik satiri - tum video boyunca degismeden durur. 2026-09-04:
+ * onceki glossy banner (220px) + siyah baslik cubugu (76px) = 296px, basarili
+ * referans videolarla (10k-160M izlenme, "Ranking Best Pool Fails" turu)
+ * karsilastirmada ekranin gereksiz yere buyuk kismini kapladigi tespit edildi.
+ * Kullanicinin acik tercihi: yogun metin/liste yigini istemiyor (referanstaki
+ * buyuyen 1-2-3 numarali caption listesi BENIMSENMEDI) - sadece banner
+ * kucultuldu, TTS + tek-satir caption sistemi aynen korundu. */
 const TopChrome: React.FC<{ titleLabel: string }> = ({ titleLabel }) => (
-  <>
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: BANNER_H, overflow: 'hidden' }}>
-      <Img src={staticFile('tierlist/channel_banner.png')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-    </div>
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: TITLE_BAR_H,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10,
+    }}
+  >
     <div
       style={{
-        position: 'absolute',
-        top: BANNER_H,
-        left: 0,
-        right: 0,
-        height: TITLE_BAR_H,
-        backgroundColor: '#0a0a0a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10,
+        fontFamily: THEME.font.family,
+        fontSize: 34,
+        fontWeight: 900,
+        color: THEME.colors.ink,
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        padding: '0 24px',
+        textShadow: TEXT_SHADOW,
       }}
     >
-      <div
-        style={{
-          fontFamily: THEME.font.family,
-          fontSize: 40,
-          fontWeight: 900,
-          color: THEME.colors.ink,
-          textAlign: 'center',
-          textTransform: 'uppercase',
-          padding: '0 24px',
-        }}
-      >
-        {titleLabel}
-      </div>
+      {titleLabel}
     </div>
-  </>
+  </div>
 );
 
 /** Klip alani - arkada bulanik/buyutulmus ayni video (kenar bosluklarini
@@ -102,9 +103,8 @@ const FramedClip: React.FC<{ src: string; muted?: boolean }> = ({ src, muted }) 
   );
 };
 
-const BANNER_H = 220;
-const TITLE_BAR_H = 76;
-const CLIP_TOP = BANNER_H + TITLE_BAR_H;
+const TITLE_BAR_H = 96;
+const CLIP_TOP = TITLE_BAR_H;
 const CAPTION_BAR_H = 260;
 
 export const FunnyRanking: React.FC<FunnyRankingProps> = ({
