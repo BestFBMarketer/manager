@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the absolute worst cooking fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: Burning water. How?" },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: Almost dropping the entire pot." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: A pan bursting into flames mid-cook." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: The tablecloth catching fire next to dinner." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: Flipping the pan and launching dinner across the kitchen!" }
+  ],
+  "outro": "Comment your biggest kitchen disaster and subscribe!"
+}
