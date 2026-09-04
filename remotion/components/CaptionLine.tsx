@@ -50,6 +50,9 @@ export const CaptionLine: React.FC<CaptionLineProps> = ({ text, durationInFrames
   });
 
   return (
+    // zIndex:50 sart - TierList'te tier-board thumbnail'leri (zIndex:5/20)
+    // explicit z-index'e sahip, zIndex:auto olsa DOM sirasi onemsiz altyazi
+    // onlarin ALTINDA kalirdi (bkz 2026-09-04 kullanici bulgusu).
     <AbsoluteFill
       style={{
         justifyContent: 'flex-end',
@@ -57,6 +60,7 @@ export const CaptionLine: React.FC<CaptionLineProps> = ({ text, durationInFrames
         paddingBottom: THEME.layout.captionBottom,
         paddingLeft: THEME.layout.safePadding,
         paddingRight: THEME.layout.safePadding,
+        zIndex: 50,
       }}
     >
       <div

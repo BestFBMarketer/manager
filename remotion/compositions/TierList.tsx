@@ -7,7 +7,7 @@
 // Last Modified: 2026-09-03
 // =====================================
 
-import { AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { CaptionLine } from '../components/CaptionLine';
 import { HookTitle } from '../components/HookTitle';
 import { THEME, TEXT_SHADOW } from '../theme';
@@ -202,6 +202,11 @@ export const TierList: React.FC<TierListProps> = ({ hookLine, hookVideoSrc, item
       ))}
 
       <Sequence from={cursor} durationInFrames={Math.round(outroDurationSec * fps)}>
+        {/* Outro'nun Dummy videosu (sesi) burada AYRICA calinmali - opak CTA
+            karti DummyPanel'in KENDISINI render etmiyor, o yuzden video hic
+            mount olmuyor ve icindeki ses de calinmiyordu (bkz 2026-09-04
+            kullanici bulgusu: "outroda ses kaybolmus sadece yazi/sessizlik"). */}
+        {outroVideoSrc ? <Audio src={resolveSrc(outroVideoSrc)} /> : null}
         {/* Opak arka plan sart - scrim (yari saydam) kullanilirsa TV paneli ve
             tier board arkadan sizip metnin ustune bindigi bozuk gorunum
             olusuyor (bkz 2026-09-03 kullanici geri bildirimi: "kabul edilemez").
