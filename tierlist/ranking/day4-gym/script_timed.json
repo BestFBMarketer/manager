@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most painful gym fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Using the treadmill completely backwards.",
+      "durationSec": 3.28,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: The resistance band snapping right into the face.",
+      "durationSec": 3.76,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: Dropping the dumbbell straight onto your toes.",
+      "durationSec": 3.52,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Ripping your pants during a deep squat.",
+      "durationSec": 3.6,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Flying off the pull-up bar straight into the mirror!",
+      "durationSec": 3.84,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Subscribe!",
+  "hookDurationSec": 3.28,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 0.72,
+  "outroAudio": "audio/outro.wav"
+}

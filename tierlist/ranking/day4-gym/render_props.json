@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most painful gym fails from 5 to 1!",
+  "titleLabel": "TOP 5 PAINFUL GYM FAILS",
+  "hookAudioSrc": "tierlist/ranking/day4-gym/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day4-gym/item_01.mp4", "voiceLine": "Number 5: Using the treadmill completely backwards.", "durationSec": 3.68 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day4-gym/item_02.mp4", "voiceLine": "Number 4: The resistance band snapping right into the face.", "durationSec": 4.16 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day4-gym/item_03.mp4", "voiceLine": "Number 3: Dropping the dumbbell straight onto your toes.", "durationSec": 3.92 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day4-gym/item_04.mp4", "voiceLine": "Number 2: Ripping your pants during a deep squat.", "durationSec": 4.0 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day4-gym/item_05.mp4", "voiceLine": "Number 1: Flying off the pull-up bar straight into the mirror!", "durationSec": 4.24 }
+  ],
+  "outroLine": "Subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day4-gym/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.68,
+  "outroDurationSec": 1.12
+}
