@@ -11,6 +11,14 @@
       "audio": "audio/item_01.wav"
     },
     {
+      "tier": "B",
+      "brandLabel": "Paco Rabanne 1 Million",
+      "clip": "clip_paco.mp4",
+      "line": "Paco Rabanne 1 Million has a guy in a suit doing interpretive robot dance moves at a giant stack of gold bars. Confident? Definitely. Coherent? Not even a little. B-Tier, we're still confused.",
+      "durationSec": 12.4,
+      "audio": "audio/item_paco.wav"
+    },
+    {
       "tier": "S",
       "brandLabel": "Dior Sauvage",
       "clip": "clip_dior.mp4",

@@ -1,0 +1,35 @@
+{
+  "hookLine": "Why do luxury brands think everyone needs to stare into nowhere to sell perfume? Today: fragrance ads, ranked.",
+  "hookVideoSrc": "tierlist/day2-perfume/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Chanel No. 5",
+      "clipSrc": "tierlist/day2-perfume/clip_chanel.mp4",
+      "dummyVideoSrc": "tierlist/day2-perfume/item_01.mp4",
+      "voiceLine": "Brad Pitt stares at a wall having an existential crisis. What did we learn? Nothing! Straight to D-Tier, sorry Brad!",
+      "durationSec": 8.08
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Paco Rabanne 1 Million",
+      "clipSrc": "tierlist/day2-perfume/clip_paco.mp4",
+      "dummyVideoSrc": "tierlist/day2-perfume/item_paco.mp4",
+      "voiceLine": "Paco Rabanne 1 Million has a guy in a suit doing interpretive robot dance moves at a giant stack of gold bars. Confident? Definitely. Coherent? Not even a little. B-Tier, we're still confused.",
+      "durationSec": 12.4
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Dior Sauvage",
+      "clipSrc": "tierlist/day2-perfume/clip_dior.mp4",
+      "dummyVideoSrc": "tierlist/day2-perfume/item_02.mp4",
+      "voiceLine": "A bison in the desert, Johnny Depp behind the wheel. No idea what the perfume smells like, but this is pure charisma. S-Tier, no debate!",
+      "durationSec": 9.68
+    }
+  ],
+  "outroLine": "Art, or nonsense? Drop it below, and hit subscribe!",
+  "outroVideoSrc": "tierlist/day2-perfume/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 7.04,
+  "outroDurationSec": 3.6
+}
