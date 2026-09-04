@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most epic water splash fails from 5 to 1!",
+  "titleLabel": "TOP 5 WATER SPLASH FAILS",
+  "hookAudioSrc": "tierlist/ranking/day3-watersplash/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day3-watersplash/item_01.mp4", "voiceLine": "Number 5: The rope swing snapping in half.", "durationSec": 3.52 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day3-watersplash/item_02.mp4", "voiceLine": "Number 4: The inflatable flamingo flipping over.", "durationSec": 4.48 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day3-watersplash/item_03.mp4", "voiceLine": "Number 3: The waterslide launch into orbit.", "durationSec": 4.64 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day3-watersplash/item_04.mp4", "voiceLine": "Number 2: Jumping off the boat straight onto a wave.", "durationSec": 4.08 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day3-watersplash/item_05.mp4", "voiceLine": "Number 1: The legendary cannonball that emptied the entire hot tub!", "durationSec": 5.36 }
+  ],
+  "outroLine": "Hit subscribe for more!",
+  "outroAudioSrc": "tierlist/ranking/day3-watersplash/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 4.56,
+  "outroDurationSec": 1.92
+}

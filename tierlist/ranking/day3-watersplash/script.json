@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most epic water splash fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: The rope swing snapping in half." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: The inflatable flamingo flipping over." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The waterslide launch into orbit." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: Jumping off the boat straight onto a wave." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: The legendary cannonball that emptied the entire hot tub!" }
+  ],
+  "outro": "Hit subscribe for more!"
+}
