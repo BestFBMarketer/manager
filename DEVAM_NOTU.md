@@ -865,20 +865,39 @@ bitecegi iddia edilmedi/edilmemeli - sabah kullaniciya GERCEK ilerleme
 durumu (kac video bitti, kac video kaldi, hangi gunlerde hangi asamada)
 acikca raporlanmali, "58/58 bitti" gibi olmayan bir sey soylenmemeli.
 
-**ILERLEME TAKIBI (canli, gece boyunca guncellenecek) - 60 video hedefi:**
+**ILERLEME TAKIBI (canli, gece boyunca guncellendi) - 60 video hedefi:**
 
-- [x] Gun1 slot1 Ranking (Epic Pool Fails) - `tierlist/ranking/day1-pool/sample_render_v7.mp4` - ONAYLANDI
-- [x] Gun1 slot2 TierList marka (Nike x2/Adidas/Puma) - `tierlist/day1-nike/sample_render_v15.mp4` - ONAYLANDI, SABLON
-- [x] Gun1 slot3 TierList spor (Olympic Sprinters) - `tierlist/day-sports1-sprinters/sample_render.mp4` - render tamam, kullanici onayi BEKLIYOR
-- [x] Gun1 slot4 Ranking (Cooking Fails) - `tierlist/ranking/day1-cooking/sample_render.mp4` - render tamam, kullanici onayi BEKLIYOR
-- [ ] Gun2 slot1 Ranking (resmi planda Gun2 22:30 - Couple Fails - kontrol et) - YAPILMADI
-- [x] Gun2 slot2 TierList marka (Dior/Paco/Chanel) - `tierlist/day2-perfume/sample_render.mp4` - render tamam, onay BEKLIYOR
-- [ ] Gun2 slot3 TierList spor (WWE Entrances) - YAPILMADI
-- [ ] Gun2 slot4 Ranking (Funny Kids Moments) - YAPILMADI
-- [ ] Gun3-15 (tumu, 4'er slot) - YAPILMADI
+**Gun1 TAMAMLANDI (4/4):**
+- [x] slot1 Ranking (Epic Pool Fails) - `tierlist/ranking/day1-pool/sample_render_v7.mp4` - ONAYLANDI
+- [x] slot2 TierList marka (Nike x2/Adidas/Puma) - `tierlist/day1-nike/sample_render_v15.mp4` - ONAYLANDI, SABLON
+- [x] slot3 TierList spor (Olympic Sprinters) - `tierlist/day-sports1-sprinters/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot4 Ranking (Cooking Fails) - `tierlist/ranking/day1-cooking/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
 
-Not: Yukaridaki "onay BEKLIYOR" isaretli videolar render edildi ve QA'dan
-gecti (audio/watermark/senkron kontrolu yapildi) ama kullaniciya GOSTERILMEDI
-(uyuyordu) - sabah once bunlari gonderip onay almak, sonra devam etmek
-gerekir. Bu liste her yeni video tamamlandiginda guncellenmeli - "58/58"
-degil, gercek sayi neyse o yazilmali.
+**Gun2 TAMAMLANDI (4/4):**
+- [x] slot1 Ranking (Funny Kids Moments) - `tierlist/ranking/day2-kids/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot2 TierList marka (Dior/Paco Rabanne/Chanel) - `tierlist/day2-perfume/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot3 TierList spor (WWE Entrances) - `tierlist/day-sports2-wwe/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+- [x] slot4 Ranking (Couple Fails) - `tierlist/ranking/day2-couples/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
+
+**Gun3-15: HENUZ BASLANMADI (52 video kaldi)**
+
+Not: "onay BEKLIYOR" isaretli 6 video render edildi ve QA'dan gecti (ffmpeg
+volumedetect ile audio kontrolu + kare-kare gorsel kontrol + watermark
+kontrolu yapildi) ama kullaniciya GOSTERILMEDI (uyuyordu, video gonderme
+araci sessiz calisan gece modunda kullanilmadi) - sabah ONCE bunlari
+gonderip onay almak lazim. Ozellikle Sports TierList (yeni format, hic
+onay gormedi) ve bazi Ranking klipleri (script'e tam uymayan makul
+alternatifler kullanildi - ör. WWE/Kids/Couples klipleri) dikkatle
+incelenmeli.
+
+**Gece boyunca ogrenilenler (verimlilik icin):**
+- Tek bir TierList video ~20-25 arac cagrisi aliyor (kaynak indirme + kare
+  tarama + TTS + 5-6 SadTalker cagrisi + composite + render + QA).
+- Tek bir Ranking video ~12-15 arac cagrisi aliyor (kaynak indirme + kare
+  tarama + TTS + crop/mix + render + QA).
+- Buyuk video indirmeleri (`yt-dlp`) bazen 100MB-500MB'a cikiyor (4K formatlar
+  otomatik secilebiliyor) - kullanilan klip cikarildiktan SONRA kaynak
+  dosyayi silmek disk tasarrufu icin onemli, bu gece birkac kez unutuldu/gec
+  yapildi.
+- Arka planda calisan `&` ile paralel yt-dlp cagrilari cwd'yi kaybediyor
+  (subshell sorunu) - TEK TEK, sirali calistirmak daha guvenilir.
