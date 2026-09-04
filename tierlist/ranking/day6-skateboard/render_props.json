@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most brutal skateboard fails from 5 to 1!",
+  "titleLabel": "TOP 5 SKATEBOARD FAILS",
+  "hookAudioSrc": "tierlist/ranking/day6-skateboard/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day6-skateboard/item_01.mp4", "voiceLine": "Number 5: Bailing off the board and tumbling straight down a full flight of stairs.", "durationSec": 5.28 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day6-skateboard/item_02.mp4", "voiceLine": "Number 4: The board flying out and sending him straight into a support pole.", "durationSec": 5.12 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day6-skateboard/item_03.mp4", "voiceLine": "Number 3: Wiping out completely on the mini ramp.", "durationSec": 3.44 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day6-skateboard/item_04.mp4", "voiceLine": "Number 2: Attempting a flip trick and slamming flat onto his back.", "durationSec": 4.32 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day6-skateboard/item_05.mp4", "voiceLine": "Number 1: Attempting a kickflip and eating pavement instantly!", "durationSec": 4.16 }
+  ],
+  "outroLine": "Skate safe and subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day6-skateboard/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.92,
+  "outroDurationSec": 1.68
+}

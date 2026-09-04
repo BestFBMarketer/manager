@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most brutal skateboard fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Bailing off the board and tumbling straight down a full flight of stairs.",
+      "durationSec": 5.28,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: The board flying out and sending him straight into a support pole.",
+      "durationSec": 5.12,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: Wiping out completely on the mini ramp.",
+      "durationSec": 3.44,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Attempting a flip trick and slamming flat onto his back.",
+      "durationSec": 4.32,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Attempting a kickflip and eating pavement instantly!",
+      "durationSec": 4.16,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Skate safe and subscribe!",
+  "hookDurationSec": 3.92,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 1.68,
+  "outroAudio": "audio/outro.wav"
+}
