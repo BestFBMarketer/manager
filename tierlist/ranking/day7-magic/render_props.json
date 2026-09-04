@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most cringeworthy magic trick fails from 5 to 1!",
+  "titleLabel": "TOP 5 MAGIC TRICK FAILS",
+  "hookAudioSrc": "tierlist/ranking/day7-magic/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day7-magic/item_01.mp4", "voiceLine": "Number 5: Trying to pull a rabbit from the top hat and nearly dropping it instead.", "durationSec": 4.64 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day7-magic/item_02.mp4", "voiceLine": "Number 4: The coin trick where the coin just doesn't disappear.", "durationSec": 3.84 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day7-magic/item_03.mp4", "voiceLine": "Number 3: The duck cannon trick where the duck just casually strolled out instead.", "durationSec": 5.68 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day7-magic/item_04.mp4", "voiceLine": "Number 2: Pulling the tablecloth trick and sending everything crashing to the floor.", "durationSec": 4.80 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day7-magic/item_05.mp4", "voiceLine": "Number 1: The levitation trick where the assistant just lies there, not floating at all!", "durationSec": 5.60 }
+  ],
+  "outroLine": "Any way, subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day7-magic/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 4.24,
+  "outroDurationSec": 1.44
+}

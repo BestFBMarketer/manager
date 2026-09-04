@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most cringeworthy magic trick fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: Trying to pull a rabbit from the top hat and nearly dropping it instead." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: The coin trick where the coin just doesn't disappear." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The duck cannon trick where the duck just casually strolled out instead." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: Pulling the tablecloth trick and sending everything crashing to the floor." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: The levitation trick where the assistant just lies there, not floating at all!" }
+  ],
+  "outro": "Any way, subscribe!"
+}
