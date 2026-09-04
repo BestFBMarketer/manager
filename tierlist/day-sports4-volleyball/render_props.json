@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank the most epic volleyball moments ever! From painful mistakes to pure gravity-defying talent.",
+  "hookVideoSrc": "tierlist/day-sports4-volleyball/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Teammate Hit",
+      "clipSrc": "tierlist/day-sports4-volleyball/clip_teammate.mp4",
+      "dummyVideoSrc": "tierlist/day-sports4-volleyball/item_01.mp4",
+      "voiceLine": "Spiking the ball with full force directly into your own teammate's head instead of over the net. Tragic, painful, and somehow always caught on camera. D-Tier, an all-time cringe moment.",
+      "durationSec": 11.52
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Setter Fail",
+      "clipSrc": "tierlist/day-sports4-volleyball/clip_setter.mp4",
+      "dummyVideoSrc": "tierlist/day-sports4-volleyball/item_02.mp4",
+      "voiceLine": "The setter completely whiffing an easy set, letting the ball just bounce on the floor while everyone stands there confused. C-Tier, a classic team-chemistry breakdown.",
+      "durationSec": 9.92
+    },
+    {
+      "tier": "A",
+      "brandLabel": "N'Gapeth",
+      "clipSrc": "tierlist/day-sports4-volleyball/clip_ngapeth.mp4",
+      "dummyVideoSrc": "tierlist/day-sports4-volleyball/item_03.mp4",
+      "voiceLine": "Earvin N'Gapeth's no-look fake spike fools the entire opposing block without even looking at the ball. Disrespectful, genius, pure showmanship. A-Tier, he's just toying with them.",
+      "durationSec": 11.76
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Nishida",
+      "clipSrc": "tierlist/day-sports4-volleyball/clip_nishida.mp4",
+      "dummyVideoSrc": "tierlist/day-sports4-volleyball/item_04.mp4",
+      "voiceLine": "But Yuji Nishida jumping so high he looks like he's leaving the entire gym for a monster kill? S-Tier gravity defiance, the man plays a different sport.",
+      "durationSec": 9.44
+    }
+  ],
+  "outroLine": "Do you play volleyball? Comment below!",
+  "outroVideoSrc": "tierlist/day-sports4-volleyball/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 6.48,
+  "outroDurationSec": 2.4
+}

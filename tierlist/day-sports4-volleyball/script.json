@@ -1,0 +1,10 @@
+{
+  "hook": "Let's rank the most epic volleyball moments ever! From painful mistakes to pure gravity-defying talent.",
+  "items": [
+    { "tier": "D", "brandLabel": "Teammate Hit", "line": "Spiking the ball with full force directly into your own teammate's head instead of over the net. Tragic, painful, and somehow always caught on camera. D-Tier, an all-time cringe moment." },
+    { "tier": "C", "brandLabel": "Setter Fail", "line": "The setter completely whiffing an easy set, letting the ball just bounce on the floor while everyone stands there confused. C-Tier, a classic team-chemistry breakdown." },
+    { "tier": "A", "brandLabel": "N'Gapeth", "line": "Earvin N'Gapeth's no-look fake spike fools the entire opposing block without even looking at the ball. Disrespectful, genius, pure showmanship. A-Tier, he's just toying with them." },
+    { "tier": "S", "brandLabel": "Nishida", "line": "But Yuji Nishida jumping so high he looks like he's leaving the entire gym for a monster kill? S-Tier gravity defiance, the man plays a different sport." }
+  ],
+  "outro": "Do you play volleyball? Comment below!"
+}
