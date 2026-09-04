@@ -1,0 +1,30 @@
+{
+  "hook": "Soda giants love a bold campaign. Let's rank the craziest ones from Pepsi and Coca-Cola.",
+  "outro": "Pepsi or Coke? Drop your pick below and subscribe!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Pepsi",
+      "clip": "clip_jenner.mp4",
+      "line": "Pepsi had Kendall Jenner end a protest by handing a cop a can of soda. It got pulled within 24 hours and is still the textbook example of a brand missing the point. D-Tier, an all-time misfire."
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Pepsi",
+      "clip": "clip_challenge.mp4",
+      "line": "But the original 'Pepsi Challenge' had real people blind taste-testing on the street and picking Pepsi on camera. Simple, confident, and it actually worked for decades. B-Tier, advertising built on an actual dare."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Coca-Cola",
+      "clip": "clip_bears.mp4",
+      "line": "Coca-Cola's Polar Bears ad turned a soda break into a whole animated world, no dialogue needed. Warm, charming, instantly recognizable. A-Tier, they made a mascot out of nothing."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Coca-Cola",
+      "clip": "clip_holidays.mp4",
+      "line": "But 'Holidays Are Coming' basically invented the modern idea of Christmas starting with a truck covered in lights. People still say the holidays haven't started until they see it. S-Tier, they own an entire season."
+    }
+  ]
+}
