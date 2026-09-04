@@ -300,6 +300,44 @@ görsel olarak doğrulandı, typecheck temiz:**
   "Antoni"/"Callum" tarzı hızlı/enerjik ses önerildi - şu anki Piper/Voicebox
   seslerinden farklı bir profil gerekebilir).
 
+## Bimble TV — 3D karakter/sahne pipeline'ı (2026-09-04)
+
+Cocomelon/NuNu TV referans videoları (tam rigli 3D karakter animasyonu)
+seviyesine ulaşmak için statik-PNG + prosedürel-hareket yaklaşımından
+vazgeçildi. Plan dosyası: `C:\Users\MONSTER\.claude\plans\ancient-skipping-hamming.md`
+(kullanıcı onaylı). Özet mimari: FLUX referans görsel → açık kaynak
+image-to-3D (Modal'da self-host) → Mesh2Motion ile rigging (tek seferlik,
+elle) → Remotion + `@remotion/three`/react-three-fiber ile sahne render.
+Meshy/Tripo (bağlı MCP araçları) denendi ama **0 kredi / premium hesap
+gerekiyor** — kanal henüz kazanmadığı için self-host'a geçildi, ileride
+kazanınca ücretli API'ye dönülebilir.
+
+**Aşama 0 doğrulaması — BAŞARILI (2026-09-04):** Hunyuan3D-2 (Tencent, açık
+kaynak, `tencent/Hunyuan3D-2`, script: `tierlist/bimble_hunyuan3d_test.py`)
+ile Bimble'ın `calm.png` referansından gerçek 3D mesh üretildi, kalite iyi
+(bulut şekli, kollar/ayaklar/patiler net ayrık — biped rig için umut verici).
+TRELLIS.2 denendi ama kurulumu çok ağır (conda + flash-attn/nvdiffrast/
+o-voxel kaynaktan derleme, 20-40+ dk, kırılgan) — Hunyuan3D-2'de kalındı.
+
+**KRİTİK KÖK-NEDEN BULGUSU (4 denemede bulundu, tekrar düşmeyelim):**
+Hunyuan3D-2'nin `requirements.txt`'i `torch`/`transformers`'ı PİNLEMİYOR —
+`pip install -r requirements.txt` en son `transformers` (5.x) sürümünü
+çekiyor, o da **PyTorch >= 2.5 şartıyor**. `torch==2.4.0` pinlersek
+(`Dinov2Model requires the PyTorch library but it was not found` gibi
+YANILTICI bir hata veriyor — aslında torch kurulu, sadece transformers'ın
+versiyon eşiği tutmuyor). Çözüm: repo kurulumundan SONRA `torch==2.6.0` +
+`torchvision==0.21.0` (veya üstü, >=2.5 herhangi bir çift) son katman olarak
+zorla kurulmalı. Tanı yöntemi: `is_torch_available()` + `pip show` + `pip
+check`'i ayrı ucuz bir Modal fonksiyonunda çalıştırmak (`diagnose`/`diag`
+entrypoint) — kör deneme yerine bunu ÖNCE yap, bir sonraki modelde de aynı
+şablon kullanılabilir.
+
+**Sonraki adım (henüz yapılmadı):** doku/renk geçişi (şu anki mesh dokusuz,
+şekil-only test edildi), Mesh2Motion ile rigleme (biped, elle/web adımı),
+2-3 temel animasyon klibi (idle/wave/walk) ile GLB export, Remotion+Three.js
+composition'ında test render. Sonra diğer karakterler (anne/baba/arkadaş/
+evcil hayvan) için aynı süreç tekrarlanır.
+
 Detaylı mimari, tüm CLI komutları ve "Isletim" (pm2/systemd/yedekleme/health check)
 bölümü: `README.md`. Sorun çıkarsa oturuma devam edip birlikte bakarız.
 
@@ -1016,3 +1054,34 @@ tasidigi dogrulandi.
 2. Panel/worker entegrasyonu, otomatik-QA araclari (yukarida "Panel
    feature-request" ve "Panel otomasyon" bolumlerinde tarif edildi) -
    HENUZ KODLANMADI.
+
+## Retention/engagement analizi + panel-capi viral-analiz araci (2026-09-05, backlog)
+
+Ilk yayinlanan otomatik video (Pool Fails) zayif performans gosterdi
+(%42.8 ort. izlenme). Kok-neden arastirmasi (referans kanallar + kanalin
+kendi Mart-2026 manuel-edit gecmisi) iki ayri bulgu cikardi, ikisi de
+hafizaya yazildi:
+- `funandrank-retention-analizi-2026-09-04.md`: klip icerigi surekli
+  zirve-aninda olmali (statik/beklemede kare degil), kisa gercek anlar
+  slow-motion/reverse-loop ile uzatilmali. Sablon (banner/caption) zaten
+  dogruydu, degistirilmedi (sadece banner kucultuldu).
+- `etkilesim-yorum-begeni-100k-esigi.md`: Referans video %89.5 retention'a
+  ragmen sadece 27 begeni/3 yorumla 10K'da kaldi. Retention ilk-1000
+  testini gecirir ama 10K->100K sicramasi icin AYRI bir sinyal - yorum/
+  begeni etkilesimi - gerekiyor.
+
+**Kullanici talebi (2026-09-05):** Panele, HERHANGI bir kanala uygulanabilir
+standart bir "kanal videolarini viral yapacak analiz" araci eklensin -
+yani tek-seferlik manuel arastirma degil, tekrar kullanilabilir panel
+ozelligi. Once en etkili yontemler arastirilip yorumlanacak, SONRA
+kullanici onayiyla uygulanacak (kod yazilmadan once plan/oneri sunulmali).
+
+**Durum:** HENUZ ARASTIRMA/PLAN ASAMASINDA - kod yazilmadi. Olasi kapsam
+(taslak, onaylanmadi):
+- YouTube Analytics API'den otomatik cekilen retention + like/comment
+  oranlarini panelde gosterme (kanal-agnostik, `channels.ts` uzerinden
+  hangi kanal olursa olsun calisir sekilde).
+- Dusuk-etkilesim videolari isaretleyip hangi ogenin (hook/outro/tier
+  secimi) degistirilmesi gerektigine dair oneri uretme.
+- Bu, Gun5-9 yuklemesi + izleme donemi bittikten sonra ele alinacak
+  (once mevcut 9 gunun sonuclarini gormek daha degerli veri saglar).
