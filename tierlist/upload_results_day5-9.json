@@ -176,8 +176,8 @@
     "tags": "shorts,vr,fails,ranking,funny,viral,virtual reality fails",
     "publishAt": "2026-09-13T00:00:00Z",
     "status": "ok",
-    "video_id": "TqomFpzdQIM",
-    "url": "https://youtu.be/TqomFpzdQIM",
-    "note": "re-uploaded 2026-09-05: original had baked-in pillarbox black bars in 2 source clips (clip_wall, clip_tvknock), fixed by cropping before mux"
+    "video_id": "z0JMHwfM32A",
+    "url": "https://youtu.be/z0JMHwfM32A",
+    "note": "re-uploaded 2026-09-05 (2nd fix): FunnyRanking banner had been shrunk by mistake for this render, restored full channel banner (kanal kimligi), previous fix was pillarbox crop"
   }
 ]
