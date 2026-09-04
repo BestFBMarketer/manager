@@ -984,11 +984,35 @@ klipler (dusuk cozunurluklu/karanlik ev videolari) mukemmel degil ama
 GERCEK olayi gosteriyor - bu, tema-disi/alakasiz klip kullanmaktan
 kesinlikle daha iyi, kullaniciya bu sinirlama acikca belirtildi.
 
+## GUN 1-4 YUKLENDI (2026-09-04, kullanici onayi sonrasi)
+
+Kullanici 8 duzeltmenin tamamini onayladi ("tum reworklar ok ilk 4 gun
+upload edebiliriz"). 16 video (Gun1-4, her gun 4 slot) YouTube'a
+`historisches-kapital/youtube_upload/` altindaki paylasilan yukleme
+altyapisiyla (token_funandrank.json zaten yetkiliydi) TEK TEK, `private`
++ `publishAt` (zamanlanmis otomatik-public) olarak yuklendi. Zamanlama
+plani (yukaridaki "4 slot UTC" tablosu) birebir uygulandi, BUGUNDEN
+(2026-09-04) baslayarak:
+
+- Gun1: 09-04 13:00/17:00/20:00 + 09-05 00:00 UTC
+- Gun2: 09-05 13:00/17:00/20:00 + 09-06 00:00 UTC
+- Gun3: 09-06 13:00/17:00/20:00 + 09-07 00:00 UTC
+- Gun4: 09-07 13:00/17:00/20:00 + 09-08 00:00 UTC
+
+Kullanilan dosyalar EN SON/duzeltilmis versiyonlar (`sample_render_v8.mp4`
+pool, `v15` nike, `v3` kids/couples, `v2` watersplash/pet/cake/gym/
+oldspice-gillette/volleyball, digerleri tek `sample_render.mp4`).
+Video ID'ler + tum metadata: `tierlist/upload_results_day1-4.json`
+(commit `2b01816`). Baslik/aciklama/tag/dil(en)/kategori(23=Comedy) Claude
+tarafindan yazildi (kanalin onceden tanimli bir sablonu yoktu), thumbnail
+OZEL URETILMEDI (YouTube otomatik kare sececek) - ileride ozel thumbnail
+eklenebilir. Bir video ornegi API'den cekilip `private`+dogru `publishAt`
+tasidigi dogrulandi.
+
 **Sirada (henuz yapilmadi):**
-1. Yukaridaki 8 duzeltmenin kullanici onayini bekle.
-2. Gun 5-15 (44 video) - HENUZ BASLANMADI, bu reworkte ogrenilen "once
+1. Gun 5-15 (44 video) - HENUZ BASLANMADI, bu reworkte ogrenilen "once
    kaynagin basligi degil ICERIGI dogrula" disiplinini bastan uygulayarak
    uretilmeli (fix-sonrasi degil, ilk seferden).
-3. Panel/worker entegrasyonu, otomatik-QA araclari (yukarida "Panel
+2. Panel/worker entegrasyonu, otomatik-QA araclari (yukarida "Panel
    feature-request" ve "Panel otomasyon" bolumlerinde tarif edildi) -
    HENUZ KODLANMADI.
