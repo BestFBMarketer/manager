@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most brutal winter fails from 5 to 1!",
+  "titleLabel": "TOP 5 WINTER FAILS",
+  "hookAudioSrc": "tierlist/ranking/day5-winter/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day5-winter/item_01.mp4", "voiceLine": "Number 5: Slipping and eating pavement on a sheet of hidden ice.", "durationSec": 4.8 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day5-winter/item_02.mp4", "voiceLine": "Number 4: Faceplanting hard in the driveway mid-snowball fight.", "durationSec": 4.48 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day5-winter/item_03.mp4", "voiceLine": "Number 3: The sled crashing straight into a fence at full speed.", "durationSec": 4.72 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day5-winter/item_04.mp4", "voiceLine": "Number 2: Getting completely buried after falling backward into the snow.", "durationSec": 4.56 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day5-winter/item_05.mp4", "voiceLine": "Number 1: Ice skating turning into an instant, full-body wipeout!", "durationSec": 5.04 }
+  ],
+  "outroLine": "Bundle up and subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day5-winter/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.52,
+  "outroDurationSec": 1.76
+}

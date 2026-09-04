@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most brutal winter fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: Slipping and eating pavement on a sheet of hidden ice." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: Faceplanting hard in the driveway mid-snowball fight." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The sled crashing straight into a fence at full speed." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: Getting completely buried after falling backward into the snow." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: Ice skating turning into an instant, full-body wipeout!" }
+  ],
+  "outro": "Bundle up and subscribe!"
+}
