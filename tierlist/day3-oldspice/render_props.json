@@ -1,0 +1,27 @@
+{
+  "hookLine": "One ad saved a dying brand overnight. Let's see how it holds up fifteen years later.",
+  "hookVideoSrc": "tierlist/day3-oldspice/hook.mp4",
+  "items": [
+    {
+      "tier": "S",
+      "brandLabel": "Old Spice",
+      "clipSrc": "tierlist/day3-oldspice/clip_oldspice.mp4",
+      "dummyVideoSrc": "tierlist/day3-oldspice/item_01.mp4",
+      "voiceLine": "Rapid fire monologue, shirtless charm, and he's somehow already on a boat. This is the undisputed king of viral advertising. S-Tier, easily!",
+      "durationSec": 9.84
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Volvo Trucks",
+      "clipSrc": "tierlist/day3-oldspice/clip_volvo.mp4",
+      "dummyVideoSrc": "tierlist/day3-oldspice/item_volvo.mp4",
+      "voiceLine": "Jean-Claude Van Damme does a full split between two moving trucks, backwards, at highway speed, without a stunt double. No dialogue needed. Pure jaw-dropping spectacle. S-Tier, absolutely unforgettable.",
+      "durationSec": 13.36
+    }
+  ],
+  "outroLine": "Still the king of viral advertising? Drop it below, and hit subscribe!",
+  "outroVideoSrc": "tierlist/day3-oldspice/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 5.52,
+  "outroDurationSec": 4.16
+}

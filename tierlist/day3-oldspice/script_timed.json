@@ -9,6 +9,14 @@
       "line": "Rapid fire monologue, shirtless charm, and he's somehow already on a boat. This is the undisputed king of viral advertising. S-Tier, easily!",
       "durationSec": 9.84,
       "audio": "audio/item_01.wav"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Volvo Trucks",
+      "clip": "clip_volvo.mp4",
+      "line": "Jean-Claude Van Damme does a full split between two moving trucks, backwards, at highway speed, without a stunt double. No dialogue needed. Pure jaw-dropping spectacle. S-Tier, absolutely unforgettable.",
+      "durationSec": 13.36,
+      "audio": "audio/item_volvo.wav"
     }
   ],
   "hookDurationSec": 5.52,
