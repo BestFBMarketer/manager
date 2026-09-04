@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank NFL touchdown celebrations!",
+  "hookVideoSrc": "tierlist/day-sports9-nflcelebrations/hook.mp4",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Gronkowski",
+      "clipSrc": "tierlist/day-sports9-nflcelebrations/clip_gronk.mp4",
+      "dummyVideoSrc": "tierlist/day-sports9-nflcelebrations/item_01.mp4",
+      "voiceLine": "Rob Gronkowski's spike shattered the ball into pieces on live TV. Chaotic, C-Tier.",
+      "durationSec": 6.4
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Chad Johnson",
+      "clipSrc": "tierlist/day-sports9-nflcelebrations/clip_chad.mp4",
+      "dummyVideoSrc": "tierlist/day-sports9-nflcelebrations/item_02.mp4",
+      "voiceLine": "Chad Johnson pulled out a fake Hall of Fame jacket after scoring. Bold, B-Tier.",
+      "durationSec": 5.6
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Terrell Owens",
+      "clipSrc": "tierlist/day-sports9-nflcelebrations/clip_owens.mp4",
+      "dummyVideoSrc": "tierlist/day-sports9-nflcelebrations/item_03.mp4",
+      "voiceLine": "Terrell Owens pulled a Sharpie from his sock and signed the ball on live TV. Iconic, A-Tier.",
+      "durationSec": 6.56
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Randy Moss",
+      "clipSrc": "tierlist/day-sports9-nflcelebrations/clip_moss.mp4",
+      "dummyVideoSrc": "tierlist/day-sports9-nflcelebrations/item_04.mp4",
+      "voiceLine": "But Randy Moss mooning the entire Packers crowd? Legendary, S-Tier. Nobody ever topped it.",
+      "durationSec": 6.48
+    }
+  ],
+  "outroLine": "What's the best celebration? Subscribe!",
+  "outroVideoSrc": "tierlist/day-sports9-nflcelebrations/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 2.56,
+  "outroDurationSec": 2.96
+}
