@@ -1,0 +1,30 @@
+{
+  "hook": "Let's rank the craziest football red cards!",
+  "outro": "Who deserved the red? Subscribe!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Neymar",
+      "clip": "clip_neymar.mp4",
+      "line": "Neymar rolling on the floor for ten minutes? Give him an Oscar, D-Tier!"
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Pepe",
+      "clip": "clip_pepe.mp4",
+      "line": "Pepe kicking everyone like a ninja? Psycho behavior, C-Tier."
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Suarez",
+      "clip": "clip_suarez.mp4",
+      "line": "Luis Suarez biting a player? Disgusting, B-Tier."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Zidane",
+      "clip": "clip_zidane.mp4",
+      "line": "But Zidane headbutting Materazzi in the World Cup Final? Absolutely iconic S-Tier madness!"
+    }
+  ]
+}

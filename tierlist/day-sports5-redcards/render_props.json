@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank the craziest football red cards!",
+  "hookVideoSrc": "tierlist/day-sports5-redcards/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Neymar",
+      "clipSrc": "tierlist/day-sports5-redcards/clip_neymar.mp4",
+      "dummyVideoSrc": "tierlist/day-sports5-redcards/item_01.mp4",
+      "voiceLine": "Neymar rolling on the floor for ten minutes? Give him an Oscar, D-Tier!",
+      "durationSec": 4.8
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Pepe",
+      "clipSrc": "tierlist/day-sports5-redcards/clip_pepe.mp4",
+      "dummyVideoSrc": "tierlist/day-sports5-redcards/item_02.mp4",
+      "voiceLine": "Pepe kicking everyone like a ninja? Psycho behavior, C-Tier.",
+      "durationSec": 4.0
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Suarez",
+      "clipSrc": "tierlist/day-sports5-redcards/clip_suarez.mp4",
+      "dummyVideoSrc": "tierlist/day-sports5-redcards/item_03.mp4",
+      "voiceLine": "Luis Suarez biting a player? Disgusting, B-Tier.",
+      "durationSec": 3.92
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Zidane",
+      "clipSrc": "tierlist/day-sports5-redcards/clip_zidane.mp4",
+      "dummyVideoSrc": "tierlist/day-sports5-redcards/item_04.mp4",
+      "voiceLine": "But Zidane headbutting Materazzi in the World Cup Final? Absolutely iconic S-Tier madness!",
+      "durationSec": 6.08
+    }
+  ],
+  "outroLine": "Who deserved the red? Subscribe!",
+  "outroVideoSrc": "tierlist/day-sports5-redcards/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 2.88,
+  "outroDurationSec": 2.08
+}
