@@ -1,0 +1,43 @@
+{
+  "hookLine": "Tech giants love a bold moment. Let's rank the craziest ones from Apple and Microsoft.",
+  "hookVideoSrc": "tierlist/day6-apple-msft/hook.mp4",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Microsoft",
+      "clipSrc": "tierlist/day6-apple-msft/clip_win98.mp4",
+      "dummyVideoSrc": "tierlist/day6-apple-msft/item_01.mp4",
+      "voiceLine": "Bill Gates himself demoed Windows 98 live on stage, and it blue-screened in front of everyone. Iconic, unscripted, humiliating. C-Tier, the crash heard around the world.",
+      "durationSec": 11.20
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Microsoft",
+      "clipSrc": "tierlist/day6-apple-msft/clip_mojave.mp4",
+      "dummyVideoSrc": "tierlist/day6-apple-msft/item_02.mp4",
+      "voiceLine": "Microsoft literally disguised Windows Vista as a fake new OS called Mojave and showed it to people who hated Vista, and they loved it. Genius reveal, but also admitting their own product's reputation was unsalvageable. B-Tier, brilliant and humiliating at once.",
+      "durationSec": 16.32
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Apple",
+      "clipSrc": "tierlist/day6-apple-msft/clip_getamac.mp4",
+      "dummyVideoSrc": "tierlist/day6-apple-msft/item_03.mp4",
+      "voiceLine": "Apple's 'Get a Mac' campaign ran for four years straight, just two guys in a room making PCs look hopeless. Simple, brutal, effective. A-Tier, dragged their rival for half a decade.",
+      "durationSec": 10.88
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Apple",
+      "clipSrc": "tierlist/day6-apple-msft/clip_apple1984.mp4",
+      "dummyVideoSrc": "tierlist/day6-apple-msft/item_04.mp4",
+      "voiceLine": "But Apple's '1984' ad only aired once during the Super Bowl and it's still called the greatest commercial ever made, a woman smashing Big Brother on screen to launch a computer. S-Tier, advertising as art.",
+      "durationSec": 11.84
+    }
+  ],
+  "outroLine": "Mac or PC? Drop your pick below and subscribe!",
+  "outroVideoSrc": "tierlist/day6-apple-msft/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 4.96,
+  "outroDurationSec": 4.08
+}

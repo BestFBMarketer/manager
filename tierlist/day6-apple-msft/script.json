@@ -1,0 +1,30 @@
+{
+  "hook": "Tech giants love a bold moment. Let's rank the craziest ones from Apple and Microsoft.",
+  "outro": "Mac or PC? Drop your pick below and subscribe!",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Microsoft",
+      "clip": "clip_win98.mp4",
+      "line": "Bill Gates himself demoed Windows 98 live on stage, and it blue-screened in front of everyone. Iconic, unscripted, humiliating. C-Tier, the crash heard around the world."
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Microsoft",
+      "clip": "clip_mojave.mp4",
+      "line": "Microsoft literally disguised Windows Vista as a fake new OS called Mojave and showed it to people who hated Vista, and they loved it. Genius reveal, but also admitting their own product's reputation was unsalvageable. B-Tier, brilliant and humiliating at once."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Apple",
+      "clip": "clip_getamac.mp4",
+      "line": "Apple's 'Get a Mac' campaign ran for four years straight, just two guys in a room making PCs look hopeless. Simple, brutal, effective. A-Tier, dragged their rival for half a decade."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Apple",
+      "clip": "clip_apple1984.mp4",
+      "line": "But Apple's '1984' ad only aired once during the Super Bowl and it's still called the greatest commercial ever made, a woman smashing Big Brother on screen to launch a computer. S-Tier, advertising as art."
+    }
+  ]
+}
