@@ -1,0 +1,30 @@
+{
+  "hook": "Let's rank NBA dunk contest moments!",
+  "outro": "Who is the best dunker? Comment!",
+  "items": [
+    {
+      "tier": "C",
+      "brandLabel": "Nate Robinson",
+      "clip": "clip_robinson.mp4",
+      "line": "Nate Robinson jumping over Howard? Cool, but he missed five times. C-Tier."
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Blake Griffin",
+      "clip": "clip_griffin.mp4",
+      "line": "Blake Griffin jumping over a car? Overrated, B-Tier."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Aaron Gordon",
+      "clip": "clip_gordon.mp4",
+      "line": "Aaron Gordon's sitting mascot dunk? Robbed, A-Tier!"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Vince Carter",
+      "clip": "clip_carter.mp4",
+      "line": "But Vince Carter's 2000 performance? 'It is over!' Pure S-Tier perfection!"
+    }
+  ]
+}
