@@ -864,3 +864,21 @@ sonrasi QA) ilerlemeye devam edildi, ama 58 videonun TAMAMININ bu oturumda
 bitecegi iddia edilmedi/edilmemeli - sabah kullaniciya GERCEK ilerleme
 durumu (kac video bitti, kac video kaldi, hangi gunlerde hangi asamada)
 acikca raporlanmali, "58/58 bitti" gibi olmayan bir sey soylenmemeli.
+
+**ILERLEME TAKIBI (canli, gece boyunca guncellenecek) - 60 video hedefi:**
+
+- [x] Gun1 slot1 Ranking (Epic Pool Fails) - `tierlist/ranking/day1-pool/sample_render_v7.mp4` - ONAYLANDI
+- [x] Gun1 slot2 TierList marka (Nike x2/Adidas/Puma) - `tierlist/day1-nike/sample_render_v15.mp4` - ONAYLANDI, SABLON
+- [x] Gun1 slot3 TierList spor (Olympic Sprinters) - `tierlist/day-sports1-sprinters/sample_render.mp4` - render tamam, kullanici onayi BEKLIYOR
+- [x] Gun1 slot4 Ranking (Cooking Fails) - `tierlist/ranking/day1-cooking/sample_render.mp4` - render tamam, kullanici onayi BEKLIYOR
+- [ ] Gun2 slot1 Ranking (resmi planda Gun2 22:30 - Couple Fails - kontrol et) - YAPILMADI
+- [x] Gun2 slot2 TierList marka (Dior/Paco/Chanel) - `tierlist/day2-perfume/sample_render.mp4` - render tamam, onay BEKLIYOR
+- [ ] Gun2 slot3 TierList spor (WWE Entrances) - YAPILMADI
+- [ ] Gun2 slot4 Ranking (Funny Kids Moments) - YAPILMADI
+- [ ] Gun3-15 (tumu, 4'er slot) - YAPILMADI
+
+Not: Yukaridaki "onay BEKLIYOR" isaretli videolar render edildi ve QA'dan
+gecti (audio/watermark/senkron kontrolu yapildi) ama kullaniciya GOSTERILMEDI
+(uyuyordu) - sabah once bunlari gonderip onay almak, sonra devam etmek
+gerekir. Bu liste her yeni video tamamlandiginda guncellenmeli - "58/58"
+degil, gercek sayi neyse o yazilmali.
