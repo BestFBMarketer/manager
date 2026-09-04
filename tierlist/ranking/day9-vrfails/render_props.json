@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the wildest VR headset fails from 5 to 1!",
+  "titleLabel": "TOP 5 VR FAILS",
+  "hookAudioSrc": "tierlist/ranking/day9-vrfails/audio/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day9-vrfails/item_01.mp4", "voiceLine": "Number 5: Swinging blind and slamming himself straight into the wall.", "durationSec": 4.4 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day9-vrfails/item_02.mp4", "voiceLine": "Number 4: Losing all balance and crashing flat onto the floor.", "durationSec": 4.4 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day9-vrfails/item_03.mp4", "voiceLine": "Number 3: Backing up and knocking the picture frame clean off the wall.", "durationSec": 3.92 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day9-vrfails/item_04.mp4", "voiceLine": "Number 2: Spinning out and collapsing in a heap by the couch.", "durationSec": 4.0 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day9-vrfails/item_05.mp4", "voiceLine": "Number 1: One wild swing and the entire TV gets ripped off the wall!", "durationSec": 4.8 }
+  ],
+  "outroLine": "Never play VR near furniture. Subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day9-vrfails/audio/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 4.0,
+  "outroDurationSec": 3.52
+}
