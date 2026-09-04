@@ -1226,3 +1226,28 @@ sfxCue'lar (zaman+dosya) eklenip Remotion composition'larina (FunnyRanking
 ve TierList) bir <Audio> katmani daha eklenmesi gerekecek - kucuk ama
 her iki composition'i da etkileyen bir degisiklik, once tek bir video
 uzerinde denenip onaylanmadan tum pipeline'a yayilmamali.
+
+## REVERT: FunnyRanking banner geri getirildi - kanal kimligi dokunulmaz (2026-09-05)
+
+2026-09-04'teki retention analizinde "kucuk/dusuk riskli" diye onaylanan
+banner-kucultme (commit `9b28795`, glossy "FUN & RANK" banner PNG
+kaldirilip ince yari-saydam baslik seridi konmustu) kullanici tarafindan
+2026-09-05'te ACIKCA GERI CEVRILDI: "bizim bannerimiz nerde sekil onemli
+degil sahne onemli izlenme icin bizim onceki sablon bizim kanal kimligimiz
+dokunulamaz." Bkz [[kanal-banner-dokunulmaz-kurali]] (yeni feedback
+hafizasi) - bu KESIN VE KALICI bir kural, bir daha denenmemeli.
+
+`FunnyRanking.tsx` orijinal tam-boy banner haline geri dondurulmu (commit
+`0b462c6`) - `BANNER_H=220` + siyah `TITLE_BAR_H=76`, `Img` import'u geri
+eklendi. Etki alani kontrol edildi: SADECE `day9-vrfails` bu kucultulmus
+sablonla render edilmisti (commit zaman damgasi banner-kucultme commit'inden
+SONRAYDI, 2026-09-05 01:06 vs 2026-09-04 23:29) - Gun1-8 + day9-fishing'in
+hepsi zaten ORIJINAL banner'la render edilmisti (dogrulandi, frame kontrolu
+yapildi). Sadece o video yeniden render edilip YouTube'daki yuklemesi
+(`TqomFpzdQIM`) silinip duzeltilmis hali (`z0JMHwfM32A`) ayni `publishAt`
+ile tekrar yuklendi.
+
+**Kalici kural:** TierList.tsx ve FunnyRanking.tsx'teki banner/logo/kanal-
+kimligi unsurlarina bir daha ASLA dokunulmayacak - retention/algoritma
+sorunu supheli olsa bile cozum HER ZAMAN sahne/klip secimi + slow-motion/
+reverse-loop tarafinda aranacak, gorsel sablonda degil.
