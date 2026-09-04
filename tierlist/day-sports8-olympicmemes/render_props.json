@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank Olympic viral moments!",
+  "hookVideoSrc": "tierlist/day-sports8-olympicmemes/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Raygun",
+      "clipSrc": "tierlist/day-sports8-olympicmemes/clip_raygun.mp4",
+      "dummyVideoSrc": "tierlist/day-sports8-olympicmemes/item_01.mp4",
+      "voiceLine": "Raygun's Australian breakdancing? Looking like a kangaroo, absolute D-Tier!",
+      "durationSec": 4.96
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Isinbayeva",
+      "clipSrc": "tierlist/day-sports8-olympicmemes/clip_isinbayeva.mp4",
+      "dummyVideoSrc": "tierlist/day-sports8-olympicmemes/item_02.mp4",
+      "voiceLine": "Yelena Isinbayeva's pole vault records? Legendary, B-Tier.",
+      "durationSec": 5.12
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Pommel Horse Guy",
+      "clipSrc": "tierlist/day-sports8-olympicmemes/clip_pommel.mp4",
+      "dummyVideoSrc": "tierlist/day-sports8-olympicmemes/item_03.mp4",
+      "voiceLine": "The Pommel Horse guy sleeping before winning gold? Hilarious, A-Tier.",
+      "durationSec": 4.48
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Simone Biles",
+      "clipSrc": "tierlist/day-sports8-olympicmemes/clip_biles.mp4",
+      "dummyVideoSrc": "tierlist/day-sports8-olympicmemes/item_04.mp4",
+      "voiceLine": "But Simone Biles doing moves literally nobody else can do? The undisputed S-Tier queen of gymnastics!",
+      "durationSec": 6.72
+    }
+  ],
+  "outroLine": "What's your favorite sport? Comment below!",
+  "outroVideoSrc": "tierlist/day-sports8-olympicmemes/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 2.16,
+  "outroDurationSec": 2.32
+}

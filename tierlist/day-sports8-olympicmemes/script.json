@@ -1,0 +1,30 @@
+{
+  "hook": "Let's rank Olympic viral moments!",
+  "outro": "What's your favorite sport? Comment below!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Raygun",
+      "clip": "clip_raygun.mp4",
+      "line": "Raygun's Australian breakdancing? Looking like a kangaroo, absolute D-Tier!"
+    },
+    {
+      "tier": "B",
+      "brandLabel": "Isinbayeva",
+      "clip": "clip_isinbayeva.mp4",
+      "line": "Yelena Isinbayeva's pole vault records? Legendary, B-Tier."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Pommel Horse Guy",
+      "clip": "clip_pommel.mp4",
+      "line": "The Pommel Horse guy sleeping before winning gold? Hilarious, A-Tier."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Simone Biles",
+      "clip": "clip_biles.mp4",
+      "line": "But Simone Biles doing moves literally nobody else can do? The undisputed S-Tier queen of gymnastics!"
+    }
+  ]
+}
