@@ -1182,3 +1182,47 @@ viral-analiz araci (2026-09-05, backlog)" bolumu - kullanicinin gonderdigi
 detayli arastirma (VPH radar, CTR/thumbnail test araci, hook jeneratoru,
 retention/pacing analizi, tartisma-tetikleyici bot, peak-saat yayinci,
 shadowban kontrolcusu) hala onay bekliyor, kod yazilmadi.
+
+## BUG: day9-vrfails'te 2 klipte siyah pillarbox bar - duzeltildi (2026-09-05)
+
+Kullanici Gun5-9 videolarini izlerken video 20'yi (ranking/day9-vrfails,
+"TOP 5 VR FAILS") "cok kotu, sablon yok olmus" diye isaretledi. Kok sebep:
+bu oturumda yeni kaynak bulunan `clip_wall.mp4` (vr_wall.webm'den) ve
+`clip_tvknock.mp4` (vr_tv.mkv'den) - ikisi de newsflare'in mobil-portre
+kaydini yatay bir 1280x720/640x360 kareye SIYAH BANTLARLA gomulu sekilde
+sunuyordu (icerik ortada dar bir dikey serit, iki yaninda kalin siyah
+bant). Bu ham videoyu FramedClip (blur arka plan + contain on plan)
+sarmalayinca, blur katmani da o siyah bantlari bulaniklastirip devasa
+kararti/bos alan olusturdu - "sablon bozulmus" hissi buradan geldi, aslinda
+template ayni, kaynak klip hatasiydi.
+
+**Duzeltme:** `ffmpeg cropdetect` ile siyah bant sinirlari bulundu
+(clip_wall: `crop=204:360:218:0`, clip_tvknock: `crop=386:720:448:0`),
+crop uygulanip mevcut TTS sesiyle yeniden mux edildi, item_01.mp4/
+item_05.mp4 guncellendi, video yeniden render edildi. YouTube'daki bozuk
+yukleme (`Hroyvg09NBQ`) silinip ayni `publishAt` ile duzeltilmis hali
+tekrar yuklendi (yeni ID: `TqomFpzdQIM`) - bkz `tierlist/upload_results_day5-9.json`.
+
+**How to apply (gelecekte):** Yeni bir Ranking/TierList klibi indirilirken
+ham kaynagin gercek icerik oranini (pillarbox/letterbox var mi) kontrol et -
+`ffprobe` boyutu 16:9/4:3 gorunse bile ICERIK dar bir dikey serit olabilir.
+Supheli durumda `ffmpeg -vf cropdetect` ile hizli kontrol, crop gerekiyorsa
+mux'tan ONCE uygula. Bu kontrol simdiye kadar rutin degildi, artik olmali.
+
+## FIKIR (backlog, henuz uygulanmadi): meme/tepki SFX katmani (2026-09-05)
+
+Kullanici onerisi: TierList videolarinda (SadTalker yorumlarinin yaninda)
+ve Ranking videolarinda etkili ses efektleri kullanilabilir - kahkaha/
+gulme sesi (laugh track), siren, "vine boom"/airhorn gibi meme-tarzi vurgu
+sesleri - ozetle "Lavita" benzeri bir kanalin kullandigi tarzda. Bu,
+[[etkilesim-yorum-begeni-100k-esigi]] bulgusuyla da uyumlu - komik/vurgulu
+anlarda dogru SFX izleyiciyi daha fazla etkileyip yorum/paylasima tesvik
+edebilir.
+
+**Durum:** Sadece fikir asamasinda, HENUZ KODLANMADI/denenmedi. Once hangi
+SFX kutuphanesi/kaynagi kullanilacagi (telifsiz meme SFX paketi mi, TTS
+motorunun kendi SFX'i mi) arastirilmali, sonra render_props.json'a
+sfxCue'lar (zaman+dosya) eklenip Remotion composition'larina (FunnyRanking
+ve TierList) bir <Audio> katmani daha eklenmesi gerekecek - kucuk ama
+her iki composition'i da etkileyen bir degisiklik, once tek bir video
+uzerinde denenip onaylanmadan tum pipeline'a yayilmamali.
