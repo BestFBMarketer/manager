@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most painful parkour fails from 5 to 1!",
+  "titleLabel": "TOP 5 PARKOUR FAILS",
+  "hookAudioSrc": "tierlist/ranking/day8-parkour/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day8-parkour/item_01.mp4", "voiceLine": "Number 5: Trying to vault into a dumpster and ending up stuck inside it.", "durationSec": 4.56 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day8-parkour/item_02.mp4", "voiceLine": "Number 4: Slipping off the wall mid-vault and slamming straight to the ground.", "durationSec": 5.04 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day8-parkour/item_03.mp4", "voiceLine": "Number 3: The wall flip attempt where both feet slip out from under him.", "durationSec": 4.72 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day8-parkour/item_04.mp4", "voiceLine": "Number 2: Sliding along the rail and losing balance completely.", "durationSec": 4.16 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day8-parkour/item_05.mp4", "voiceLine": "Number 1: The backflip attempt that ends with a hard fall to the pavement!", "durationSec": 4.24 }
+  ],
+  "outroLine": "Stay safe out there, subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day8-parkour/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.60,
+  "outroDurationSec": 1.84
+}

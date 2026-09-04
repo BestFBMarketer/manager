@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most painful parkour fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Trying to vault into a dumpster and ending up stuck inside it.",
+      "durationSec": 4.56,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: Slipping off the wall mid-vault and slamming straight to the ground.",
+      "durationSec": 5.04,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: The wall flip attempt where both feet slip out from under him.",
+      "durationSec": 4.72,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Sliding along the rail and losing balance completely.",
+      "durationSec": 4.16,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: The backflip attempt that ends with a hard fall to the pavement!",
+      "durationSec": 4.24,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Stay safe out there, subscribe!",
+  "hookDurationSec": 3.6,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 1.84,
+  "outroAudio": "audio/outro.wav"
+}
