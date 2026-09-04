@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the most chaotic live TV news fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: A kid casually crashing dad's live BBC interview." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: The reporter's giant chicken flapping right into his face." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The reporter completely zoning out the second the camera cuts to her." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: A stray stop sign flying straight into the reporter's face during a storm." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: The anchor collapsing live on air, right in the middle of the broadcast!" }
+  ],
+  "outro": "Stay tuned and subscribe!"
+}

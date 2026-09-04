@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most chaotic live TV news fails from 5 to 1!",
+  "titleLabel": "TOP 5 LIVE NEWS FAILS",
+  "hookAudioSrc": "tierlist/ranking/day7-newsfails/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day7-newsfails/item_01.mp4", "voiceLine": "Number 5: A kid casually crashing dad's live BBC interview.", "durationSec": 5.36 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day7-newsfails/item_02.mp4", "voiceLine": "Number 4: The reporter's giant chicken flapping right into his face.", "durationSec": 4.48 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day7-newsfails/item_03.mp4", "voiceLine": "Number 3: The reporter completely zoning out the second the camera cuts to her.", "durationSec": 5.12 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day7-newsfails/item_04.mp4", "voiceLine": "Number 2: A stray stop sign flying straight into the reporter's face during a storm.", "durationSec": 5.60 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day7-newsfails/item_05.mp4", "voiceLine": "Number 1: The anchor collapsing live on air, right in the middle of the broadcast!", "durationSec": 5.12 }
+  ],
+  "outroLine": "Stay tuned and subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day7-newsfails/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.68,
+  "outroDurationSec": 1.44
+}
