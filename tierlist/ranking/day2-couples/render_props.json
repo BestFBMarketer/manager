@@ -1,0 +1,17 @@
+{
+  "hookLine": "Ranking the most embarrassing couple fails from 5 to 1!",
+  "titleLabel": "TOP 5 COUPLE FAILS",
+  "hookAudioSrc": "tierlist/ranking/day2-couples/hook.wav",
+  "items": [
+    { "rank": 5, "videoSrc": "tierlist/ranking/day2-couples/item_01.mp4", "voiceLine": "Number 5: Dropping her during a piggyback ride.", "durationSec": 4.16 },
+    { "rank": 4, "videoSrc": "tierlist/ranking/day2-couples/item_02.mp4", "voiceLine": "Number 4: Getting rejected on the kiss cam.", "durationSec": 3.28 },
+    { "rank": 3, "videoSrc": "tierlist/ranking/day2-couples/item_03.mp4", "voiceLine": "Number 3: The tandem bike disaster.", "durationSec": 3.44 },
+    { "rank": 2, "videoSrc": "tierlist/ranking/day2-couples/item_04.mp4", "voiceLine": "Number 2: Throwing her into the lake, phone still in her pocket!", "durationSec": 5.04 },
+    { "rank": 1, "videoSrc": "tierlist/ranking/day2-couples/item_05.mp4", "voiceLine": "Number 1: The proposal ring falling straight into the ocean!", "durationSec": 4.48 }
+  ],
+  "outroLine": "Tag your partner and subscribe!",
+  "outroAudioSrc": "tierlist/ranking/day2-couples/outro.wav",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 3.76,
+  "outroDurationSec": 2.08
+}

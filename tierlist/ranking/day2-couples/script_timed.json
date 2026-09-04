@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the most embarrassing couple fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Dropping her during a piggyback ride.",
+      "durationSec": 3.76,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: Getting rejected on the kiss cam.",
+      "durationSec": 2.88,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: The tandem bike disaster.",
+      "durationSec": 3.04,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Throwing her into the lake, phone still in her pocket!",
+      "durationSec": 4.64,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: The proposal ring falling straight into the ocean!",
+      "durationSec": 4.08,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Tag your partner and subscribe!",
+  "hookDurationSec": 3.36,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 1.68,
+  "outroAudio": "audio/outro.wav"
+}
