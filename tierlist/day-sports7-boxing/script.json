@@ -1,0 +1,30 @@
+{
+  "hook": "Let's rank legendary boxing walkouts!",
+  "outro": "Who hits the hardest? Subscribe!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Deontay Wilder",
+      "clip": "clip_wilder.mp4",
+      "line": "Deontay Wilder blaming his heavy costume for losing? Huge excuse, D-Tier!"
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Floyd Mayweather",
+      "clip": "clip_mayweather.mp4",
+      "line": "Floyd Mayweather walking out with Justin Bieber? Cringe, C-Tier."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Tyson Fury",
+      "clip": "clip_fury.mp4",
+      "line": "Tyson Fury coming out on a throne singing? Classic, A-Tier!"
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Muhammad Ali",
+      "clip": "clip_ali.mp4",
+      "line": "But Muhammad Ali doing the Ali Shuffle before the bell? Pure S-Tier greatness!"
+    }
+  ]
+}

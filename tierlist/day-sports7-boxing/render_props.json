@@ -1,0 +1,43 @@
+{
+  "hookLine": "Let's rank legendary boxing walkouts!",
+  "hookVideoSrc": "tierlist/day-sports7-boxing/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "Deontay Wilder",
+      "clipSrc": "tierlist/day-sports7-boxing/clip_wilder.mp4",
+      "dummyVideoSrc": "tierlist/day-sports7-boxing/item_01.mp4",
+      "voiceLine": "Deontay Wilder blaming his heavy costume for losing? Huge excuse, D-Tier!",
+      "durationSec": 5.28
+    },
+    {
+      "tier": "C",
+      "brandLabel": "Floyd Mayweather",
+      "clipSrc": "tierlist/day-sports7-boxing/clip_mayweather.mp4",
+      "dummyVideoSrc": "tierlist/day-sports7-boxing/item_02.mp4",
+      "voiceLine": "Floyd Mayweather walking out with Justin Bieber? Cringe, C-Tier.",
+      "durationSec": 4.16
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Tyson Fury",
+      "clipSrc": "tierlist/day-sports7-boxing/clip_fury.mp4",
+      "dummyVideoSrc": "tierlist/day-sports7-boxing/item_03.mp4",
+      "voiceLine": "Tyson Fury coming out on a throne singing? Classic, A-Tier!",
+      "durationSec": 4.08
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Muhammad Ali",
+      "clipSrc": "tierlist/day-sports7-boxing/clip_ali.mp4",
+      "dummyVideoSrc": "tierlist/day-sports7-boxing/item_04.mp4",
+      "voiceLine": "But Muhammad Ali doing the Ali Shuffle before the bell? Pure S-Tier greatness!",
+      "durationSec": 5.92
+    }
+  ],
+  "outroLine": "Who hits the hardest? Subscribe!",
+  "outroVideoSrc": "tierlist/day-sports7-boxing/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 2.80,
+  "outroDurationSec": 1.84
+}
