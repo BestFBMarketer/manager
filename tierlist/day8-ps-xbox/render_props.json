@@ -1,0 +1,43 @@
+{
+  "hookLine": "Console wars never end. Let's rank the craziest ads from PlayStation and Xbox.",
+  "hookVideoSrc": "tierlist/day8-ps-xbox/hook.mp4",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "PlayStation",
+      "clipSrc": "tierlist/day8-ps-xbox/clip_baby.mp4",
+      "dummyVideoSrc": "tierlist/day8-ps-xbox/item_01.mp4",
+      "voiceLine": "PlayStation once ran an ad that was just a newborn baby with a voiceover about the miracle of life... to sell a game console. Bizarre, unsettling, nobody asked for this. D-Tier, an all-time head-scratcher.",
+      "durationSec": 12.64
+    },
+    {
+      "tier": "C",
+      "brandLabel": "PlayStation",
+      "clipSrc": "tierlist/day8-ps-xbox/clip_cat.mp4",
+      "dummyVideoSrc": "tierlist/day8-ps-xbox/item_02.mp4",
+      "voiceLine": "Then there's the PS2 ad that got banned in multiple countries for being straight-up disturbing. Bold creative choice, terrible execution. C-Tier, style over sense.",
+      "durationSec": 11.2
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Xbox",
+      "clipSrc": "tierlist/day8-ps-xbox/clip_lifeshort.mp4",
+      "dummyVideoSrc": "tierlist/day8-ps-xbox/item_03.mp4",
+      "voiceLine": "Xbox's 'Life is Short. Play More.' ad walks through an entire lifetime in sixty seconds just to say go play games. Emotional, well shot, genuinely moving. A-Tier, they made you cry for a console ad.",
+      "durationSec": 14.0
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Xbox",
+      "clipSrc": "tierlist/day8-ps-xbox/clip_halo.mp4",
+      "dummyVideoSrc": "tierlist/day8-ps-xbox/item_04.mp4",
+      "voiceLine": "But Halo 3's 'Believe' campaign built an entire fake war memorial and museum just to hype one video game. Cinematic, massive budget, treated like a real historical event. S-Tier, advertising on a completely different level.",
+      "durationSec": 13.84
+    }
+  ],
+  "outroLine": "PlayStation or Xbox? Drop your pick and subscribe!",
+  "outroVideoSrc": "tierlist/day8-ps-xbox/outro.mp4",
+  "channelHandle": "@FunandRank",
+  "hookDurationSec": 5.92,
+  "outroDurationSec": 3.52
+}

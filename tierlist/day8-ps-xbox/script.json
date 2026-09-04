@@ -1,0 +1,30 @@
+{
+  "hook": "Console wars never end. Let's rank the craziest ads from PlayStation and Xbox.",
+  "outro": "PlayStation or Xbox? Drop your pick and subscribe!",
+  "items": [
+    {
+      "tier": "D",
+      "brandLabel": "PlayStation",
+      "clip": "clip_baby.mp4",
+      "line": "PlayStation once ran an ad that was just a newborn baby with a voiceover about the miracle of life... to sell a game console. Bizarre, unsettling, nobody asked for this. D-Tier, an all-time head-scratcher."
+    },
+    {
+      "tier": "C",
+      "brandLabel": "PlayStation",
+      "clip": "clip_cat.mp4",
+      "line": "Then there's the PS2 ad that got banned in multiple countries for being straight-up disturbing. Bold creative choice, terrible execution. C-Tier, style over sense."
+    },
+    {
+      "tier": "A",
+      "brandLabel": "Xbox",
+      "clip": "clip_lifeshort.mp4",
+      "line": "Xbox's 'Life is Short. Play More.' ad walks through an entire lifetime in sixty seconds just to say go play games. Emotional, well shot, genuinely moving. A-Tier, they made you cry for a console ad."
+    },
+    {
+      "tier": "S",
+      "brandLabel": "Xbox",
+      "clip": "clip_halo.mp4",
+      "line": "But Halo 3's 'Believe' campaign built an entire fake war memorial and museum just to hype one video game. Cinematic, massive budget, treated like a real historical event. S-Tier, advertising on a completely different level."
+    }
+  ]
+}
