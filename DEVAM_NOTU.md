@@ -885,7 +885,25 @@ acikca raporlanmali, "58/58 bitti" gibi olmayan bir sey soylenmemeli.
 - [x] slot3 TierList spor (UFC Knockouts) - `tierlist/day-sports3-ufc/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
 - [x] slot4 Ranking (Funny Pet Fails) - `tierlist/ranking/day3-pet/sample_render.mp4` - render+QA tamam, onay BEKLIYOR
 
-**Gun4-15: HENUZ BASLANMADI (48 video kaldi) - toplam 12/60 tamamlandi**
+**Gun4 TAMAMLANDI (4/4) - BATCH 1 (Gun 1-4) BITTI:**
+- [x] slot1 Ranking (Birthday Cake Fails) - `tierlist/ranking/day4-cake/sample_render.mp4`
+- [x] slot2 TierList marka (Old Spice vs Gillette) - `tierlist/day4-oldspice-gillette/sample_render.mp4`
+- [x] slot3 TierList spor (Volleyball Kills) - `tierlist/day-sports4-volleyball/sample_render.mp4`
+- [x] slot4 Ranking (Gym Fails) - `tierlist/ranking/day4-gym/sample_render.mp4`
+
+**Gun5-15: HENUZ BASLANMADI (44 video kaldi) - toplam 16/60 tamamlandi (Batch 1 bitti)**
+
+**NOT (2026-09-04 sabah):** Kullanici "Shorts Factory Panel" masaustu kisayolunun
+kayip oldugunu bildirdi - kontrol edildi, o kisayol aslinda BASKA bir uygulamaya
+("Master Admin Panel" -> MasterAdminApp.exe) aitti, shortsfactory panel'in HIC
+kisayolu yokmus. Yeniden olusturuldu (`start-panel.bat`'a isaret eder).
+Panel acildiginda "Onay Kuyrugu" BOS cikti - bu oturumda uretilen TUM
+TierList/Ranking videolari panelin onay-kuyrugu/worker sistemine HIC
+GIRMEDI, dogrudan `npx remotion render` ile elle uretildi. Fun&Rank kanali
+panelde tanimli bile degil ("Kanallar" listesinde yok). Yani panel BU
+videolari gostermez - kullaniciya dosyalari DOGRUDAN gondermek gerekiyor
+(SendUserFile). Ileride Fun&Rank/TierList-Ranking pipeline'ini panelin
+worker/queue sistemine entegre etmek ayri bir gorev.
 
 Not: "onay BEKLIYOR" isaretli 6 video render edildi ve QA'dan gecti (ffmpeg
 volumedetect ile audio kontrolu + kare-kare gorsel kontrol + watermark
