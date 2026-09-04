@@ -1,0 +1,11 @@
+{
+  "hook": "Ranking the worst birthday cake fails from 5 to 1!",
+  "items": [
+    { "brandLabel": "Rank 5", "rank": 5, "line": "Number 5: Spelling the name completely wrong." },
+    { "brandLabel": "Rank 4", "rank": 4, "line": "Number 4: The cake sliding right off the table." },
+    { "brandLabel": "Rank 3", "rank": 3, "line": "Number 3: The dog eating the cake before the song even ends." },
+    { "brandLabel": "Rank 2", "rank": 2, "line": "Number 2: Lighting the napkins on fire with the candles." },
+    { "brandLabel": "Rank 1", "rank": 1, "line": "Number 1: Smashing their face into the cake so hard the table breaks!" }
+  ],
+  "outro": "Subscribe!"
+}

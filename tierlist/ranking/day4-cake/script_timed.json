@@ -1,0 +1,45 @@
+{
+  "hook": "Ranking the worst birthday cake fails from 5 to 1!",
+  "items": [
+    {
+      "brandLabel": "Rank 5",
+      "rank": 5,
+      "line": "Number 5: Spelling the name completely wrong.",
+      "durationSec": 3.28,
+      "audio": "audio/item_01.wav"
+    },
+    {
+      "brandLabel": "Rank 4",
+      "rank": 4,
+      "line": "Number 4: The cake sliding right off the table.",
+      "durationSec": 3.2,
+      "audio": "audio/item_02.wav"
+    },
+    {
+      "brandLabel": "Rank 3",
+      "rank": 3,
+      "line": "Number 3: The dog eating the cake before the song even ends.",
+      "durationSec": 4.48,
+      "audio": "audio/item_03.wav"
+    },
+    {
+      "brandLabel": "Rank 2",
+      "rank": 2,
+      "line": "Number 2: Lighting the napkins on fire with the candles.",
+      "durationSec": 3.52,
+      "audio": "audio/item_04.wav"
+    },
+    {
+      "brandLabel": "Rank 1",
+      "rank": 1,
+      "line": "Number 1: Smashing their face into the cake so hard the table breaks!",
+      "durationSec": 4.56,
+      "audio": "audio/item_05.wav"
+    }
+  ],
+  "outro": "Subscribe!",
+  "hookDurationSec": 3.52,
+  "hookAudio": "audio/hook.wav",
+  "outroDurationSec": 0.88,
+  "outroAudio": "audio/outro.wav"
+}
