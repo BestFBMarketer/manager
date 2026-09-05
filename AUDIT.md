@@ -4,6 +4,90 @@
 
 ---
 
+## 2026-09-05 — Fun&Rank Gün1-9 kanıtlanmış üretim + İçerik Zekası modülü + repo temizliği
+
+### Yapılan iş özeti
+
+**1. Fun&Rank (`shorts`, `@FunandRank`) Gün1-9 üretimi TAMAMLANDI, kanıtlandı:**
+36 video (16 Gün1-4 + 20 Gün5-9) FunnyRanking (Top-5 countdown) ve TierList
+(marka/spor karşılaştırma, SadTalker+TTS) composition'larıyla üretildi,
+`private`+`publishAt` ile YouTube'a yüklendi (2026-09-08→09-13 arası
+yayına girecek). Klip kaynaklama disiplini (yt-dlp + dense frame-tarama ile
+literal-olay doğrulama Ranking için, tematik yeterlilik TierList için)
+onlarca reddedilmiş/düzeltilmiş kaynak örneğiyle olgunlaştı - bkz
+`ranking-klip-hassasiyeti-tierlist-kadar-olmali.md`. **ÖNEMLİ NÜANS:** bu
+üretim panelin worker/job-kuyruğu üzerinden DEĞİL, tamamen elle (Claude
+script.json yazıp `npx remotion render` çağırarak) yapıldı - yukarıdaki
+P2 maddesinin güncellemesine bakın.
+
+**2. İçerik Zekası (Content Intelligence) modülü TAMAMEN KODLANDI ve gerçek
+veriyle test edildi** (önceki bölümlerde/DEVAM_NOTU'da "henüz araştırma
+aşamasında, kod yazılmadı" diye geçiyordu - bu ARTIK GEÇERSİZ):
+- 6 yeni SQLite tablosu: `external_credential`, `video_analytics_snapshot`,
+  `competitor_channel`, `competitor_video_snapshot`, `vph_alert`,
+  `content_rule`, `competitor_candidate`.
+- `youtubeAnalyticsClient.ts`, `analyticsFetcher.ts` - funandrank için 32
+  videonun gerçek retention/engagement verisi çekildi, doğrulandı.
+- `competitorRadar.ts` - 20 rakip kanal aktif, VPH outlier + uzun-video/
+  sahne-kaynağı tespiti (süre>183sn VEYA thumbnail 16:9) gerçek veriyle
+  test edildi (FailArmy örneği).
+- `competitorDiscovery.ts` - anahtar-kelime ile rakip keşfi + onay akışı,
+  canlı test edildi (yanlış-onay hatası yaşanıp düzeltildi, kanal-önizleme
+  linki eklendi).
+- `ruleSynthesizer.ts` - free-tier LLM (`patternSynthesis` task) gerçek
+  veriden bağımsız olarak "Wait for #1" başlık kalıbını yeniden buldu.
+- `rankingPlanner.ts::buildSystemPrompt` artık onaylı kuralları
+  (`getActiveRules`) otomatik prompt'a ekliyor - kural onaylandıkça kod
+  DEĞİŞMİYOR, sadece DB satırı.
+- Panel: `src/panel/routes/analytics.ts` + 4 yeni sayfa (AnalyticsDashboard,
+  FlaggedVideos, RulesReview, CompetitorWatchlist) - route auth + build
+  doğrulandı.
+- 5 Windows Scheduled Task kuruldu (wake-to-run açık): analytics (günlük),
+  VPH radar (3 saatte bir), rakip keşfi + kural sentezi (haftalık, SADECE
+  öneri üretir, otomatik onay YOK), kaynak-video temizliği (günlük, 30 gün
+  retention).
+- **Açık:** sadece `shorts` kanalının analytics OAuth scope'u var (diğer
+  4 kanal - travel/mystic/bimble/historisches-kapital - yeniden
+  yetkilendirilmeli). Sinyal-skorlama+otomatik-üretim-tetikleme (Faz 2,
+  plan: `dapper-spinning-sparkle.md`) henüz yazılmadı.
+
+**3. Git repo boyutu 5.18GB → 721MB:** `git filter-repo` ile ham kaynak
+klipler + final render'lar tüm geçmişten temizlendi (önce Google Drive'a
+kopyalanıp doğrulandı), force-push edildi. Yeni kalıcı kural: ham indirme
+→ `G:\Drive'ım\shortsfactory\sourcevideos\<kanal>\`, final render →
+`...\finaloutputs\<kanal>\` - TÜM kanallar için geçerli, `tierlist/`'e
+özel değil.
+
+### Test/doğrulama
+
+- Her yeni backend dosyası gerçek veriyle (funandrank kanalı, 32 video,
+  20 rakip kanal) canlı test edildi, `npm run typecheck` + panel-web
+  `npm run build` her adımda temiz.
+- Panel server boot-smoke-test: `/api/health` 200, auth'lu route 401
+  (requireAuth doğru sıralanmış).
+- Git temizliği: `git bundle verify` ile tam yedek doğrulandı, iki
+  filter-repo turu sonrası GitHub push'u sıfır uyarıyla tamamlandı.
+
+### Açık riskler / bilinen eksikler
+
+- Rakip keşfi anahtar kelimeleri hâlâ kaba ("brand ads ranked" çok genel
+  kalıp alakasız büyük kanalları çekti) - kalibrasyon gerekiyor.
+- Analytics scope eksikliği (4/5 kanal) - interaktif OAuth consent
+  gerektirdiği için otomatikleştirilemez, kullanıcıyla birlikte yapılmalı.
+- Drive retention-policy script'i sadece `sourcevideos` için var,
+  `finaloutputs` için bir politika henüz konuşulmadı/yazılmadı.
+
+### Sonraki adım
+
+1. Kalan 4 kanalı analytics scope'uyla yeniden yetkilendir.
+2. Faz 2 (sinyal skorlama + otomatik üretim tetikleme) - açık kararlar:
+   Google Trends servisi seçimi, TikTok sinyali kaynağı.
+3. Panelin worker/job-kuyruğuna Fun&Rank/TierList'i gerçekten bağlama
+   kararı (şu an bilinçli olarak elle çalışıyor, kod hazır ama hiç
+   denenmedi).
+
+---
+
 ## 2026-08-29 — İlk gerçek uçtan uca render (HotelTour, drone klip) + hız/doğruluk düzeltmeleri
 
 ### Yapılan iş özeti
@@ -302,9 +386,16 @@ tespit içindir — yeni kod yazılmadı.
       `videos.update` gerekirse referansta yaşanan 403'e çarpar, geniş `youtube` scope'una çıkar.
 
 **P2:**
-- [ ] FunnyRanking discovery/curation yazılmadı, "haftalık paylaşılan kaynak havuzu" DEVAM_NOTU.md'de
-      "sıradaki oturumun ana işi" diye zaten işaretli.
-- [ ] TierList iskelet halinde (klip kaynaklama, LLM tier-planner, arkaplan görseli, TTS profili yok).
+- [ ] FunnyRanking discovery/curation yazılmadı - klip kaynaklama HÂLÂ tamamen elle
+      (Claude/kullanıcı yt-dlp ile arayıp buluyor), otomatik bir "kaynak keşfi" modülü yok.
+      (2026-09-05 durumu: bu disiplinin KENDİSİ artık kanıtlanmış/olgunlaşmış - bkz aşağı -
+      ama kod olarak otomatikleştirilmedi, hâlâ manuel.)
+- [x] ~~TierList iskelet halinde (klip kaynaklama, LLM tier-planner, arkaplan görseli, TTS profili yok).~~
+      **GÜNCELLİĞİNİ YİTİRDİ (2026-09-05):** TierList composition'ı ve tüm production pipeline'ı
+      (SadTalker, TTS, tier-board, 4-tier kuralı) artık TAM ÇALIŞIR ve KANITLANMIŞ durumda - bkz
+      aşağıdaki "2026-09-05" bölümü. Tek eksik: worker-stage kodu (`funnyRanking.ts`, 195 satır,
+      job-kuyruğu üzerinden tetiklenen otomatik hali) hiç GERÇEK bir job üzerinden test edilmedi -
+      tüm gerçek üretim ELLE (script.json + doğrudan `npx remotion render`) yapıldı.
 - [ ] YouTube bağlantısı için panel UI yok, kullanıcı hâlâ elle `authYoutube.ts` çalıştırıyor.
 - [ ] Instagram cross-post `PUBLIC_MEDIA_BASE_URL` deploy adımını bekliyor (kod hazır).
 
