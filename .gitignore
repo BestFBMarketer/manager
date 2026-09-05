@@ -18,3 +18,8 @@ tierlist/*/talking_alpha/
 tierlist/*/talking_webm/
 tierlist/test_alpha_prores.mov
 tierlist/test_alpha_fix.webm
+
+# Bimble 3D rig test-buyuk binary dosyalar (100MB+, git'e uygun degil)
+tierlist/bimble_axis_test.glb
+tierlist/bimble_blender_rigged.glb
+public/bimble/models/bimble_rigged.glb

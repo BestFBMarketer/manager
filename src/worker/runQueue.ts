@@ -165,6 +165,11 @@ async function dispatchJob(db: Database.Database, job: JobRow): Promise<void> {
         result = await runStoryNarrativeJob(db, job, channel);
         break;
       }
+      case 'BimbleTV': {
+        const { runBimbleTvJob } = await import('./stages/bimbleTv.js');
+        result = await runBimbleTvJob(db, job, channel);
+        break;
+      }
       case 'ShortsDerivative': {
         const { runShortsDerivativeJob } = await import('./stages/shortsDerivative.js');
         result = await runShortsDerivativeJob(db, job, channel);

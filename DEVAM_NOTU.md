@@ -1389,3 +1389,40 @@ netlestirilmesi gerekenler:
    [[funandrank-tum-gecmis-analytics-2026-09-05]] ve icerik-zekasi
    modulunun (bkz DEVAM_NOTU "Icerik zekasi modulu") analytics dashboard'u
    olgunlastiktan sonra ele alinabilir, simdilik sadece not.
+
+## Bimble TV 3D - Blender rig walk animasyonu iyilestirme, oturum sonu (2026-09-05)
+
+Kullanici geri bildirimi (2 tur): "yuruyus yok, sallanma/titreme var" - walk_pose()
+fonksiyonu iki kez guncellendi:
+1. Ilk duzeltme: genlik 0.4->0.65 rad, diz bukumu 0.9->1.1 (ustel egri, lift^1.3),
+   dongü 1.6sn->2.4sn.
+2. Ikinci duzeltme (SON, henuz kullanici onayi ALINMADI): kalca yanal agirlik-
+   aktarimi (`hips.location[0] = sin(phase)*0.035`), kalca+govde karsi-rotasyon
+   (govde/kalca gercek yuruyuste ters doner, oncesinde bu YOKTU - saf on-arka
+   bacak sallanmasi "titreme" gibi okunuyordu).
+3. Son render: `out/bimble_blender_walk4.mp4` - kullaniciya gonderildi,
+   **CEVAP BEKLENIYOR** (oturum PC kapanmasi nedeniyle burada kesildi).
+
+Ayrica bu turda cozulen: agiz/kafa ayrisma bug'i - spine/head kemik siniri
+0.68->0.58 height'e cekildi (yanak/agiz bolgesi artik head kemigine bagli,
+govdeyle degil).
+
+Kullanici ayrica "benim verdigim GLB'leri kullan" dedi - su an bimble122.glb
+kullaniliyor (kullanicinin kendi Downloads'indan), ama "bimble1.glb"
+alternatifi de belirtilmisti, netlesmedi (soru soruldu, "tamam ozaman"
+belirsiz cevap geldi). **DÖNÜLDÜĞÜNDE ÖNCE BUNU NETLEŞTİR.**
+
+**Script durumu:** `tierlist/blender/rig_bimble.py` calisir durumda, iki
+kritik Blender/glTF bug'i cozuldu (bkz yukaridaki "Blender headless rig
+CALISTI" bolumu - Automatic Weights heat-solver bu mesh'te basarisiz
+oluyordu, rotation_mode QUATERNION->XYZ fix'i sart).
+
+**SIRADAKI ADIM (donunce ilk is):** walk4.mp4 hakkinda kullanici geri
+bildirimini al. Hala "titreme" gibi geliyorsa, muhtemel sonraki denemeler:
+- Foot/toe bone eklemek (su an sadece thigh+shin var, ayak duz kaliyor,
+  gercek adimda ayak ucu/topuk farkli aci yapar).
+- Kontr-rotasyon genligini/fazini ince ayarlamak (su anki degerler
+  gorsel dogrulanmadi, sadece kod olarak eklendi - RENDER EDILIP
+  KONTROL EDILMEDI, cunku oturum kesildi).
+- Alternatif: "bimble1.glb" ile ayni script'i tekrar calistirip kaynak
+  mesh degisikliginin sonucu etkileyip etkilemedigini gormek.

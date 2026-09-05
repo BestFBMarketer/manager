@@ -16,7 +16,8 @@ export type TemplateName =
   | 'FunnyRanking'
   | 'HotelTourLandscape'
   | 'HotelTourVertical'
-  | 'StoryNarrative';
+  | 'StoryNarrative'
+  | 'BimbleTV';
 
 export type ChannelType = 'standard' | 'story';
 export type TopicSource = 'reference' | 'ai_generated' | 'both';

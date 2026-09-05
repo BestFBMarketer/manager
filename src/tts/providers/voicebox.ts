@@ -18,7 +18,7 @@ import type { TtsProvider, TtsRequest, TtsResult } from '../types.js';
 const BASE_URL = optionalEnv('VOICEBOX_URL') ?? 'http://127.0.0.1:17493';
 
 const POLL_INTERVAL_MS = 1_000;
-const POLL_MAX_ATTEMPTS = 60; // ~1 dakika - uzun metinler (hikaye kanali) daha uzun surebilir
+const POLL_MAX_ATTEMPTS = 180; // ~3 dakika - uzun metinler + yogun yukte gecikmis/basarisiz status denemeleri de bu sayaca dahil
 
 export interface VoiceProfile {
   id: string;
@@ -82,16 +82,35 @@ async function resolveProfileId(voiceRef: string): Promise<string> {
   return match.id;
 }
 
-/** /generate hemen "completed" donmezse (uzun metin) durumu polling ile bekler. */
+/**
+ * /generate hemen "completed" donmezse (uzun metin) durumu polling ile bekler.
+ *
+ * Voicebox aktif uretim yaparken /status'a tek bir istegin kendisi de yavas
+ * cevap verebilir (sunucu CPU/GPU-bound calisirken I/O'yu geciktirebilir) -
+ * bu yuzden tek bir attempt'in timeout/parse hatasi ANINDA basarisizlik
+ * SAYILMAZ, sadece o attempt atlanir ve polling devam eder. Sadece
+ * POLL_MAX_ATTEMPTS tamamen tukenirse hata firlatilir.
+ */
 async function waitUntilDone(generationId: string): Promise<GenerationResponse> {
   for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt += 1) {
-    const response = await fetch(`${BASE_URL}/generate/${generationId}/status`, {
-      signal: AbortSignal.timeout(TIMEOUTS.HTTP_REQUEST_MS),
-    });
-    const data = (await response.json()) as GenerationResponse;
+    try {
+      const response = await fetch(`${BASE_URL}/generate/${generationId}/status`, {
+        signal: AbortSignal.timeout(TIMEOUTS.HTTP_REQUEST_MS),
+      });
+      // Bu endpoint SSE formatinda donuyor ("data: {...}") - yogun yukte birden
+      // fazla progress event'i art arda gelebilir, SON satir esas alinir.
+      const rawText = (await response.text()).trim();
+      const lines = rawText.split('\n').map((line) => line.trim()).filter(Boolean);
+      const lastLine = lines[lines.length - 1] ?? rawText;
+      const jsonText = lastLine.startsWith('data:') ? lastLine.slice('data:'.length).trim() : lastLine;
+      const data = JSON.parse(jsonText) as GenerationResponse;
 
-    if (data.status === 'completed') return data;
-    if (data.status === 'failed') throw new Error(`voicebox uretimi basarisiz: ${data.error ?? 'bilinmeyen hata'}`);
+      if (data.status === 'completed') return data;
+      if (data.status === 'failed') throw new Error(`voicebox uretimi basarisiz: ${data.error ?? 'bilinmeyen hata'}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('voicebox uretimi basarisiz')) throw error;
+      Logger.debug(`voicebox status kontrolu gecikti (deneme ${attempt + 1}/${POLL_MAX_ATTEMPTS}), tekrar denenecek`, error);
+    }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }

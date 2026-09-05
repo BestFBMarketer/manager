@@ -15,6 +15,8 @@ import { StoryNarrative, storyNarrativeDurationInFrames, type StoryNarrativeProp
 import { Thumbnail, type ThumbnailProps } from './compositions/Thumbnail';
 import { ShortsDerivative, shortsDerivativeDurationInFrames, type ShortsDerivativeProps } from './compositions/ShortsDerivative';
 import { TierList, tierListDurationInFrames, type TierListProps } from './compositions/TierList';
+import { BimbleTV, bimbleTvDurationInFrames, type BimbleTVProps } from './compositions/BimbleTV';
+import { BimbleTV3D, bimbleTv3DDurationInFrames, type BimbleTV3DProps } from './compositions/BimbleTV3D';
 
 const FPS = 30;
 const VERTICAL = { width: 1080, height: 1920 };
@@ -78,6 +80,27 @@ const SHORTS_DERIVATIVE_DEFAULTS: ShortsDerivativeProps = {
   hookDurationSec: 2,
   channelHandle: '@bestmarketer',
   ctaText: 'Tamamı kanalda',
+};
+
+const BIMBLE_DEFAULTS: BimbleTVProps = {
+  title: 'I Wanted The Toy But Mom Said No',
+  beats: [
+    { emotion: 'calm', text: "Hi friends! Today I wanted something SO badly...", durationSec: 4 },
+    { emotion: 'happy', text: 'A big red dinosaur toy. I HAD to have it.', durationSec: 4 },
+    { emotion: 'sad', text: "Mom said not today. My chest got tight.", durationSec: 4, sfx: 'pop_sparkle' },
+    { emotion: 'bigfeeling', text: 'The feeling got bigger and bigger...', durationSec: 4 },
+    { emotion: 'calm', text: 'So I took three big breaths. In... and out.', durationSec: 5, sfx: 'chime_breath' },
+    { emotion: 'proud', text: "I didn't get the toy. But I got through my big feeling.", durationSec: 4, sfx: 'tada' },
+  ],
+  chorus: ['Hearing no is hard to do', 'But I can breathe it through', 'Through and through, through and through', "That's what Bimble knows"],
+  chorusDurationSec: 8,
+  channelHandle: '@Bimble-TV',
+  titleDurationSec: 3,
+};
+
+const BIMBLE_3D_DEFAULTS: BimbleTV3DProps = {
+  animationName: 'Idle',
+  durationSec: 4,
 };
 
 const TOUR_DEFAULTS: HotelTourProps = {
@@ -178,6 +201,30 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={shortsDerivativeDurationInFrames(SHORTS_DERIVATIVE_DEFAULTS, FPS)}
         calculateMetadata={({ props }) => ({
           durationInFrames: shortsDerivativeDurationInFrames(props, FPS),
+        })}
+      />
+
+      <Composition
+        id="BimbleTV"
+        component={BimbleTV}
+        defaultProps={BIMBLE_DEFAULTS}
+        fps={FPS}
+        {...LANDSCAPE}
+        durationInFrames={bimbleTvDurationInFrames(BIMBLE_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: bimbleTvDurationInFrames(props, FPS),
+        })}
+      />
+
+      <Composition
+        id="BimbleTV3D"
+        component={BimbleTV3D}
+        defaultProps={BIMBLE_3D_DEFAULTS}
+        fps={FPS}
+        {...LANDSCAPE}
+        durationInFrames={bimbleTv3DDurationInFrames(BIMBLE_3D_DEFAULTS, FPS)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: bimbleTv3DDurationInFrames(props, FPS),
         })}
       />
 
