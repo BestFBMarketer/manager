@@ -1251,3 +1251,141 @@ ile tekrar yuklendi.
 kimligi unsurlarina bir daha ASLA dokunulmayacak - retention/algoritma
 sorunu supheli olsa bile cozum HER ZAMAN sahne/klip secimi + slow-motion/
 reverse-loop tarafinda aranacak, gorsel sablonda degil.
+
+## Bimble TV 3D - Mesh2Motion terk edildi, Cinevva Auto Rigger ile CALISAN rig bulundu (2026-09-05)
+
+Mesh2Motion'da 6+ farkli mesh/ayar kombinasyonuyla (sira duzeltme, ayak bilegi
+ayirma, simplify/quantize kaldirma) hep ayni sonuc: bind pozunda saglam ama
+HERHANGI animasyonda govde/kollar parcalaniyordu. Kullaniciyla arastirip
+alternatif bulduk: **Cinevva Auto Rigger** (app.cinevva.com/tools/rigger,
+ucretsiz, tarayici tabanli, GLB native).
+
+**Neden calisti:** Mesh2Motion elle/pixel-tahminli joint surukleme gerektiriyordu
+(surekli boyut degistiren tarayici penceresi + benzer-gorunumlu joint'leri
+ayirt edememe yuzunden hatali). Cinevva'nin "Algorithmic" motoru TAMAMEN
+otomatik (elle nokta koyma yok) - biped govde planini kendi tespit edip
+Mixamo-uyumlu iskelet+skin agirligi uretiyor, ~15 saniyede, ucretsiz (2 kredi,
+hesaba kayitli her kullaniciya jeton veriliyor).
+
+**Onemli kisit:** Cinevva'nin Algorithmic motoru **agir mesh'lerde sessizce
+basarisiz oluyor** (500K-1.5M ucgen denendi, ikisi de "Rigging & animating
+model..." asamasinda takilip sessizce sifirlaniyor, Bones:0 kaliyordu).
+**50.000 ucgen / ~30K vertex** ile calisti (Hunyuan web'de "50k" kalite
+secenegi). Kural: rig icin dokusuz+50K-mertebesi mesh kullan, doku/renk
+SONRA ayri bir texture-transfer adiminda eklenebilir (heniz yapilmadi).
+
+**Dogrulama:** Sadece Cinevva'nin kendi onizlemesinde degil, **kendi
+Remotion+Three.js pipeline'imizda** (`BimbleTV3D.tsx`, `useGLTF`/
+`useAnimations`) gercek render alindi - Idle ve Walk ikisi de TAMAMEN temiz
+(120 kare, hicbir karede kol/govde bozulmasi yok). Dosyalar:
+`tierlist/bimble_cinevva_rigged.glb` (2.44MB, 22 kemik, 6 animasyon: Idle,
+Jump, Jump Land, Jump Start, Sprint, Walk), kopyasi
+`public/bimble/models/bimble_rigged.glb` olarak pipeline'a takildi.
+`remotion/Root.tsx`'teki `BIMBLE_3D_DEFAULTS.animationName` "Idle A" (eski
+Mesh2Motion klip adi) -> "Idle" (Cinevva klip adi) olarak guncellendi.
+
+**Sirada:**
+1. Doku/renk sorunu: rig icin kullanilan mesh dokusuzdu (agirlik/performans
+   icin). Renkli mesh'i riglenmis iskelete nasil baglanacagi (Blender'da
+   skin transfer, ya da renkli+50k mesh'i dogrudan rigleme denemesi) COZULMEDI.
+2. Kullanicinin "Wave/Greeting" beklentisi icin Cinevva kutuphanesinde
+   "wave"/"greet" arandi, YOK - sadece Idle/Jump/Jump Land/Jump Start/
+   Sprint/Walk cikti (6 klip limiti ucretsiz tier'da). Daha fazla animasyon
+   gerekirse ekstra kredi/abonelik gerekebilir, arastirilmadi.
+3. Onaylanirsa Asama 1 (anne/baba/arkadas/evcil hayvan icin ayni
+   FLUX/Hunyuan-referans -> Hunyuan3D-2(50k) -> Cinevva-Algorithmic-rig
+   pipeline'i tekrarlanacak).
+
+## Bimble TV 3D - Blender headless rig CALISTI (2026-09-05, kullanicinin talebiyle Cinevva'dan Blender'a donuldu)
+
+Kullanici hatirlatti: en basta Blender onerilmisti, plan surecinde Cinevva'ya
+kaymisti - kullanici Blender'a donulmesini istedi (kendi PC'sinde, sinirsiz,
+ucretsiz, tam kontrol - Cinevva'nin 50K poligon tavani/6 animasyon limiti/
+"basik" mesh sorunlari yok).
+
+**Kurulum:** `E:\Downloads\blender-5.2.0-windows-x64.msi` zaten indirilmisti,
+sessiz kuruldu (`msiexec /qb`). Blender 5.2.0 LTS,
+`C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`.
+
+**Script:** `tierlist/blender/rig_bimble.py` - headless calisir:
+`blender --background --python rig_bimble.py -- --input X.glb --output Y.glb`
+- GLB import -> mesh bounding-box'indan orana gore 11 kemiklik basit biped
+  iskelet (hips/spine/head, 2x thigh+shin, 2x upper_arm+hand) -> ozel
+  mesafe-bazli agirlik atama -> 2 basit keyframe animasyon (Idle, Walk) ->
+  GLB export.
+
+**Iki kritik bug bulunup cozuldu (ikisi de gercek Blender/glTF pipeline
+tuzagi, ileride tekrar rig yapilirken hatirlanmali):**
+1. `bpy.ops.object.parent_set(type='ARMATURE_AUTO')` (Blender'in kendi
+   "Automatic Weights" heat-solver'i) bu AI-uretimi mesh'te (790K vertex,
+   muhtemelen bozuk/non-manifold topoloji) TAMAMEN basarisiz oluyordu
+   (0/790965 vertex agirlik aldi, "Bone Heat Weighting: failed to find
+   solution" uyarisi verip SESSIZCE hicbir agirlik atamiyordu). **Cozum:**
+   heat-solver'i tamamen atlayip numpy ile ozel mesafe-bazli skinning
+   yazildi (`assign_weights()` - her vertex'in en yakin 2 kemik-segmentine
+   ters-mesafe agirlikla baglanmasi, quantize edilmis toplu `vertex_group.add()`
+   cagrilariyla 790K vertex'te hizli calisiyor).
+2. Pose bone'larin varsayilan `rotation_mode` degeri **QUATERNION** -
+   bu mod acikken `pose_bone.rotation_euler`'e yazip keyframe'lemek
+   **SESSIZCE HICBIR ETKI YAPMIYOR** (butun eksenlerde/buyuk acilarda
+   test edildi, sifir gorsel hareket cikti - "Multiple rotation mode
+   detected" export uyarisi bu celiskinin belirtisiymis). **Cozum:**
+   `make_action()` icinde pose moduna girer girmez her pose bone icin
+   `pb.rotation_mode = "XYZ"` set edilmesi sart (euler kullanmadan once).
+
+**Sonuc:** 790K-vertex, DOKULU (roundness/hacim korunuyor - kullanicinin
+"basik" elestirisi cozuldu), kendi Remotion+Three.js pipeline'imizda
+gercek yuruyus animasyonu hatasiz calisiyor. Kaynak mesh'in (`bimble122.glb`,
+kullanicinin Hunyuan web'de urettigi en son surum) kendi pozunda bir kol
+govde arkasinda duruyor (HAM/riglenmemis mesh'te de ayni - dogrulandi,
+rig hatasi degil, kaynak referans pozunun kendi ozelligi).
+
+**Sirada:**
+1. Dosya boyutu cok buyuk (257MB) - `export_force_sampling=True` +
+   790K vertex nedeniyle. gltf-transform ile texture/geometry sikistirma
+   (quantize/webp) render-oncesi pipeline'a eklenmeli, simplify'dan KACIN
+   (2026-09-05 erken bulgusu: simplify skin agirliklarini bozabiliyordu -
+   Blender-native rig icin bu risk gecerli olmayabilir ama test edilmedi).
+2. Iki kolu simetrik gosteren bir referans mesh (orn. eski
+   `bimble_standing.png` tabanli, T/A-pose net) ile script tekrar
+   calistirilip tam simetrik rig sonucu da dogrulanmali (su anki test
+   kaynak-mesh-pozu yuzunden tek kol gosteriyor).
+3. Onaylanirsa Asama 1: ayni script'i (mesh degistirerek) anne/baba/
+   arkadas/evcil hayvan icin tekrar calistir (evcil hayvan icin 4-ayakli
+   iskelet varyasyonu gerekecek - script'te henuz yok, sadece biped var).
+
+## FIKIR (backlog, henuz arastirilmadi): kaynak klip doygunlugu - alternatif platformlar (2026-09-05)
+
+Fun&Rank "Cooking Fails" videosu (`VvEaqe-cJrQ`, 526 izlenme, %36.1 retention)
+kullanici tarafindan incelendi: "diğerlerine kıyasla daha iyi bir kurguya
+sahip aslında" - yani bu videonun kendi kurgu/klip-secim kalitesi Pool
+Fails'ten daha iyiydi, ama retention YINE zayif kaldi.
+
+**Kullanicinin hipotezi:** "belki izleyici doymuştur çok eski doymuş
+kaynaklardan alıyoruzdur sahneleri" - yani sorun kurgu degil, KAYNAK
+KLIPLERIN kendisi olabilir. Bu klipler (yt-dlp ile YouTube'dan) cogunlukla
+zaten pek cok baska "fail compilation" kanalinda kullanilmis, ABD'li Shorts
+izleyicisinin muhtemelen defalarca gordugu ayni havuzdan geliyor - "bunu
+gordum" hissi aninda kaydirmaya yol aciyor olabilir ("shorts izleyicisi
+acımasızdır özellikle usa hemen kaydırır").
+
+**Onerilen arastirma yonu:** Kaynak klip aramasini sadece YouTube'a
+sikistirmak yerine TikTok, Instagram Reels, Dailymotion gibi daha az
+"geri donusturulmus" platformlardan da klip cekmeyi degerlendir - bu
+platformlarda ayni fail-compilation kulliyati YouTube kadar tekrar
+tekrar dolasima girmemis olabilir, daha "taze" sahne bulma ihtimali var.
+
+**Durum:** SADECE HIPOTEZ - hicbir arastirma/kod yapilmadi. Once
+netlestirilmesi gerekenler:
+1. TikTok/Reels/Dailymotion'dan yt-dlp ile indirme teknik olarak ne kadar
+   guvenilir (YouTube kadar stabil mi, ayni bot-tespiti sorunlari var mi)?
+2. Bu platformlardan indirilen icerigin telif/ToS durumu YouTube'dakinden
+   farkli mi (fail-compilation zaten cogunlukla baskasinin cektigi ham
+   footage - kaynak platform degisince bu durum degismiyor olabilir ama
+   dogrulanmadi).
+3. Bu hipotezi test etmenin en ucuz yolu: ayni temada (orn. "cooking fails")
+   BIR videoyu bilerek TikTok/Reels kaynakli klip havuzundan uretip
+   YouTube-kaynakli esdegeriyle retention karsilastirmasi yapmak - once
+   [[funandrank-tum-gecmis-analytics-2026-09-05]] ve icerik-zekasi
+   modulunun (bkz DEVAM_NOTU "Icerik zekasi modulu") analytics dashboard'u
+   olgunlastiktan sonra ele alinabilir, simdilik sadece not.
