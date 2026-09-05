@@ -142,7 +142,10 @@ export default function CompetitorWatchlist() {
             {candidates.map((c) => (
               <div key={c.id} className="row" style={{ justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
                 <span>
-                  {c.channel_title} <span className="muted">({c.subscriber_count?.toLocaleString() ?? '?'} abone · "{c.matched_keyword}" eşleşti)</span>
+                  <a href={`https://www.youtube.com/channel/${c.competitor_yt_id}`} target="_blank" rel="noreferrer">
+                    {c.channel_title}
+                  </a>{' '}
+                  <span className="muted">({c.subscriber_count?.toLocaleString() ?? '?'} abone · "{c.matched_keyword}" eşleşti)</span>
                 </span>
                 <div className="row" style={{ gap: 6 }}>
                   <button disabled={busy} onClick={() => handleApproveCandidate(c.id)}>Onayla</button>
@@ -161,7 +164,12 @@ export default function CompetitorWatchlist() {
         {competitors && competitors.length === 0 && <p className="muted">henüz rakip eklenmedi</p>}
         {competitors?.map((c) => (
           <div key={c.id} className="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
-            <span>{c.label ?? c.competitor_yt_id} <span className="muted">({c.competitor_yt_id})</span></span>
+            <span>
+              <a href={`https://www.youtube.com/channel/${c.competitor_yt_id}`} target="_blank" rel="noreferrer">
+                {c.label ?? c.competitor_yt_id}
+              </a>{' '}
+              <span className="muted">({c.competitor_yt_id})</span>
+            </span>
             <button className="secondary" onClick={() => handleRemove(c.id)}>Kaldır</button>
           </div>
         ))}
