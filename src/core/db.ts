@@ -267,6 +267,7 @@ CREATE TABLE IF NOT EXISTS competitor_video_snapshot (
   checked_at            TEXT NOT NULL DEFAULT (datetime('now')),
   view_count            INTEGER NOT NULL,
   vph                   REAL NOT NULL,
+  duration_sec          INTEGER,
   raw_json              TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS idx_competitor_video_snapshot_lookup
@@ -365,6 +366,10 @@ function applyIncrementalMigrations(db: Database.Database): void {
     { table: 'publish_target', column: 'refresh_token', ddl: 'ALTER TABLE publish_target ADD COLUMN refresh_token TEXT' },
     { table: 'publish_target', column: 'token_expires_at', ddl: 'ALTER TABLE publish_target ADD COLUMN token_expires_at TEXT' },
     { table: 'publish_target', column: 'account_label', ddl: 'ALTER TABLE publish_target ADD COLUMN account_label TEXT' },
+    // Uzun-video/sahne-kaynagi tespiti icin - bu oturumda competitor_video_snapshot
+    // tablosu duration_sec'siz olusturuldugu icin (CREATE TABLE IF NOT EXISTS
+    // geriye donuk kolon eklemez), eklemeli migrasyon gerekiyor.
+    { table: 'competitor_video_snapshot', column: 'duration_sec', ddl: 'ALTER TABLE competitor_video_snapshot ADD COLUMN duration_sec INTEGER' },
   ];
 
   for (const { table, column, ddl } of alterations) {

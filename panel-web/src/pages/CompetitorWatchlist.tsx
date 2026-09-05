@@ -181,6 +181,11 @@ export default function CompetitorWatchlist() {
           <div key={a.id} className="row" style={{ justifyContent: 'space-between', marginBottom: 8, alignItems: 'flex-start' }}>
             <div>
               <a href={`https://youtu.be/${a.video_id}`} target="_blank" rel="noreferrer">{a.title}</a>
+              {a.duration_sec !== null && a.duration_sec > 183 && (
+                <span className="badge" style={{ marginLeft: 6 }} title="Shorts değil - sahne kaynağı olarak kullanılabilir">
+                  Uzun video · sahne kaynağı
+                </span>
+              )}
               <p className="muted" style={{ margin: '2px 0 0' }}>
                 {a.vph.toFixed(0)} vph (kanal ort. {a.competitor_avg_vph.toFixed(0)}'ın {(a.vph / a.competitor_avg_vph).toFixed(1)} katı) ·{' '}
                 {new Date(a.created_at).toLocaleString()}

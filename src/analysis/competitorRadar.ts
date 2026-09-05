@@ -19,6 +19,27 @@ import { optionalEnv } from '../config/env.js';
 const LOOKBACK_HOURS = 48;
 const VPH_OUTLIER_MULTIPLIER = 5; // kullanicinin sinyal matrisi: "kanal ortalamasinin 5 kati"
 const MIN_PRIOR_SAMPLES_FOR_BASELINE = 2; // ilk 1-2 ornekte anlamli ortalama yok, alarm basma
+const LONG_FORM_DURATION_SEC = 183; // 3dk uzeri - "made for shorts" sinirinin acikca disinda
+
+/** ISO 8601 sure formatini (orn "PT4M13S") saniyeye cevirir. */
+function parseIso8601Duration(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const match = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso);
+  if (!match) return null;
+  const hours = Number(match[1] ?? 0);
+  const minutes = Number(match[2] ?? 0);
+  const seconds = Number(match[3] ?? 0);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+/** Kullanicinin bulgusu: "16:9 formatsa zaten shorts değildir" - sure kisa olsa
+ * bile yatay (genislik>yukseklik) thumbnail, gercek bir Shorts olmadiginin
+ * kesin isareti. Bu yuzden iki sinyal OR'lanir: uzun sure VEYA yatay format. */
+function isLongFormSource(durationSec: number | null, thumbWidth?: number | null, thumbHeight?: number | null): boolean {
+  if (durationSec !== null && durationSec > LONG_FORM_DURATION_SEC) return true;
+  if (thumbWidth && thumbHeight && thumbWidth > thumbHeight) return true;
+  return false;
+}
 
 interface CompetitorChannelRow {
   id: number;
@@ -96,8 +117,8 @@ async function scanCompetitorChannel(apiKey: string, competitor: CompetitorChann
 
   const db = getDb();
   const insertSnapshot = db.prepare(
-    `INSERT INTO competitor_video_snapshot (competitor_channel_id, video_id, title, published_at, view_count, vph, raw_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO competitor_video_snapshot (competitor_channel_id, video_id, title, published_at, view_count, vph, duration_sec, raw_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   const insertAlert = db.prepare(
     `INSERT OR IGNORE INTO vph_alert (channel_id, competitor_channel_id, video_id, title, vph, competitor_avg_vph, threshold_used)
@@ -106,7 +127,7 @@ async function scanCompetitorChannel(apiKey: string, competitor: CompetitorChann
 
   for (let i = 0; i < videoIds.length; i += 50) {
     const batch = videoIds.slice(i, i + 50);
-    const resp = await youtube.videos.list({ part: ['statistics', 'snippet'], id: batch });
+    const resp = await youtube.videos.list({ part: ['statistics', 'snippet', 'contentDetails'], id: batch });
     for (const video of resp.data.items ?? []) {
       if (!video.id || !video.snippet?.publishedAt) continue;
       const viewCount = Number(video.statistics?.viewCount ?? 0);
@@ -116,8 +137,11 @@ async function scanCompetitorChannel(apiKey: string, competitor: CompetitorChann
       );
       const vph = viewCount / hoursSincePublished;
       const title = video.snippet.title ?? '';
+      const durationSec = parseIso8601Duration(video.contentDetails?.duration);
+      const thumb = video.snippet.thumbnails?.high ?? video.snippet.thumbnails?.default;
+      const longForm = isLongFormSource(durationSec, thumb?.width, thumb?.height);
 
-      insertSnapshot.run(competitor.id, video.id, title, video.snippet.publishedAt, viewCount, vph, JSON.stringify(video));
+      insertSnapshot.run(competitor.id, video.id, title, video.snippet.publishedAt, viewCount, vph, durationSec, JSON.stringify(video));
 
       const { avg: baselineVph, sampleCount } = getBaselineVph(competitor.id, video.id);
       if (sampleCount < MIN_PRIOR_SAMPLES_FOR_BASELINE || baselineVph <= 0) continue;
@@ -128,12 +152,16 @@ async function scanCompetitorChannel(apiKey: string, competitor: CompetitorChann
       const result = insertAlert.run(competitor.channel_id, competitor.id, video.id, title, vph, baselineVph, threshold);
       if (result.changes > 0) {
         const label = competitor.label ?? competitor.competitor_yt_id;
-        Logger.success(`VPH outlier: ${label} - "${title}" (${vph.toFixed(0)} vph, kanal ort. ${baselineVph.toFixed(0)})`);
+        const sourceNote = longForm ? ' [UZUN VIDEO - sahne kaynağı olabilir]' : '';
+        Logger.success(`VPH outlier: ${label} - "${title}" (${vph.toFixed(0)} vph, kanal ort. ${baselineVph.toFixed(0)})${sourceNote}`);
         await notify({
-          subject: `Rakip kanal patlaması: ${label}`,
+          subject: `Rakip kanal patlaması: ${label}${longForm ? ' (uzun video)' : ''}`,
           body: `"${title}" son ${hoursSincePublished.toFixed(1)} saatte ${viewCount} izlenme aldı ` +
-            `(${vph.toFixed(0)} vph, kanal ortalamasının ${(vph / baselineVph).toFixed(1)} katı). ` +
-            `Video: https://youtu.be/${video.id}`,
+            `(${vph.toFixed(0)} vph, kanal ortalamasının ${(vph / baselineVph).toFixed(1)} katı).` +
+            (longForm
+              ? ' Bu bir SHORTS DEĞİL (uzun video/yatay format) - içinden birden fazla sahne kesip Ranking için kullanılabilir.'
+              : '') +
+            ` Video: https://youtu.be/${video.id}`,
           severity: 'info',
         });
       }

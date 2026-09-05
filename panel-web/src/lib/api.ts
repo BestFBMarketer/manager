@@ -400,4 +400,5 @@ export interface VphAlert {
   threshold_used: number;
   status: 'new' | 'seen' | 'dismissed';
   created_at: string;
+  duration_sec: number | null;
 }

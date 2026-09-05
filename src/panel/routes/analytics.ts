@@ -297,8 +297,19 @@ export function analyticsRouter(): Router {
     try {
       const db = getDb();
       const status = typeof req.query.status === 'string' ? req.query.status : 'new';
+      // duration_sec en son snapshot'tan join'lenir - "bu Shorts degil, sahne
+      // kaynagi olabilir" bilgisini UI'da gostermek icin (kullanici bulgusu:
+      // uzun sure veya yatay(16:9) format = kesin Shorts degil).
       const rows = db
-        .prepare('SELECT * FROM vph_alert WHERE channel_id = ? AND status = ? ORDER BY created_at DESC')
+        .prepare(
+          `SELECT va.*,
+             (SELECT cvs.duration_sec FROM competitor_video_snapshot cvs
+              WHERE cvs.competitor_channel_id = va.competitor_channel_id AND cvs.video_id = va.video_id
+              ORDER BY cvs.checked_at DESC LIMIT 1) AS duration_sec
+           FROM vph_alert va
+           WHERE va.channel_id = ? AND va.status = ?
+           ORDER BY va.created_at DESC`,
+        )
         .all(req.params.id, status);
       res.json(rows);
     } catch (error) {
