@@ -130,6 +130,18 @@ export const api = {
     }),
   removeCompetitor: (id: number) => request<{ ok: true }>(`/competitors/${id}`, { method: 'DELETE' }),
 
+  listCompetitorCandidates: (channelId: string, status: string = 'proposed') =>
+    request<CompetitorCandidate[]>(`/channels/${channelId}/competitor-candidates?status=${encodeURIComponent(status)}`),
+  discoverCompetitors: (channelId: string, keywords: string[]) =>
+    request<{ ok: true; discovered: number }>(`/channels/${channelId}/competitor-candidates/discover`, {
+      method: 'POST',
+      body: JSON.stringify({ keywords }),
+    }),
+  approveCompetitorCandidate: (id: number, decidedBy: string) =>
+    request<{ ok: true }>(`/competitor-candidates/${id}/approve`, { method: 'POST', body: JSON.stringify({ decidedBy }) }),
+  rejectCompetitorCandidate: (id: number, decidedBy: string) =>
+    request<{ ok: true }>(`/competitor-candidates/${id}/reject`, { method: 'POST', body: JSON.stringify({ decidedBy }) }),
+
   listVphAlerts: (channelId: string, status: string = 'new') =>
     request<VphAlert[]>(`/channels/${channelId}/vph-alerts?status=${encodeURIComponent(status)}`),
   dismissVphAlert: (id: number) => request<{ ok: true }>(`/vph-alerts/${id}/dismiss`, { method: 'POST' }),
@@ -364,6 +376,17 @@ export interface CompetitorChannel {
   label: string | null;
   enabled: number;
   created_at: string;
+}
+
+export interface CompetitorCandidate {
+  id: number;
+  channel_id: string;
+  competitor_yt_id: string;
+  channel_title: string;
+  subscriber_count: number | null;
+  matched_keyword: string;
+  status: 'proposed' | 'approved' | 'rejected';
+  discovered_at: string;
 }
 
 export interface VphAlert {

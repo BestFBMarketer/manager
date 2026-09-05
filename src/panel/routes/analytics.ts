@@ -13,6 +13,7 @@ import { Router, type Request, type Response } from 'express';
 import { getDb } from '../../core/db.js';
 import { Logger } from '../../core/logger.js';
 import { fetchAndStoreAnalytics } from '../../analysis/analyticsFetcher.js';
+import { discoverCompetitorCandidates, promoteCandidateToCompetitor } from '../../analysis/competitorDiscovery.js';
 
 // Flagged videolar icin esik degerleri - "yeterince iyi degil, bak" cizgisi.
 // bkz etkilesim-yorum-begeni-100k-esigi.md: retention yuksek olsa bile
@@ -222,6 +223,72 @@ export function analyticsRouter(): Router {
       res.json({ ok: true });
     } catch (error) {
       Logger.error(`Rakip silme basarisiz (#${req.params.id})`, error);
+      res.status(400).json({ error: errorMessage(error) });
+    }
+  });
+
+  router.get('/channels/:id/competitor-candidates', (req: Request<{ id: string }>, res: Response) => {
+    try {
+      const db = getDb();
+      const status = typeof req.query.status === 'string' ? req.query.status : 'proposed';
+      const rows = db
+        .prepare('SELECT * FROM competitor_candidate WHERE channel_id = ? AND status = ? ORDER BY discovered_at DESC')
+        .all(req.params.id, status);
+      res.json(rows);
+    } catch (error) {
+      Logger.error(`Rakip aday listesi okunamadi (${req.params.id})`, error);
+      res.status(500).json({ error: 'rakip aday listesi okunamadı' });
+    }
+  });
+
+  router.post('/channels/:id/competitor-candidates/discover', async (req: Request<{ id: string }>, res: Response) => {
+    const keywords = Array.isArray(req.body?.keywords) ? (req.body.keywords as unknown[]).filter((k): k is string => typeof k === 'string') : [];
+    if (keywords.length === 0) {
+      res.status(400).json({ error: 'keywords (string[]) zorunlu' });
+      return;
+    }
+    try {
+      const count = await discoverCompetitorCandidates(req.params.id, keywords);
+      res.json({ ok: true, discovered: count });
+    } catch (error) {
+      Logger.error(`Rakip kesfi basarisiz (${req.params.id})`, error);
+      res.status(400).json({ error: errorMessage(error) });
+    }
+  });
+
+  router.post('/competitor-candidates/:id/approve', (req: Request<{ id: string }>, res: Response) => {
+    const decidedBy = typeof req.body?.decidedBy === 'string' ? req.body.decidedBy : '';
+    if (!decidedBy.trim()) {
+      res.status(400).json({ error: 'decidedBy zorunlu' });
+      return;
+    }
+    try {
+      promoteCandidateToCompetitor(Number(req.params.id), decidedBy);
+      res.json({ ok: true });
+    } catch (error) {
+      Logger.error(`Rakip aday onayi basarisiz (#${req.params.id})`, error);
+      res.status(400).json({ error: errorMessage(error) });
+    }
+  });
+
+  router.post('/competitor-candidates/:id/reject', (req: Request<{ id: string }>, res: Response) => {
+    const decidedBy = typeof req.body?.decidedBy === 'string' ? req.body.decidedBy : '';
+    if (!decidedBy.trim()) {
+      res.status(400).json({ error: 'decidedBy zorunlu' });
+      return;
+    }
+    try {
+      const db = getDb();
+      const result = db
+        .prepare("UPDATE competitor_candidate SET status='rejected', decided_by=?, decided_at=datetime('now') WHERE id = ? AND status='proposed'")
+        .run(decidedBy, Number(req.params.id));
+      if (result.changes === 0) {
+        res.status(404).json({ error: 'aday bulunamadı veya zaten karara bağlanmış' });
+        return;
+      }
+      res.json({ ok: true });
+    } catch (error) {
+      Logger.error(`Rakip aday reddi basarisiz (#${req.params.id})`, error);
       res.status(400).json({ error: errorMessage(error) });
     }
   });

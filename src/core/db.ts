@@ -307,6 +307,26 @@ CREATE TABLE IF NOT EXISTS content_rule (
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_content_rule_channel_status ON content_rule(channel_id, status, created_at);
+
+-- Otomatik kesfedilen rakip aday kanallari - competitor_channel'a (gercek
+-- izleme listesi) dogrudan yazilmaz, once burada proposed olarak durur,
+-- insan onayindan sonra competitor_channel'a tasinir. content_rule ile
+-- ayni onay-dongusu deseni.
+CREATE TABLE IF NOT EXISTS competitor_candidate (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id          TEXT NOT NULL REFERENCES channel(id),
+  competitor_yt_id    TEXT NOT NULL,
+  channel_title       TEXT NOT NULL,
+  subscriber_count    INTEGER,
+  matched_keyword     TEXT NOT NULL,
+  status              TEXT NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed','approved','rejected')),
+  decided_by          TEXT,
+  decided_at          TEXT,
+  discovered_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_competitor_candidate_unique
+  ON competitor_candidate(channel_id, competitor_yt_id);
+CREATE INDEX IF NOT EXISTS idx_competitor_candidate_status ON competitor_candidate(channel_id, status, discovered_at);
 `;
 
 /**

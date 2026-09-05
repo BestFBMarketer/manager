@@ -1,23 +1,81 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, type CompetitorChannel, type VphAlert } from '../lib/api.js';
+import { api, type CompetitorCandidate, type CompetitorChannel, type VphAlert } from '../lib/api.js';
 
 export default function CompetitorWatchlist() {
   const { id } = useParams<{ id: string }>();
   const [competitors, setCompetitors] = useState<CompetitorChannel[] | null>(null);
   const [alerts, setAlerts] = useState<VphAlert[] | null>(null);
+  const [candidates, setCandidates] = useState<CompetitorCandidate[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newYtId, setNewYtId] = useState('');
   const [newLabel, setNewLabel] = useState('');
+  const [keywords, setKeywords] = useState('');
+  const [decidedBy, setDecidedBy] = useState('');
   const [busy, setBusy] = useState(false);
+  const [discovering, setDiscovering] = useState(false);
 
   function load() {
     if (!id) return;
     api.listCompetitors(id).then(setCompetitors).catch((err) => setError(err instanceof Error ? err.message : 'rakip listesi yüklenemedi'));
     api.listVphAlerts(id).then(setAlerts).catch((err) => setError(err instanceof Error ? err.message : 'VPH uyarıları yüklenemedi'));
+    api.listCompetitorCandidates(id).then(setCandidates).catch((err) => setError(err instanceof Error ? err.message : 'rakip aday listesi yüklenemedi'));
   }
 
   useEffect(load, [id]);
+
+  async function handleDiscover() {
+    if (!id) return;
+    const kws = keywords.split(',').map((k) => k.trim()).filter(Boolean);
+    if (kws.length === 0) {
+      setError('En az bir anahtar kelime gerekli (virgülle ayır)');
+      return;
+    }
+    setDiscovering(true);
+    setError(null);
+    try {
+      await api.discoverCompetitors(id, kws);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'keşif başarısız');
+    } finally {
+      setDiscovering(false);
+    }
+  }
+
+  async function handleApproveCandidate(candidateId: number) {
+    if (!decidedBy.trim()) {
+      setError('Onaylayan adı gerekli');
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.approveCompetitorCandidate(candidateId, decidedBy);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'onay başarısız');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRejectCandidate(candidateId: number) {
+    if (!decidedBy.trim()) {
+      setError('Reddeden adı gerekli');
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.rejectCompetitorCandidate(candidateId, decidedBy);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'reddetme başarısız');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleAdd() {
     if (!id || !newYtId.trim()) return;
@@ -54,6 +112,48 @@ export default function CompetitorWatchlist() {
       </p>
 
       {error && <p className="error-text">{error}</p>}
+
+      <div className="card" style={{ marginBottom: 20 }}>
+        <h3 style={{ marginTop: 0 }}>Rakip Keşfi</h3>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Anahtar kelimelerle YouTube'da benzer kanalları otomatik ara - bulunanlar aşağıda
+          onay bekler, onaylanmadan izleme listesine (ve VPH taramasına) eklenmez.
+        </p>
+        <div className="row" style={{ gap: 8 }}>
+          <input
+            placeholder="anahtar kelimeler, virgülle (örn: pool fails compilation, top 5 fails)"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            style={{ flex: 3 }}
+          />
+          <button disabled={discovering} onClick={handleDiscover}>
+            {discovering ? 'aranıyor...' : 'Keşfet'}
+          </button>
+        </div>
+
+        {candidates && candidates.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <input
+              placeholder="kararı veren (isim)"
+              value={decidedBy}
+              onChange={(e) => setDecidedBy(e.target.value)}
+              style={{ marginBottom: 8, width: '100%' }}
+            />
+            {candidates.map((c) => (
+              <div key={c.id} className="row" style={{ justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                <span>
+                  {c.channel_title} <span className="muted">({c.subscriber_count?.toLocaleString() ?? '?'} abone · "{c.matched_keyword}" eşleşti)</span>
+                </span>
+                <div className="row" style={{ gap: 6 }}>
+                  <button disabled={busy} onClick={() => handleApproveCandidate(c.id)}>Onayla</button>
+                  <button disabled={busy} className="secondary" onClick={() => handleRejectCandidate(c.id)}>Reddet</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {candidates && candidates.length === 0 && <p className="muted" style={{ marginTop: 8 }}>onay bekleyen aday yok</p>}
+      </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h3 style={{ marginTop: 0 }}>İzlenen Rakipler</h3>
