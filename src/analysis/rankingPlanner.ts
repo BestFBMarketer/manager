@@ -10,6 +10,7 @@ import { RANKING } from '../config/constants.js';
 import type { ChannelConfig } from '../config/channels.js';
 import { Logger } from '../core/logger.js';
 import { callLlmJson } from '../llm/router.js';
+import { getActiveRules } from './contentRules.js';
 
 export interface RankingCandidate {
   clipId: string;
@@ -42,10 +43,11 @@ const LANGUAGE_NAMES: Record<ChannelConfig['language'], string> = {
   en: 'English',
 };
 
-function buildSystemPrompt(
+export function buildSystemPrompt(
   language: ChannelConfig['language'],
   styleExamples: string[],
   requestedCategories: string[] = [],
+  channelId?: string,
 ): string {
   const lines = [
     'You write scripts for a YouTube Shorts ranking channel.',
@@ -85,6 +87,19 @@ function buildSystemPrompt(
       '(internet meme slang, "bro" register, absurd comparisons - do not copy lines, match the STYLE):',
       ...styleExamples.map((example, i) => `Example ${i + 1}: ${example}`),
     );
+  }
+
+  // Icerik zekasi modulunun onaylanmis kurallari - bkz analysis/contentRules.ts.
+  // Kural onaylandikca/reddedildikce burasi DEGISMEZ, sadece DB satiri degisir.
+  if (channelId) {
+    const activeRules = getActiveRules(channelId);
+    if (activeRules.length > 0) {
+      lines.push(
+        '',
+        "This channel's own analytics have revealed the following rules - follow them:",
+        ...activeRules.map((r) => `RULE (${r.category}): ${r.ruleText}`),
+      );
+    }
   }
 
   return lines.join(' ');
@@ -152,6 +167,10 @@ export function enforceBudget(plan: RankingPlan): RankingPlan {
  * @param styleExamples Kanalin gercek, daha once yayinlanmis videolarindan
  *                       alinmis countdown metinleri (channel.settings.voiceLineExamples) -
  *                       LLM'e few-shot stil ornegi olarak verilir
+ * @param channelId Panelin `channel.id` degeri - verilirse icerik-zekasi
+ *                  modulunun onaylanmis kurallari (bkz analysis/contentRules.ts)
+ *                  prompt'a otomatik eklenir. Verilmezse (orn. eski cagrilar/
+ *                  test) davranis oncekiyle birebir ayni kalir.
  * @returns Sure butcesine uydurulmus ranking plani
  */
 export async function planRanking(
@@ -160,6 +179,7 @@ export async function planRanking(
   language: ChannelConfig['language'] = 'en',
   styleExamples: string[] = [],
   requestedCategories: string[] = [],
+  channelId?: string,
 ): Promise<RankingPlan> {
   if (candidates.length < RANKING.ITEM_COUNT) {
     throw new Error(
@@ -180,7 +200,7 @@ export async function planRanking(
   ].join('\n');
 
   const { data } = await callLlmJson<RankingPlan>(
-    { task: 'viralHook', system: buildSystemPrompt(language, styleExamples, requestedCategories), user: userPrompt },
+    { task: 'viralHook', system: buildSystemPrompt(language, styleExamples, requestedCategories, channelId), user: userPrompt },
     isRankingPlan,
   );
 

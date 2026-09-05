@@ -21,8 +21,11 @@ export default function Sidebar({ onLoggedOut }: { onLoggedOut: () => void }) {
 
   return (
     <div className="sidebar">
-      <NavLink to="/review" className={({ isActive }) => `tab${isActive ? ' active' : ''}`} style={{ marginBottom: 16, display: 'block' }}>
+      <NavLink to="/review" className={({ isActive }) => `tab${isActive ? ' active' : ''}`} style={{ marginBottom: 8, display: 'block' }}>
         Onay Kuyruğu
+      </NavLink>
+      <NavLink to="/rules" className={({ isActive }) => `tab${isActive ? ' active' : ''}`} style={{ marginBottom: 16, display: 'block' }}>
+        Kural Onayı
       </NavLink>
       <h3 style={{ marginTop: 0 }}>Kanallar</h3>
       {error && <p className="error-text">{error}</p>}

@@ -25,6 +25,7 @@ import { publishTargetsRouter } from './routes/publishTargets.js';
 import { repurposeRouter } from './routes/repurpose.js';
 import { oauthRouter, oauthCallbackRouter } from './routes/oauth.js';
 import { voicesRouter } from './routes/voices.js';
+import { analyticsRouter } from './routes/analytics.js';
 import { SqliteSessionStore } from './sessionStore.js';
 import { PUBLIC_MEDIA_DIR } from '../publish/publicMediaHost.js';
 
@@ -90,6 +91,7 @@ function createApp(): express.Express {
   app.use('/api', requireAuth, repurposeRouter());
   app.use('/api', requireAuth, oauthRouter());
   app.use('/api', requireAuth, voicesRouter());
+  app.use('/api', requireAuth, analyticsRouter());
 
   if (existsSync(FRONTEND_DIST)) {
     app.use(express.static(FRONTEND_DIST));

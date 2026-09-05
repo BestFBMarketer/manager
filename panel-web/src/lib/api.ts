@@ -105,6 +105,34 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ count, offsetDays }),
     }),
+
+  getAnalytics: (channelId: string) => request<VideoAnalyticsSnapshot[]>(`/channels/${channelId}/analytics`),
+  refreshAnalytics: (channelId: string) =>
+    request<{ ok: true; videosUpdated: number }>(`/channels/${channelId}/analytics/refresh`, { method: 'POST' }),
+  getFlaggedVideos: (channelId: string) =>
+    request<Array<VideoAnalyticsSnapshot & { suggestion: string }>>(`/channels/${channelId}/analytics/flagged`),
+
+  listRules: (channelId?: string, status: string = 'proposed') =>
+    request<ContentRule[]>(
+      `/rules?status=${encodeURIComponent(status)}${channelId ? `&channel=${encodeURIComponent(channelId)}` : ''}`,
+    ),
+  getActiveRules: (channelId: string) => request<Array<{ category: string; rule_text: string; rationale: string }>>(`/channels/${channelId}/rules/active`),
+  approveRule: (id: number, decidedBy: string) =>
+    request<{ ok: true }>(`/rules/${id}/approve`, { method: 'POST', body: JSON.stringify({ decidedBy }) }),
+  rejectRule: (id: number, decidedBy: string, note?: string) =>
+    request<{ ok: true }>(`/rules/${id}/reject`, { method: 'POST', body: JSON.stringify({ decidedBy, note }) }),
+
+  listCompetitors: (channelId: string) => request<CompetitorChannel[]>(`/channels/${channelId}/competitors`),
+  addCompetitor: (channelId: string, competitorYtId: string, label?: string) =>
+    request<{ ok: true }>(`/channels/${channelId}/competitors`, {
+      method: 'POST',
+      body: JSON.stringify({ competitorYtId, label }),
+    }),
+  removeCompetitor: (id: number) => request<{ ok: true }>(`/competitors/${id}`, { method: 'DELETE' }),
+
+  listVphAlerts: (channelId: string, status: string = 'new') =>
+    request<VphAlert[]>(`/channels/${channelId}/vph-alerts?status=${encodeURIComponent(status)}`),
+  dismissVphAlert: (id: number) => request<{ ok: true }>(`/vph-alerts/${id}/dismiss`, { method: 'POST' }),
 };
 
 export interface LongVideo {
@@ -298,5 +326,55 @@ export interface StoryReference {
   source_url: string;
   label: string | null;
   enabled: number;
+  created_at: string;
+}
+
+export interface VideoAnalyticsSnapshot {
+  video_id: string;
+  title: string | null;
+  views: number;
+  average_view_percentage: number | null;
+  average_view_duration_sec: number | null;
+  likes: number;
+  comments: number;
+  subscribers_gained: number;
+  published_at: string | null;
+  snapshot_date: string;
+}
+
+export interface ContentRule {
+  id: number;
+  channel_id: string;
+  category: string;
+  rule_text: string;
+  rationale: string;
+  evidence_json: string;
+  status: 'proposed' | 'approved' | 'rejected';
+  proposed_by: string;
+  decided_by: string | null;
+  decided_at: string | null;
+  reviewer_note: string | null;
+  created_at: string;
+}
+
+export interface CompetitorChannel {
+  id: number;
+  channel_id: string;
+  competitor_yt_id: string;
+  label: string | null;
+  enabled: number;
+  created_at: string;
+}
+
+export interface VphAlert {
+  id: number;
+  channel_id: string;
+  competitor_channel_id: number;
+  video_id: string;
+  title: string;
+  vph: number;
+  competitor_avg_vph: number;
+  threshold_used: number;
+  status: 'new' | 'seen' | 'dismissed';
   created_at: string;
 }

@@ -193,6 +193,120 @@ CREATE INDEX IF NOT EXISTS idx_panel_session_expires ON panel_session(expires_at
 CREATE INDEX IF NOT EXISTS idx_job_stage    ON job(stage, status);
 CREATE INDEX IF NOT EXISTS idx_usage_time   ON llm_usage(created_at);
 CREATE INDEX IF NOT EXISTS idx_upload_channel_status ON upload(channel_id, status, publish_at);
+
+-- =====================================
+-- Icerik zekasi modulu (EK 3, 2026-09-05) - kendi-kanal analytics, rakip VPH
+-- radar, kural onay dongusu. bkz DEVAM_NOTU.md "Retention/engagement analizi
+-- + panel-capi viral-analiz araci" ve plan C:\Users\MONSTER\.claude\plans\dapper-spinning-sparkle.md
+-- =====================================
+
+-- Panelin .env/refresh_token_env_key sistemi disinda kalan OAuth kimlik
+-- bilgilerini (historisches-kapital/youtube_upload/token_*.json'dan
+-- ice aktarilir) koprulemek icin. Sadece analytics amacli - upload akisi
+-- (youtubeClient.ts) buna dokunmaz.
+CREATE TABLE IF NOT EXISTS external_credential (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id        TEXT NOT NULL REFERENCES channel(id),
+  purpose           TEXT NOT NULL DEFAULT 'youtube_analytics',
+  source_token_path TEXT,
+  client_id         TEXT NOT NULL,
+  client_secret     TEXT NOT NULL,
+  refresh_token     TEXT NOT NULL,
+  scopes_json       TEXT NOT NULL DEFAULT '[]',
+  imported_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  last_verified_at  TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_external_credential_channel_purpose
+  ON external_credential(channel_id, purpose);
+
+-- Kanal basina, video basina, gun basina anlik goruntu - "en son" degil
+-- trend gorebilelim diye. YouTube Analytics API'nin taze video icin
+-- 24-48 saat gecikmesi var, bu yuzden gunluk cekim yeterli.
+CREATE TABLE IF NOT EXISTS video_analytics_snapshot (
+  id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id                TEXT NOT NULL REFERENCES channel(id),
+  video_id                  TEXT NOT NULL,
+  snapshot_date             TEXT NOT NULL,
+  views                     INTEGER NOT NULL DEFAULT 0,
+  average_view_percentage   REAL,
+  average_view_duration_sec REAL,
+  likes                     INTEGER NOT NULL DEFAULT 0,
+  comments                  INTEGER NOT NULL DEFAULT 0,
+  shares                    INTEGER NOT NULL DEFAULT 0,
+  subscribers_gained        INTEGER NOT NULL DEFAULT 0,
+  subscribers_lost          INTEGER NOT NULL DEFAULT 0,
+  title                     TEXT,
+  published_at              TEXT,
+  raw_json                  TEXT NOT NULL DEFAULT '{}',
+  fetched_at                TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_video_analytics_snapshot_unique
+  ON video_analytics_snapshot(channel_id, video_id, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_video_analytics_snapshot_lookup
+  ON video_analytics_snapshot(channel_id, video_id, snapshot_date);
+
+-- Hangi rakip kanallarin hangi kanalimiz icin izlendigi
+CREATE TABLE IF NOT EXISTS competitor_channel (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id       TEXT NOT NULL REFERENCES channel(id),
+  competitor_yt_id TEXT NOT NULL,
+  label            TEXT,
+  enabled          INTEGER NOT NULL DEFAULT 1,
+  created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_competitor_channel_unique
+  ON competitor_channel(channel_id, competitor_yt_id);
+
+-- Ham VPH ornekleri (trend/debug icin saklanir, sadece alert degil)
+CREATE TABLE IF NOT EXISTS competitor_video_snapshot (
+  id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+  competitor_channel_id INTEGER NOT NULL REFERENCES competitor_channel(id),
+  video_id              TEXT NOT NULL,
+  title                 TEXT,
+  published_at          TEXT NOT NULL,
+  checked_at            TEXT NOT NULL DEFAULT (datetime('now')),
+  view_count            INTEGER NOT NULL,
+  vph                   REAL NOT NULL,
+  raw_json              TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_competitor_video_snapshot_lookup
+  ON competitor_video_snapshot(competitor_channel_id, video_id, checked_at);
+
+-- Tetiklenen uyarilar (competitor+video basina dedup, tekrar tarama spam yapmasin)
+CREATE TABLE IF NOT EXISTS vph_alert (
+  id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id            TEXT NOT NULL REFERENCES channel(id),
+  competitor_channel_id INTEGER NOT NULL REFERENCES competitor_channel(id),
+  video_id              TEXT NOT NULL,
+  title                 TEXT NOT NULL,
+  vph                   REAL NOT NULL,
+  competitor_avg_vph    REAL NOT NULL DEFAULT 0,
+  threshold_used        REAL NOT NULL,
+  status                TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','seen','dismissed')),
+  created_at            TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vph_alert_unique ON vph_alert(competitor_channel_id, video_id);
+CREATE INDEX IF NOT EXISTS idx_vph_alert_status ON vph_alert(channel_id, status, created_at);
+
+-- Uretim tarafinin okudugu kural tablosu - proposed/approved/rejected
+-- review_item'in onay dongusunu taklit eder. getActiveRules() (contentRules.ts)
+-- sadece status='approved' okur.
+CREATE TABLE IF NOT EXISTS content_rule (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel_id    TEXT NOT NULL REFERENCES channel(id),
+  category      TEXT NOT NULL,
+  rule_text     TEXT NOT NULL,
+  rationale     TEXT NOT NULL DEFAULT '',
+  evidence_json TEXT NOT NULL DEFAULT '{}',
+  status        TEXT NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed','approved','rejected')),
+  proposed_by   TEXT NOT NULL DEFAULT 'rule_synthesizer',
+  decided_by    TEXT,
+  decided_at    TEXT,
+  reviewer_note TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_content_rule_channel_status ON content_rule(channel_id, status, created_at);
 `;
 
 /**

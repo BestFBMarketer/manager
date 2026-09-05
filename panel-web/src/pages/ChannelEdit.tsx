@@ -109,6 +109,21 @@ export default function ChannelEdit() {
               Shorts türet
             </button>
           </Link>
+          <Link to={`/channels/${id}/analytics`}>
+            <button type="button" className="secondary">
+              Analytics
+            </button>
+          </Link>
+          <Link to={`/channels/${id}/analytics/flagged`}>
+            <button type="button" className="secondary">
+              Düşük Performans
+            </button>
+          </Link>
+          <Link to={`/channels/${id}/competitors`}>
+            <button type="button" className="secondary">
+              Rakip Radar
+            </button>
+          </Link>
         </div>
       </div>
       <p className="muted">

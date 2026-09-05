@@ -21,8 +21,12 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
     "@remotion/cli": "^4.0.512",
     "@remotion/renderer": "^4.0.512",
+    "@remotion/three": "^4.0.512",
+    "@types/three": "^0.185.4",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
     "cheerio": "^1.2.0",
@@ -34,16 +38,19 @@
     "googleapis": "^175.0.0",
     "gopro-telemetry": "^1.2.11",
     "gpmf-extract": "^0.3.3",
+    "node-notifier": "^10.0.1",
     "nodemailer": "^9.0.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "remotion": "^4.0.512"
+    "remotion": "^4.0.512",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.19.0",
     "@types/node": "^22.9.0",
+    "@types/node-notifier": "^8.0.5",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

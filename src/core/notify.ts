@@ -1,12 +1,13 @@
 // =====================================
 // MODULE: Notify
-// Purpose: E-posta bildirimleri - hata, success, ve worker raporları
-// Dependencies: nodemailer, core/logger
+// Purpose: E-posta + masaustu bildirimleri - hata, success, ve worker raporlari
+// Dependencies: nodemailer, node-notifier, core/logger
 // Author: BestMarketer Team
-// Last Modified: 2026-08-19
+// Last Modified: 2026-09-05
 // =====================================
 
 import nodemailer from 'nodemailer';
+import notifier from 'node-notifier';
 import { Logger } from './logger.js';
 
 export interface NotifyOptions {
@@ -22,6 +23,21 @@ interface LastNotificationTime {
 
 const SPAM_PREVENTION_MS = 15 * 60 * 1000; // 15 dakika - aynı hata tekrar yazılmasın
 const lastNotifications = new Map<string, number>();
+
+/** Ayni anahtarin 15 dakika icinde tekrar gonderilmesini engeller. Email/desktop
+ * ayri anahtar uzayinda (prefix ile) tutulur, biri digerini spam-korumasiyla
+ * susturmasin diye - notify() ikisini ayni cagrida tetikleyince her ikisi de
+ * bagimsiz kendi 15-dakikalik penceresini kontrol eder. */
+function shouldSend(namespacedKey: string): boolean {
+  const now = Date.now();
+  const lastTime = lastNotifications.get(namespacedKey) || 0;
+  if (now - lastTime < SPAM_PREVENTION_MS) {
+    Logger.debug(`Bildirim spam koruması: ${namespacedKey} 15 dakikada bir gönderilir`);
+    return false;
+  }
+  lastNotifications.set(namespacedKey, now);
+  return true;
+}
 
 /**
  * SMTP konfigürasyonu (process.env'den okunur).
@@ -62,16 +78,7 @@ export async function notifyEmail(opts: NotifyOptions): Promise<void> {
   const transporter = getTransporter();
   if (!transporter) return;
 
-  const key = `${opts.severity}:${opts.subject}`;
-  const now = Date.now();
-  const lastTime = lastNotifications.get(key) || 0;
-
-  if (now - lastTime < SPAM_PREVENTION_MS) {
-    Logger.debug(`Bildirim spam koruması: ${key} 15 dakikada bir gönderilir`);
-    return;
-  }
-
-  lastNotifications.set(key, now);
+  if (!shouldSend(`email:${opts.severity}:${opts.subject}`)) return;
 
   try {
     const to = process.env.NOTIFY_EMAIL_TO;
@@ -89,4 +96,38 @@ export async function notifyEmail(opts: NotifyOptions): Promise<void> {
   } catch (err) {
     Logger.error('E-posta gönderimi başarısız', err);
   }
+}
+
+/**
+ * Masaustu bildirimi gonder (Windows toast / macOS Notification Center / Linux
+ * libnotify - node-notifier platforma gore uygun mekanizmayi secer). Bu makine
+ * uzerinde calisan worker/cron scriptleri (analyticsQueue, competitorRadarQueue,
+ * ruleSynthesisQueue vb) icin - VPS'e tasinirsa bu kanal sessizce no-op olur
+ * (node-notifier hedef platformda bildirim mekanizmasi bulamayinca sadece
+ * loglar, hata firlatmaz).
+ */
+export function notifyDesktop(opts: NotifyOptions): void {
+  if (!shouldSend(`desktop:${opts.severity}:${opts.subject}`)) return;
+
+  notifier.notify(
+    {
+      title: `[${opts.severity.toUpperCase()}] ${opts.subject}`,
+      message: opts.body,
+      sound: opts.severity === 'error',
+      wait: false,
+    },
+    (err) => {
+      if (err) Logger.error('Masaüstü bildirimi başarısız', err);
+    },
+  );
+}
+
+/**
+ * Hem e-posta hem masaustu bildirimi birlikte gonderir - analytics/VPH/kural-
+ * onay bildirimlerinin varsayilan kanali (kullanici talebi: "masaustu bildirim
+ * + email"). Her iki kanal kendi spam-korumasini bagimsiz uygular.
+ */
+export async function notify(opts: NotifyOptions): Promise<void> {
+  notifyDesktop(opts);
+  await notifyEmail(opts);
 }

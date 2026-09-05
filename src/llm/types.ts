@@ -16,7 +16,9 @@ export type LlmTask =
   | 'factBrief'
   | 'narrativeScript'
   | 'clipCommentary'
-  | 'topicGen';
+  | 'topicGen'
+  | 'bimbleScript'
+  | 'patternSynthesis';
 
 export interface LlmRequest {
   task: LlmTask;

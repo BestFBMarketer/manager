@@ -74,6 +74,7 @@ export async function runFunnyRankingJob(
       channel.language,
       channel.settings.voiceLineExamples,
       channel.settings.discoveryCategories,
+      channel.id,
     );
     db.prepare('UPDATE job SET stage=? WHERE id=?').run('ranking_planned', jobId);
 

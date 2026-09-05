@@ -35,6 +35,15 @@ export const LLM_CHAINS: Record<LlmTask, string[]> = {
   // kritik degil (kotu bir konu basligi elenip yeniden denenebilir), ucretsiz
   // katmanla baslar.
   topicGen: ['gemini', 'deepseek', 'claude'],
+
+  // Bimble TV - toddler duygu/sosyal beceri hikayesi, ton ve duygu tutarliligi
+  // dogrudan izlenebilirligi belirliyor, ucretsiz katmanla baslamiyor.
+  bimbleScript: ['claude', 'openai', 'gemini'],
+
+  // Analytics pattern-bulma (icerik zekasi modulu) - onerilen kurallar zaten
+  // insan onayindan gecmeden aktif olmuyor (content_rule.status), bu yuzden
+  // hatali/zayif bir oneri riski dusuk - ucretsiz katmanla baslar.
+  patternSynthesis: ['gemini', 'deepseek', 'claude'],
 };
 
 /** Ucretli saglayicilarin gunluk maliyet tavani (USD). Asilirsa sadece ucretsizler calisir. */
