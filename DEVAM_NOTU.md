@@ -1426,3 +1426,27 @@ bildirimini al. Hala "titreme" gibi geliyorsa, muhtemel sonraki denemeler:
   KONTROL EDILMEDI, cunku oturum kesildi).
 - Alternatif: "bimble1.glb" ile ayni script'i tekrar calistirip kaynak
   mesh degisikliginin sonucu etkileyip etkilemedigini gormek.
+
+## KURAL (2026-09-05): ham indirme + final render artik G: Drive'da, git'e girmiyor
+
+`git push` denemesi basarisiz oldu (HTTP 500) - sebep arastirilinca
+unpushed 76 commit'lik aralikta **5.18 GB** blob bulundu: birkac ham
+yt-dlp indirmesi 200-500MB arasi (`tierlist/*/clips/*.webm`, `tierlist/*/src/*.mp4.webm`)
++ 67 adet tracked `sample_render.mp4` final render dosyasi.
+
+**Kullanicinin yeni kurali:**
+1. Ham kaynak indirmeler (yt-dlp, cut'lanmadan onceki hali) artik
+   `G:\Drive'ım\shortsfactory\sourcevideos\` altina indirilecek.
+2. Final render ciktilari (`sample_render.mp4`) artik `G:\Drive'ım\shortsfactory\finaloutputs\`
+   altina tasinacak.
+3. Ikisi de ne yerel proje diskinde ne git'te yer kaplayacak.
+
+`.gitignore`'a defans-katmani eklendi (`tierlist/*/src/`, `tierlist/*/clips_cut/`,
+`tierlist/*/sample_render*.mp4`) - biri yanlislikla eskisi gibi proje icine
+indirirse yine de commit'e girmez. Detay: hafiza `shortsfactory-medya-drive-kurali.md`.
+
+**HENUZ COZULMEDI:** Mevcut git gecmisindeki 5.18GB bu yeni kuralla
+otomatik temizlenmiyor. Push hala basarisiz olacak. Ayri bir karar
+gerekiyor (`git filter-repo`/BFG ile buyuk dosyalari TUM gecmisten silmek,
+force-push gerektirir - geri donusu zor) - kullanicidan onay bekleniyor,
+henuz netlesmedi.

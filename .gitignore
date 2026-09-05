@@ -11,7 +11,19 @@ panel-web/dist/
 # tierlist - indirilen kaynak reklam videolari (GB'lerce, yt-dlp ile tekrar
 # indirilebilir), repo'ya girmesin. Ciktilar (audio/talking/clip_*.mp4) kalir.
 tierlist/*/clips/
+tierlist/*/src/
+tierlist/ranking/*/clips/
+tierlist/ranking/*/src/
 tierlist/__pycache__/
+
+# YENI KURAL (2026-09-05): ham kaynak indirmeler ve final render'lar artik
+# yerel/git'te DEGIL, G:\Drive'ım\shortsfactory\sourcevideos ve \finaloutputs
+# altinda tutuluyor - bkz DEVAM_NOTU.md. Bu satirlar, biri eskiden oldugu gibi
+# yanlislikla yerel/proje icine indirirse yine de git'e girmesini onler.
+tierlist/*/sample_render*.mp4
+tierlist/ranking/*/sample_render*.mp4
+tierlist/*/clips_cut/
+tierlist/ranking/*/clips_cut/
 # ProRes4444 alpha denemeleri (130-270MB/klip) - Remotion'da guvenilmez cikti,
 # ffmpeg-side compositing'e (composite_dummy_panel.sh) gecildi, artik uretilmiyor.
 tierlist/*/talking_alpha/
