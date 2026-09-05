@@ -1445,8 +1445,32 @@ yt-dlp indirmesi 200-500MB arasi (`tierlist/*/clips/*.webm`, `tierlist/*/src/*.m
 `tierlist/*/sample_render*.mp4`) - biri yanlislikla eskisi gibi proje icine
 indirirse yine de commit'e girmez. Detay: hafiza `shortsfactory-medya-drive-kurali.md`.
 
-**HENUZ COZULMEDI:** Mevcut git gecmisindeki 5.18GB bu yeni kuralla
-otomatik temizlenmiyor. Push hala basarisiz olacak. Ayri bir karar
-gerekiyor (`git filter-repo`/BFG ile buyuk dosyalari TUM gecmisten silmek,
-force-push gerektirir - geri donusu zor) - kullanicidan onay bekleniyor,
-henuz netlesmedi.
+**COZULDU (2026-09-05, ayni gun devami):** Kullanici onayladi, `git filter-repo`
+iki turda calistirildi:
+- Tur 1: `tierlist/*/(clips|src|clips_cut)/` + `sample_render*.mp4` path'leri
+  TUM gecmisten silindi (once hepsi Drive'a kopyalanip dogrulandi).
+- Tur 2: kacan 3 dosya (`kisscam2.mp4.webm` 98MB, `is_all_in.mp4.mkv` 53MB,
+  `lake.mp4` 31MB - farkli klasor adlandirmasi yuzunden ilk regex'i kacirmislardi)
+  ayni sekilde Drive'a kopyalanip gecmisten silindi.
+
+Her iki turda da once `git bundle create --all` ile tam yedek alindi
+(`../manager-backup-before-filter-repo-*.bundle`, 5.3GB, `git bundle verify`
+ile dogrulandi), sonra origin remote (filter-repo guvenlik onlemi olarak
+otomatik kaldiriyor) geri eklendi, sonra `git push origin main --force`
+yapildi - ikisi de basarili ("forced update", GitHub'dan sadece ilk turda
+2 dosya icin "50MB uzeri" UYARISI geldi, tur 2 sonrasi o da gitti).
+
+**Sonuc:** `.git` 5.18GB -> **721MB**. Bu commit'lerin hicbiri daha once
+remote'a basariyla gitmemisti (surekli 500 hatasi aliyordu), yani bu
+force-push kimsenin paylasilan calismasini ezmedi - guvenli bir islemdi.
+
+**Kapsam genisletildi:** Kural sadece Fun&Rank/tierlist icin degil, panelin
+TUM kanallari (travel/mystic/bimble/historisches-kapital) icin gecerli -
+gerekirse Drive'da kanal-bazli alt klasorler acilacak
+(`sourcevideos/<kanal>/`, `finaloutputs/<kanal>/`).
+
+**YENI BACKLOG (henuz cozulmedi):** Kullanici, Drive'daki `sourcevideos`
+icindeki ham kaynak videolarin da SURESIZ saklanmamasi gerektigini belirtti -
+uretimi bitmis videolar belli bir sure sonra PERIYODIK olarak otomatik
+silinmeli (retention policy). Sure netlesmedi (kac gun/hafta?), henuz
+kod/otomasyon yazilmadi.
